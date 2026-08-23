@@ -1,8 +1,11 @@
-import { hash, verify, Algorithm } from '@node-rs/argon2'
+import { hash, verify, type Algorithm } from '@node-rs/argon2'
 import { randomBytes, createCipheriv, createDecipheriv } from 'node:crypto'
 
 export async function hashPassword(password: string): Promise<string> {
-  return hash(password, { algorithm: Algorithm.Argon2id })
+  // Algorithm.Argon2id = 2 (per node_modules/@node-rs/argon2/index.d.ts). Algorithm is an
+  // ambient const enum; isolatedModules (required by Next.js/SWC) forbids importing its
+  // values directly, only its type, so the literal value is asserted here instead.
+  return hash(password, { algorithm: 2 as Algorithm })
 }
 
 export async function verifyPassword(hash: string, password: string): Promise<boolean> {
