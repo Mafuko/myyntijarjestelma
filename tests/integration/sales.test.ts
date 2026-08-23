@@ -1,4 +1,10 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest'
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest'
+
+vi.mock('@/lib/rate-limit', () => ({
+  barcodeLookupRateLimiter: {},
+  checkRateLimit: vi.fn().mockResolvedValue({ allowed: true }),
+}))
+
 import { testPrisma, resetDb } from './setup'
 import { lookupItemByCode, recordSale } from '@/lib/services/sales'
 

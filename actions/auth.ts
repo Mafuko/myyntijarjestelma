@@ -1,6 +1,7 @@
 'use server'
 
 import { signIn, signOut } from '@/lib/auth'
+import { loginRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import { activateInvite } from '@/lib/services/users'
 import { loginSchema } from '@/lib/validation/user'
 
@@ -13,6 +14,11 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
   })
   if (!parsed.success) {
     return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+  }
+
+  const { allowed } = await checkRateLimit(loginRateLimiter, parsed.data.email)
+  if (!allowed) {
+    return { ok: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts. Please try again in a minute.' } }
   }
 
   try {

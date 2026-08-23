@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { barcodeLookupRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import { requireEventAccess } from '@/lib/services/authz'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
@@ -12,6 +13,11 @@ export async function lookupItemByCode(
 ): Promise<Result<{ itemId: string; name: string; price: string; sellerAlias: string; status: string }>> {
   const authz = await requireEventAccess(session, eventId, ['STAFF', 'ADMIN'])
   if (!authz.ok) return authz
+
+  const { allowed } = await checkRateLimit(barcodeLookupRateLimiter, authz.userId)
+  if (!allowed) {
+    return { ok: false, error: { code: 'RATE_LIMITED', message: 'Too many lookups — please slow down' } }
+  }
 
   const item = await prisma.item.findFirst({ where: { eventId, barcodeValue: code } })
   if (!item) {
