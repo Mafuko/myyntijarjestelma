@@ -1,11 +1,12 @@
 import { randomBytes } from 'node:crypto'
-import { prisma } from '@/lib/db'
+import { PrismaClient } from '@prisma/client'
+import { prisma as defaultPrisma } from '@/lib/db'
 import { hashPassword } from '@/lib/crypto'
 import { inviteUserSchema, acceptInviteSchema } from '@/lib/validation/user'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
 
-export async function inviteUser(input: unknown): Promise<Result<{ inviteUrl: string | null }>> {
+export async function inviteUser(input: unknown, prisma: PrismaClient = defaultPrisma): Promise<Result<{ inviteUrl: string | null }>> {
   const parsed = inviteUserSchema.safeParse(input)
   if (!parsed.success) {
     return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
@@ -47,7 +48,7 @@ export async function inviteUser(input: unknown): Promise<Result<{ inviteUrl: st
   return { ok: true, data: { inviteUrl } }
 }
 
-export async function activateInvite(input: unknown): Promise<Result<{ userId: string }>> {
+export async function activateInvite(input: unknown, prisma: PrismaClient = defaultPrisma): Promise<Result<{ userId: string }>> {
   const parsed = acceptInviteSchema.safeParse(input)
   if (!parsed.success) {
     return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
