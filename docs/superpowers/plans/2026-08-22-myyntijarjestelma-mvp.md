@@ -5569,6 +5569,8 @@ Expected: FAIL — `deleteUserPii` is not exported yet.
 
 - [ ] **Step 3: Append to `lib/services/users.ts`**
 
+> **Post-hoc correction (Task 2.5 finding):** auth uses JWT sessions with a `User.tokenVersion` field for revocation (Auth.js's Credentials provider doesn't support the database session strategy — see Task 2.2/2.5's execution notes). Deleting a user's PII must also bump `tokenVersion` here, or a session already issued before deletion stays valid (Auth.js only re-checks `tokenVersion` on session read, not on every possible use) until it naturally expires, even though `passwordHash: null` already blocks any *future* login.
+
 ```typescript
 import { requireOwner } from '@/lib/services/authz'
 import { writeAuditLog } from '@/lib/services/audit'
@@ -5587,6 +5589,7 @@ export async function deleteUserPii(session: MinimalSession, targetUserId: strin
       payoutMethod: null,
       passwordHash: null,
       inviteToken: null,
+      tokenVersion: { increment: 1 },
     },
   })
 

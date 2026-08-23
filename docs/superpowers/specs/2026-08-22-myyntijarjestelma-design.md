@@ -7,7 +7,7 @@ Source requirements: [Myyntijärjestelmä.pdf](../../../Myyntijärjestelmä.pdf)
 
 - **Tech stack:** Next.js 15 (App Router) + TypeScript, deployed on Vercel.
 - **V1 scope:** full role-based access (Seller/Staff/Admin) from day one, not deferred.
-- **Auth:** email + password via Auth.js (NextAuth v5), argon2id password hashing, database-backed sessions (revocable).
+- **Auth:** email + password via Auth.js (NextAuth v5), argon2id password hashing, JWT sessions with a `tokenVersion`-based revocation check (see Section 1 — Auth.js's Credentials provider only supports the JWT strategy, discovered during implementation; revocability is preserved via a per-user version stamp re-checked on every session read, not via database session storage).
 - **Barcode scanning:** support both a USB/Bluetooth HID (keyboard-wedge) scanner and camera-based scanning later; keyboard-wedge input flow is the v1 baseline.
 - **Google Sheets import:** file upload (CSV/XLSX export), not a live Google Sheets API integration — keeps external API/OAuth scope surface out of the trust boundary.
 - **Payments:** IBAN/cash preference is reference data only for the organizer to pay out manually. No payment/payout API integration.
@@ -19,7 +19,7 @@ Source requirements: [Myyntijärjestelmä.pdf](../../../Myyntijärjestelmä.pdf)
 
 - **Framework:** Next.js 15 App Router + TypeScript. Server Components for reads, Server Actions for mutations, Route Handlers only where a true HTTP endpoint is needed (PDF download, SSE stream).
 - **Data layer:** Postgres (Neon) via Prisma ORM — parameterized queries by default (no SQL injection surface from hand-built SQL), typed migrations.
-- **Auth:** Auth.js (NextAuth v5), credentials provider, argon2id password hashing, database-backed sessions (revocable by deleting the session row — e.g. to immediately ban a user).
+- **Auth:** Auth.js (NextAuth v5), credentials provider, argon2id password hashing. **Correction found during implementation:** Auth.js's Credentials provider throws `UnsupportedStrategy` under the database session strategy — it only supports JWT (`@auth/core`'s own source: "Signing in with credentials only supported if JWT strategy is enabled"). Revocability is instead achieved with a `User.tokenVersion` integer: stamped onto the JWT at sign-in, re-checked against the current DB value on every session read via the `session` callback. Bumping a user's `tokenVersion` (e.g. an admin ban, or the PII-deletion flow in Session 10) invalidates every session for that user on their very next request, independent of the JWT's own expiry — preserving the "revoke on demand" property the database-session approach was originally chosen for.
 - **Real-time:** SSE via a Route Handler that polls Postgres for the caller's scoped sales snapshot every ~2 seconds and pushes the full current state each tick (not an in-process event emitter — Vercel serverless functions aren't guaranteed to keep the process that handled a sale mutation and the process serving a given SSE connection as the same instance, so any handoff has to go through the database, not process memory). Resending full state each tick is cheap at this scale, and it means a reconnect after a dropped connection naturally re-syncs without any special "did I miss an event" handling — this doubles as the answer to the error-handling requirement in Section 5.
 - **File generation:**
   - PDF price tags: `@react-pdf/renderer` or `pdf-lib`, generated server-side only, streamed as a download.
