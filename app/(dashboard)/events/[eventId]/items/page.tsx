@@ -22,6 +22,18 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
     <div className="p-8">
       <h1 className="text-xl font-semibold">My items</h1>
 
+      {items.some((i) => i.status === 'LISTED') && (
+        <a
+          href={`/api/price-tags/${eventId}?itemIds=${items
+            .filter((i) => i.status === 'LISTED')
+            .map((i) => i.id)
+            .join(',')}`}
+          className="mt-2 inline-block underline"
+        >
+          Print all price tags
+        </a>
+      )}
+
       <ul className="mt-4 flex flex-col gap-2">
         {items.map((item) => (
           <li key={item.id} className="flex items-center gap-3">
@@ -39,6 +51,11 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
                   Delete
                 </button>
               </form>
+            )}
+            {item.status === 'LISTED' && (
+              <a href={`/api/price-tags/${eventId}?itemIds=${item.id}`} className="text-sm underline">
+                Price tag
+              </a>
             )}
           </li>
         ))}
