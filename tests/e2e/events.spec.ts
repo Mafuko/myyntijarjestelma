@@ -1,0 +1,52 @@
+import { test, expect } from '@playwright/test'
+import { testPrisma, resetDb } from '../integration/setup'
+import { hashPassword } from '../../lib/crypto'
+
+test.beforeEach(async () => {
+  await resetDb()
+})
+test.afterAll(async () => {
+  await testPrisma.$disconnect()
+})
+
+test('owner creates an event and invites a seller who can then see it', async ({ page, context }) => {
+  const passwordHash = await hashPassword('owner-password-123')
+  await testPrisma.user.create({ data: { name: 'Owner', email: 'owner@example.com', isOwner: true, passwordHash } })
+
+  await page.goto('/login')
+  await page.getByLabel('Email').fill('owner@example.com')
+  await page.getByLabel('Password').fill('owner-password-123')
+  await page.getByRole('button', { name: /log in/i }).click()
+  await expect(page).toHaveURL(/\/events/)
+
+  await page.getByPlaceholder('Event name').fill('Syyskirppis')
+  await page.getByLabel('Event date').fill('2026-09-15')
+  await page.getByLabel('Registration deadline').fill('2026-09-01')
+  await page.getByLabel('Item edit cutoff').fill('2026-09-10')
+  await page.getByRole('button', { name: /create event/i }).click()
+  await expect(page.getByText('Syyskirppis')).toBeVisible()
+
+  await page.getByText('Syyskirppis').click()
+  await page.getByRole('link', { name: /members/i }).click()
+
+  await page.getByPlaceholder('Name').fill('Invited Seller')
+  await page.getByPlaceholder('Email').fill('invitedseller@example.com')
+  await page.selectOption('select[name="role"]', 'SELLER')
+  await page.getByPlaceholder('Seller alias').fill('Kirppis-Liisa')
+  await page.getByRole('button', { name: /^invite$/i }).click()
+
+  const invitedUser = await testPrisma.user.findUniqueOrThrow({ where: { email: 'invitedseller@example.com' } })
+  expect(invitedUser.inviteToken).toBeTruthy()
+
+  await context.clearCookies()
+  await page.goto(`/invite/${invitedUser.inviteToken}`)
+  await page.getByLabel('Password').fill('seller-password-123')
+  await page.getByRole('button', { name: /set password/i }).click()
+  await expect(page).toHaveURL(/\/login/)
+
+  await page.getByLabel('Email').fill('invitedseller@example.com')
+  await page.getByLabel('Password').fill('seller-password-123')
+  await page.getByRole('button', { name: /log in/i }).click()
+  await expect(page).toHaveURL(/\/events/)
+  await expect(page.getByText('Syyskirppis')).toBeVisible()
+})
