@@ -350,12 +350,21 @@ git commit -m "feat: add Prisma schema for User, Event, Item, Sale, AuditLog"
 
 - [ ] **Step 1: Write `lib/db.ts`**
 
+> **Post-hoc correction (found during Task 2.3's execution, applies from Task 1.4 onward):** Prisma 7 requires an explicit driver adapter (see Task 1.4's execution notes) — construct `PrismaClient` with `new PrismaPg({ connectionString })` from `@prisma/adapter-pg`. Separately, resolve the connection string per-environment: Vitest always sets `process.env.VITEST`, so `lib/db.ts` should point at `DATABASE_URL_TEST` under Vitest and `DATABASE_URL` otherwise — without this, every service-layer integration test in this plan would seed fixtures via `testPrisma` (pointed at `DATABASE_URL_TEST`) while the service under test reads/writes via `prisma` (pointed at `DATABASE_URL`), two different physical databases. `NODE_ENV` is not a reliable signal for this because Next.js's own dev server forces `NODE_ENV=development` regardless of what's inherited from the parent shell.
+
 ```typescript
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+const connectionString = process.env.VITEST
+  ? process.env.DATABASE_URL_TEST
+  : process.env.DATABASE_URL
+
+const adapter = new PrismaPg({ connectionString })
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter })
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
@@ -1225,6 +1234,8 @@ export const config = {
 
 - [ ] **Step 5: Write `playwright.config.ts`**
 
+> **Post-hoc correction (same root cause as Task 1.4's `lib/db.ts` fix):** `next dev` forces `NODE_ENV=development` and never sets `VITEST`, so without an explicit override the E2E-spawned dev server would connect to `DATABASE_URL` (dev DB) while every E2E test seeds fixtures via `testPrisma` (pointed at `DATABASE_URL_TEST`) — the same dev/test database mismatch, one layer up. Override `DATABASE_URL` directly for the spawned process via Playwright's `webServer.env`.
+
 ```typescript
 import { defineConfig } from '@playwright/test'
 
@@ -1234,6 +1245,9 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    env: {
+      DATABASE_URL: process.env.DATABASE_URL_TEST ?? '',
+    },
   },
   use: { baseURL: 'http://localhost:3000' },
 })
