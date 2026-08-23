@@ -1,6 +1,8 @@
 import { randomBytes } from 'node:crypto'
 import { prisma } from '@/lib/db'
 import { requireEventAccess } from '@/lib/services/authz'
+import bwipjs from 'bwip-js/node'
+import { Document, Page, View, Text, Image, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
@@ -72,4 +74,44 @@ export async function generatePriceTagData(
   }
 
   return { ok: true, data: results }
+}
+
+async function renderBarcodePng(value: string): Promise<string> {
+  const png = await bwipjs.toBuffer({ bcid: 'code128', text: value, scale: 3, height: 10, includetext: false })
+  return `data:image/png;base64,${png.toString('base64')}`
+}
+
+const styles = StyleSheet.create({
+  page: { padding: 16, flexDirection: 'row', flexWrap: 'wrap' },
+  tag: { width: 180, height: 100, border: '1pt solid #000', margin: 4, padding: 6, justifyContent: 'space-between' },
+  name: { fontSize: 10, fontWeight: 700 },
+  price: { fontSize: 14, fontWeight: 700 },
+  meta: { fontSize: 8 },
+  barcode: { width: 150, height: 30 },
+  code: { fontSize: 8, textAlign: 'center' },
+})
+
+export async function renderPriceTagsPdf(tags: PriceTagData[]): Promise<Buffer> {
+  const withImages = await Promise.all(
+    tags.map(async (tag) => ({ ...tag, barcodeImage: await renderBarcodePng(tag.barcodeValue) }))
+  )
+
+  return renderToBuffer(
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {withImages.map((tag) => (
+          <View key={tag.id} style={styles.tag}>
+            <Text style={styles.name}>{tag.name}</Text>
+            <Text style={styles.price}>{tag.price} €</Text>
+            <Text style={styles.meta}>
+              {tag.sellerAlias}
+              {tag.isAgeRestricted ? ' — K-18' : ''}
+            </Text>
+            <Image src={tag.barcodeImage} style={styles.barcode} />
+            <Text style={styles.code}>{tag.barcodeValue}</Text>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  )
 }
