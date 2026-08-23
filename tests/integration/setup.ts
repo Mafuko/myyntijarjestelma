@@ -6,7 +6,8 @@ export const testPrisma = new PrismaClient({ adapter })
 
 export async function resetDb() {
   await testPrisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "AuditLog", "Sale", "Item", "Category", "EventMembership", "Event", "User"
+    TRUNCATE TABLE "AuditLog", "Sale", "Item", "Category", "EventMembership", "Event", "User",
+      "Account", "Session", "VerificationToken"
     RESTART IDENTITY CASCADE
   `)
 }
