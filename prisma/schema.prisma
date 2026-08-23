@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EventRole {
+  SELLER
+  STAFF
+  ADMIN
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  REMOVED
+}
+
+enum PayoutMethod {
+  CASH
+  BANK_TRANSFER
+}
+
+enum ItemStatus {
+  LISTED
+  SOLD
+  REMOVED
+}
+
+enum SaleMethod {
+  BARCODE_SCAN
+  MANUAL_CODE_ENTRY
+  MANUAL_OVERRIDE
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  passwordHash   String?
+  phone          String?
+  payoutMethod   PayoutMethod?
+  ibanCiphertext String?
+  isOwner        Boolean  @default(false)
+  inviteToken    String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  memberships      EventMembership[]
+  createdEvents    Event[]           @relation("EventCreator")
+  items            Item[]
+  sales            Sale[]            @relation("SaleRecordedBy")
+  auditLogsAsActor AuditLog[]        @relation("AuditActor")
+}
+
+model Event {
+  id                  String   @id @default(cuid())
+  name                String
+  eventDate           DateTime
+  registrationDeadline DateTime
+  itemEditCutoffDate  DateTime
+  commissionRate      Decimal  @default(0.10) @db.Decimal(5, 4)
+  createdByUserId     String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  createdBy    User              @relation("EventCreator", fields: [createdByUserId], references: [id])
+  memberships  EventMembership[]
+  categories   Category[]
+  items        Item[]
+}
+
+model EventMembership {
+  id           String            @id @default(cuid())
+  userId       String
+  eventId      String
+  role         EventRole
+  sellerAlias  String?
+  status       MembershipStatus  @default(PENDING)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+}
+
+model Category {
+  id      String @id @default(cuid())
+  eventId String
+  name    String
+
+  event Event  @relation(fields: [eventId], references: [id])
+  items Item[]
+
+  @@unique([eventId, name])
+}
+
+model Item {
+  id              String     @id @default(cuid())
+  eventId         String
+  sellerId        String
+  name            String
+  price           Decimal    @db.Decimal(10, 2)
+  categoryId      String
+  isAgeRestricted Boolean    @default(false)
+  barcodeValue    String?    @unique
+  status          ItemStatus @default(LISTED)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  event    Event     @relation(fields: [eventId], references: [id])
+  seller   User      @relation(fields: [sellerId], references: [id])
+  category Category  @relation(fields: [categoryId], references: [id])
+  sale     Sale?
+}
+
+model Sale {
+  id           String     @id @default(cuid())
+  itemId       String     @unique
+  soldByUserId String
+  soldAt       DateTime   @default(now())
+  method       SaleMethod
+
+  item    Item @relation(fields: [itemId], references: [id])
+  soldBy  User @relation("SaleRecordedBy", fields: [soldByUserId], references: [id])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String
+  action       String
+  targetType   String
+  targetId     String
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  actor User @relation("AuditActor", fields: [actorUserId], references: [id])
+}
