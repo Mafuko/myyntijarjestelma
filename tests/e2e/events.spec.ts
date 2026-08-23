@@ -35,6 +35,12 @@ test('owner creates an event and invites a seller who can then see it', async ({
   await page.getByPlaceholder('Seller alias').fill('Kirppis-Liisa')
   await page.getByRole('button', { name: /^invite$/i }).click()
 
+  // The invite Server Action resolves asynchronously; wait for the members
+  // list (re-rendered via revalidatePath once the invite is persisted) to
+  // show the new member before reading the database directly below —
+  // otherwise this races the in-flight request and can read stale data.
+  await expect(page.getByText('invitedseller@example.com')).toBeVisible()
+
   const invitedUser = await testPrisma.user.findUniqueOrThrow({ where: { email: 'invitedseller@example.com' } })
   expect(invitedUser.inviteToken).toBeTruthy()
 
