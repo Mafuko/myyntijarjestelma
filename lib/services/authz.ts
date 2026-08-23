@@ -8,6 +8,10 @@ export type AuthzResult =
 
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
+async function getUser(userId: string) {
+  return prisma.user.findUnique({ where: { id: userId } })
+}
+
 export async function requireEventAccess(
   session: MinimalSession,
   eventId: string,
@@ -18,7 +22,7 @@ export async function requireEventAccess(
     return { ok: false, error: { code: 'UNAUTHENTICATED', message: 'Not signed in' } }
   }
 
-  const user = await prisma.user.findUnique({ where: { id: userId } })
+  const user = await getUser(userId)
   if (user?.isOwner) {
     return { ok: true, userId, role: 'OWNER' }
   }
@@ -38,7 +42,7 @@ export async function requireOwner(session: MinimalSession): Promise<AuthzResult
   if (!userId) {
     return { ok: false, error: { code: 'UNAUTHENTICATED', message: 'Not signed in' } }
   }
-  const user = await prisma.user.findUnique({ where: { id: userId } })
+  const user = await getUser(userId)
   if (!user?.isOwner) {
     return { ok: false, error: { code: 'FORBIDDEN', message: 'Only the site owner can perform this action' } }
   }

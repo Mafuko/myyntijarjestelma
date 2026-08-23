@@ -101,6 +101,16 @@ describe('requireEventAccess authorization matrix', () => {
     const result = await requireEventAccess(sessionFor(staff.id), event.id, ['STAFF'])
     expect(result.ok).toBe(false)
   })
+
+  it('denies a PENDING membership even with a matching role', async () => {
+    const { event, staff } = await setupEventWithMembers()
+    await testPrisma.eventMembership.update({
+      where: { userId_eventId: { userId: staff.id, eventId: event.id } },
+      data: { status: 'PENDING' },
+    })
+    const result = await requireEventAccess(sessionFor(staff.id), event.id, ['STAFF'])
+    expect(result.ok).toBe(false)
+  })
 })
 
 describe('requireOwner', () => {
