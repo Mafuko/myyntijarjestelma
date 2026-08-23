@@ -36,7 +36,7 @@ describe('inviteUser', () => {
       role: 'SELLER',
       eventId: event.id,
       sellerAlias: 'Kalle',
-    }, testPrisma)
+    })
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -58,7 +58,7 @@ describe('inviteUser', () => {
       email: 'staff@example.com',
       role: 'STAFF',
       eventId: event.id,
-    }, testPrisma)
+    })
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -70,7 +70,7 @@ describe('inviteUser', () => {
 
   it('rejects inviting the same user to the same event twice', async () => {
     const { event } = await createOwnerAndEvent()
-    await inviteUser({ name: 'Dup', email: 'dup@example.com', role: 'SELLER', eventId: event.id, sellerAlias: 'D' }, testPrisma)
+    await inviteUser({ name: 'Dup', email: 'dup@example.com', role: 'SELLER', eventId: event.id, sellerAlias: 'D' })
 
     const result = await inviteUser({
       name: 'Dup',
@@ -78,7 +78,7 @@ describe('inviteUser', () => {
       role: 'SELLER',
       eventId: event.id,
       sellerAlias: 'D',
-    }, testPrisma)
+    })
 
     expect(result.ok).toBe(false)
     if (result.ok) return
@@ -87,7 +87,7 @@ describe('inviteUser', () => {
 
   it('rejects a SELLER invite without a sellerAlias', async () => {
     const { event } = await createOwnerAndEvent()
-    const result = await inviteUser({ name: 'No Alias', email: 'noalias@example.com', role: 'SELLER', eventId: event.id }, testPrisma)
+    const result = await inviteUser({ name: 'No Alias', email: 'noalias@example.com', role: 'SELLER', eventId: event.id })
     expect(result.ok).toBe(false)
   })
 })
@@ -109,11 +109,11 @@ describe('activateInvite', () => {
       role: 'SELLER',
       eventId: event.id,
       sellerAlias: 'X',
-    }, testPrisma)
+    })
     if (!inviteResult.ok) throw new Error('setup failed')
     const token = inviteResult.data.inviteUrl!.split('/').pop()!
 
-    const result = await activateInvite({ token, password: 'a-secure-password-1' }, testPrisma)
+    const result = await activateInvite({ token, password: 'a-secure-password-1' })
 
     expect(result.ok).toBe(true)
     const user = await testPrisma.user.findUnique({ where: { email: 'sellerx@example.com' } })
@@ -126,7 +126,7 @@ describe('activateInvite', () => {
   })
 
   it('rejects an unknown token', async () => {
-    const result = await activateInvite({ token: 'does-not-exist', password: 'a-secure-password-1' }, testPrisma)
+    const result = await activateInvite({ token: 'does-not-exist', password: 'a-secure-password-1' })
     expect(result.ok).toBe(false)
     if (result.ok) return
     expect(result.error.code).toBe('INVALID_TOKEN')
