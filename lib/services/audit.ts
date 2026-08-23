@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { Prisma } from '@prisma/client'
 
 const SENSITIVE_KEYS = new Set(['password', 'passwordHash', 'iban', 'ibanCiphertext'])
 
@@ -23,7 +24,7 @@ export async function writeAuditLog(params: {
       action: params.action,
       targetType: params.targetType,
       targetId: params.targetId,
-      metadata: params.metadata ? sanitizeMetadata(params.metadata) : undefined,
+      metadata: params.metadata ? (sanitizeMetadata(params.metadata) as Prisma.InputJsonValue) : undefined,
     },
   })
 }
