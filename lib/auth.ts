@@ -4,11 +4,16 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/db'
 import { verifyPassword } from '@/lib/crypto'
 import { loginSchema } from '@/lib/validation/user'
+import { authConfig } from '@/lib/auth.config'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: 'database' },
-  pages: { signIn: '/login' },
+  // The Credentials provider only supports the JWT session strategy —
+  // Auth.js throws UnsupportedStrategy at sign-in time otherwise, since
+  // credentials sign-in has no OAuth-style account-linking flow for the
+  // adapter to persist a database session against.
+  session: { strategy: 'jwt' },
   providers: [
     Credentials({
       credentials: { email: {}, password: {} },
