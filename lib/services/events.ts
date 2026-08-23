@@ -18,10 +18,14 @@ export async function createEvent(session: MinimalSession, input: unknown): Prom
     return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
   }
 
-  const event = await prisma.event.create({ data: { ...parsed.data, createdByUserId: authz.userId } })
+  const event = await prisma.$transaction(async (tx) => {
+    const created = await tx.event.create({ data: { ...parsed.data, createdByUserId: authz.userId } })
 
-  await prisma.category.createMany({
-    data: DEFAULT_CATEGORIES.map((name) => ({ eventId: event.id, name })),
+    await tx.category.createMany({
+      data: DEFAULT_CATEGORIES.map((name) => ({ eventId: created.id, name })),
+    })
+
+    return created
   })
 
   await writeAuditLog({
