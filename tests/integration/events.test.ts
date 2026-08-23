@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { testPrisma, resetDb } from './setup'
-import { createEvent, updateEvent, listEventsForUser } from '@/lib/services/events'
+import { createEvent, updateEvent, listEventsForUser, inviteMemberToEvent } from '@/lib/services/events'
 
 function sessionFor(userId: string) {
   return { user: { id: userId } } as any
@@ -99,5 +99,52 @@ describe('listEventsForUser', () => {
     const otherEvents = await listEventsForUser(other.id)
     expect(otherEvents).toHaveLength(1)
     expect(otherEvents[0].role).toBe('STAFF')
+  })
+})
+
+describe('inviteMemberToEvent', () => {
+  beforeEach(async () => {
+    await resetDb()
+  })
+  afterAll(async () => {
+    await testPrisma.$disconnect()
+  })
+
+  it('allows an ADMIN member to invite and writes an audit log', async () => {
+    const { owner } = await makeUsers()
+    const created = await createEvent(sessionFor(owner.id), EVENT_INPUT)
+    if (!created.ok) throw new Error('setup failed')
+
+    const result = await inviteMemberToEvent(sessionFor(owner.id), {
+      name: 'New Seller',
+      email: 'newseller@example.com',
+      role: 'SELLER',
+      eventId: created.data.eventId,
+      sellerAlias: 'Kalle',
+    })
+
+    expect(result.ok).toBe(true)
+    const log = await testPrisma.auditLog.findFirst({ where: { action: 'MEMBER_INVITED' } })
+    expect(log?.metadata).toMatchObject({ invitedEmail: 'newseller@example.com' })
+  })
+
+  it('rejects a SELLER trying to invite another member', async () => {
+    const { owner } = await makeUsers()
+    const created = await createEvent(sessionFor(owner.id), EVENT_INPUT)
+    if (!created.ok) throw new Error('setup failed')
+
+    const seller = await testPrisma.user.create({ data: { name: 'Seller', email: 'seller2@example.com', passwordHash: 'x' } })
+    await testPrisma.eventMembership.create({
+      data: { userId: seller.id, eventId: created.data.eventId, role: 'SELLER', sellerAlias: 'S', status: 'ACTIVE' },
+    })
+
+    const result = await inviteMemberToEvent(sessionFor(seller.id), {
+      name: 'Blocked',
+      email: 'blocked@example.com',
+      role: 'STAFF',
+      eventId: created.data.eventId,
+    })
+
+    expect(result.ok).toBe(false)
   })
 })
