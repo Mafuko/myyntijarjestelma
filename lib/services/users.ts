@@ -2,8 +2,11 @@ import { randomBytes } from 'node:crypto'
 import { prisma } from '@/lib/db'
 import { hashPassword } from '@/lib/crypto'
 import { inviteUserSchema, acceptInviteSchema } from '@/lib/validation/user'
+import { requireOwner } from '@/lib/services/authz'
+import { writeAuditLog } from '@/lib/services/audit'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type MinimalSession = { user?: { id?: string | null } | null } | null
 
 export async function inviteUser(input: unknown): Promise<Result<{ inviteUrl: string | null }>> {
   const parsed = inviteUserSchema.safeParse(input)
@@ -70,4 +73,32 @@ export async function activateInvite(input: unknown): Promise<Result<{ userId: s
   ])
 
   return { ok: true, data: { userId: user.id } }
+}
+
+export async function deleteUserPii(session: MinimalSession, targetUserId: string): Promise<Result<{}>> {
+  const authz = await requireOwner(session)
+  if (!authz.ok) return authz
+
+  await prisma.user.update({
+    where: { id: targetUserId },
+    data: {
+      name: 'Deleted user',
+      email: `deleted-${targetUserId}@deleted.local`,
+      phone: null,
+      ibanCiphertext: null,
+      payoutMethod: null,
+      passwordHash: null,
+      inviteToken: null,
+      tokenVersion: { increment: 1 },
+    },
+  })
+
+  await writeAuditLog({
+    actorUserId: authz.userId,
+    action: 'USER_PII_DELETED',
+    targetType: 'User',
+    targetId: targetUserId,
+  })
+
+  return { ok: true, data: {} }
 }

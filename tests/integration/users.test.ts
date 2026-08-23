@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { testPrisma, resetDb } from './setup'
-import { inviteUser, activateInvite } from '@/lib/services/users'
+import { inviteUser, activateInvite, deleteUserPii } from '@/lib/services/users'
+
+function sessionFor(userId: string) {
+  return { user: { id: userId } }
+}
 
 async function createOwnerAndEvent() {
   const owner = await testPrisma.user.create({
@@ -130,5 +134,37 @@ describe('activateInvite', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
     expect(result.error.code).toBe('INVALID_TOKEN')
+  })
+})
+
+describe('deleteUserPii', () => {
+  beforeEach(async () => { await resetDb() })
+  afterAll(async () => { await testPrisma.$disconnect() })
+
+  it('scrubs PII fields, prevents future login, and writes an audit log', async () => {
+    const owner = await testPrisma.user.create({ data: { name: 'Owner', email: 'owner4@example.com', isOwner: true, passwordHash: 'x' } })
+    const target = await testPrisma.user.create({
+      data: { name: 'Real Name', email: 'real@example.com', phone: '+358401234567', passwordHash: 'hash', ibanCiphertext: 'ciphertext' },
+    })
+
+    const result = await deleteUserPii(sessionFor(owner.id), target.id)
+    expect(result.ok).toBe(true)
+
+    const scrubbed = await testPrisma.user.findUniqueOrThrow({ where: { id: target.id } })
+    expect(scrubbed.name).toBe('Deleted user')
+    expect(scrubbed.phone).toBeNull()
+    expect(scrubbed.ibanCiphertext).toBeNull()
+    expect(scrubbed.passwordHash).toBeNull()
+    expect(scrubbed.email).not.toBe('real@example.com')
+
+    const log = await testPrisma.auditLog.findFirst({ where: { action: 'USER_PII_DELETED' } })
+    expect(log?.targetId).toBe(target.id)
+  })
+
+  it('rejects a non-owner', async () => {
+    const admin = await testPrisma.user.create({ data: { name: 'Admin', email: 'admin4@example.com', passwordHash: 'x' } })
+    const target = await testPrisma.user.create({ data: { name: 'Target', email: 'target2@example.com', passwordHash: 'x' } })
+    const result = await deleteUserPii(sessionFor(admin.id), target.id)
+    expect(result.ok).toBe(false)
   })
 })
