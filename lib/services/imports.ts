@@ -22,7 +22,7 @@ export async function parseImportFile(fileName: string, fileBuffer: Buffer): Pro
 
   if (isXlsx) {
     const workbook = new ExcelJS.Workbook()
-    await workbook.xlsx.load(fileBuffer)
+    await workbook.xlsx.load(fileBuffer as any) // exceljs's own ambient Buffer interface conflicts with @types/node's generic Buffer<ArrayBufferLike>; neither a direct nor unknown-intermediate cast bridges the two libraries' independently-declared types
     const sheet = workbook.worksheets[0]
     if (!sheet) {
       return { ok: false, error: { code: 'EMPTY_FILE', message: 'No worksheet found' } }
