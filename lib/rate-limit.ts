@@ -16,6 +16,13 @@ export const barcodeLookupRateLimiter = new Ratelimit({
 })
 
 export async function checkRateLimit(limiter: Ratelimit, identifier: string): Promise<{ allowed: boolean }> {
-  const { success } = await limiter.limit(identifier)
-  return { allowed: success }
+  try {
+    const { success } = await limiter.limit(identifier)
+    return { allowed: success }
+  } catch {
+    // Fail CLOSED (deny) on any rate-limiter error, e.g. the Redis backend being
+    // unreachable. This is a deliberate, user-approved trade-off -- never fail
+    // open just because the limiter itself is unavailable.
+    return { allowed: false }
+  }
 }

@@ -27,25 +27,38 @@ describe('validateImportRows', () => {
   afterAll(async () => { await testPrisma.$disconnect() })
 
   it('accepts a row with a known category and reports errors for bad prices or unknown categories', async () => {
-    const { event } = await setup()
-    const { validRows, rowErrors } = await validateImportRows(event.id, [
+    const { seller, event } = await setup()
+    const result = await validateImportRows(sessionFor(seller.id), event.id, [
       { Tavara: 'Manga Vol. 1', Hinta: '5', Tyyppi: 'Kirjat ja lehdet', 'K-18': '' },
       { Tavara: 'Bad Price', Hinta: '-1', Tyyppi: 'Kirjat ja lehdet', 'K-18': '' },
       { Tavara: 'Unknown Category Item', Hinta: '2', Tyyppi: 'Nonexistent', 'K-18': '' },
     ])
 
-    expect(validRows).toHaveLength(1)
-    expect(validRows[0]).toMatchObject({ name: 'Manga Vol. 1', price: 5, isAgeRestricted: false })
-    expect(rowErrors).toHaveLength(2)
-    expect(rowErrors.map((e) => e.row)).toEqual([3, 4])
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.data.validRows).toHaveLength(1)
+    expect(result.data.validRows[0]).toMatchObject({ name: 'Manga Vol. 1', price: 5, isAgeRestricted: false })
+    expect(result.data.rowErrors).toHaveLength(2)
+    expect(result.data.rowErrors.map((e) => e.row)).toEqual([3, 4])
   })
 
   it('parses the K-18 column as a boolean', async () => {
-    const { event } = await setup()
-    const { validRows } = await validateImportRows(event.id, [
+    const { seller, event } = await setup()
+    const result = await validateImportRows(sessionFor(seller.id), event.id, [
       { Tavara: 'Adult Item', Hinta: '10', Tyyppi: 'Kirjat ja lehdet', 'K-18': 'x' },
     ])
-    expect(validRows[0].isAgeRestricted).toBe(true)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.data.validRows[0].isAgeRestricted).toBe(true)
+  })
+
+  it('rejects a caller with no membership on this event', async () => {
+    const { event } = await setup()
+    const outsider = await testPrisma.user.create({ data: { name: 'Outsider', email: 'outsider@example.com', passwordHash: 'x' } })
+    const result = await validateImportRows(sessionFor(outsider.id), event.id, [
+      { Tavara: 'Manga Vol. 1', Hinta: '5', Tyyppi: 'Kirjat ja lehdet', 'K-18': '' },
+    ])
+    expect(result.ok).toBe(false)
   })
 })
 
@@ -55,10 +68,13 @@ describe('commitImport', () => {
 
   it('creates one item per valid row for the calling seller', async () => {
     const { seller, event } = await setup()
-    const { validRows } = await validateImportRows(event.id, [
+    const validated = await validateImportRows(sessionFor(seller.id), event.id, [
       { Tavara: 'Manga Vol. 1', Hinta: '5', Tyyppi: 'Kirjat ja lehdet', 'K-18': '' },
       { Tavara: 'Manga Vol. 2', Hinta: '5', Tyyppi: 'Kirjat ja lehdet', 'K-18': '' },
     ])
+    expect(validated.ok).toBe(true)
+    if (!validated.ok) return
+    const { validRows } = validated.data
 
     const result = await commitImport(sessionFor(seller.id), event.id, validRows)
     expect(result.ok).toBe(true)
@@ -80,9 +96,12 @@ describe('commitImport', () => {
     await testPrisma.eventMembership.create({
       data: { userId: seller.id, eventId: closedEvent.id, role: 'SELLER', sellerAlias: 'S', status: 'ACTIVE' },
     })
-    const { validRows } = await validateImportRows(closedEvent.id, [
+    const validated = await validateImportRows(sessionFor(seller.id), closedEvent.id, [
       { Tavara: 'Late item', Hinta: '5', Tyyppi: 'Muu', 'K-18': '' },
     ])
+    expect(validated.ok).toBe(true)
+    if (!validated.ok) return
+    const { validRows } = validated.data
 
     const result = await commitImport(sessionFor(seller.id), closedEvent.id, validRows)
     expect(result.ok).toBe(false)
@@ -90,14 +109,27 @@ describe('commitImport', () => {
   })
 
   it('rejects a non-seller (e.g. staff) committing an import', async () => {
-    const { event } = await setup()
+    const { seller, event } = await setup()
     const staff = await testPrisma.user.create({ data: { name: 'Staff', email: 'staff2@example.com', passwordHash: 'x' } })
     await testPrisma.eventMembership.create({ data: { userId: staff.id, eventId: event.id, role: 'STAFF', status: 'ACTIVE' } })
-    const { validRows } = await validateImportRows(event.id, [
+    const validated = await validateImportRows(sessionFor(seller.id), event.id, [
       { Tavara: 'Item', Hinta: '5', Tyyppi: 'Kirjat ja lehdet', 'K-18': '' },
     ])
+    expect(validated.ok).toBe(true)
+    if (!validated.ok) return
+    const { validRows } = validated.data
 
     const result = await commitImport(sessionFor(staff.id), event.id, validRows)
+    expect(result.ok).toBe(false)
+  })
+
+  it('rejects a non-seller (e.g. staff) previewing an import via validateImportRows', async () => {
+    const { event } = await setup()
+    const staff = await testPrisma.user.create({ data: { name: 'Staff', email: 'staff3@example.com', passwordHash: 'x' } })
+    await testPrisma.eventMembership.create({ data: { userId: staff.id, eventId: event.id, role: 'STAFF', status: 'ACTIVE' } })
+    const result = await validateImportRows(sessionFor(staff.id), event.id, [
+      { Tavara: 'Item', Hinta: '5', Tyyppi: 'Kirjat ja lehdet', 'K-18': '' },
+    ])
     expect(result.ok).toBe(false)
   })
 })

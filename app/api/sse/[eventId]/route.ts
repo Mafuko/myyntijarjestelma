@@ -24,18 +24,31 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
       }
 
-      send(initial.data)
-
-      const interval = setInterval(async () => {
-        const snapshot = await getSalesSnapshot(session, eventId)
-        if (snapshot.ok) send(snapshot.data)
-      }, POLL_INTERVAL_MS)
-
-      request.signal.addEventListener('abort', () => {
+      function stop() {
+        if (closed) return
         closed = true
         clearInterval(interval)
         controller.close()
-      })
+      }
+
+      send(initial.data)
+
+      const interval = setInterval(async () => {
+        // Re-check auth/access on every tick rather than reusing the session
+        // captured at connection open, so a mid-connection revocation (e.g. a
+        // tokenVersion bump from PII deletion, or an admin removing the
+        // caller's EventMembership) cuts the stream within one poll interval
+        // instead of only at the next reconnect.
+        const currentSession = await auth()
+        const snapshot = await getSalesSnapshot(currentSession, eventId)
+        if (snapshot.ok) {
+          send(snapshot.data)
+        } else {
+          stop()
+        }
+      }, POLL_INTERVAL_MS)
+
+      request.signal.addEventListener('abort', stop)
     },
   })
 

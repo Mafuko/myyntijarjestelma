@@ -11,7 +11,19 @@ export async function lookupCode(
   code: string
 ): Promise<Result<{ itemId: string; name: string; price: string; sellerAlias: string; status: string }>> {
   const session = await auth()
-  return lookupItemByCode(session, eventId, code)
+
+  try {
+    return await lookupItemByCode(session, eventId, code)
+  } catch {
+    // Defense in depth: lookupItemByCode's own DB calls could in principle
+    // reject (e.g. a transient connection error) rather than resolving to a
+    // Result. Guard the Server Action's contract of never throwing across the
+    // server/client boundary, matching confirmSale's pattern below.
+    return {
+      ok: false,
+      error: { code: 'UNEXPECTED_ERROR', message: 'Something went wrong looking up that code. Please try again.' },
+    }
+  }
 }
 
 export async function confirmSale(

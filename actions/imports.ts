@@ -23,13 +23,21 @@ export async function handleImportForm(
     return { status: 'error', message: 'Please choose a file to import' }
   }
 
+  if (intent !== 'preview' && intent !== 'commit') {
+    return { status: 'error', message: 'Invalid import action' }
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer())
   const parsed = await parseImportFile(file.name, buffer)
   if (!parsed.ok) {
     return { status: 'error', message: parsed.error.message }
   }
 
-  const { validRows, rowErrors } = await validateImportRows(eventId, parsed.data.rows)
+  const validated = await validateImportRows(session, eventId, parsed.data.rows)
+  if (!validated.ok) {
+    return { status: 'error', message: validated.error.message }
+  }
+  const { validRows, rowErrors } = validated.data
 
   if (intent === 'preview') {
     return { status: 'preview', validCount: validRows.length, rowErrors }

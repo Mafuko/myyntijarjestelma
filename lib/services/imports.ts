@@ -97,9 +97,13 @@ export type RowError = { row: number; field: string; message: string }
 export type ValidatedRow = { name: string; price: number; categoryId: string; isAgeRestricted: boolean }
 
 export async function validateImportRows(
+  session: MinimalSession,
   eventId: string,
   rawRows: RawImportRow[]
-): Promise<{ validRows: ValidatedRow[]; rowErrors: RowError[] }> {
+): Promise<Result<{ validRows: ValidatedRow[]; rowErrors: RowError[] }>> {
+  const authz = await requireEventAccess(session, eventId, ['SELLER'])
+  if (!authz.ok) return authz
+
   const categories = await prisma.category.findMany({ where: { eventId } })
   const categoryByName = new Map(categories.map((c) => [c.name.toLowerCase(), c.id]))
 
@@ -132,7 +136,7 @@ export async function validateImportRows(
     validRows.push({ name: parsed.data.name, price: parsed.data.price, categoryId, isAgeRestricted: parsed.data.isAgeRestricted })
   })
 
-  return { validRows, rowErrors }
+  return { ok: true, data: { validRows, rowErrors } }
 }
 
 export async function commitImport(

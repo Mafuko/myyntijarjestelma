@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { requireEventAccess } from '@/lib/services/authz'
 
@@ -26,8 +27,8 @@ export async function getSalesSnapshot(session: MinimalSession, eventId: string)
   const aliasBySellerId = new Map(memberships.map((m) => [m.userId, m.sellerAlias ?? 'Unknown']))
 
   const soldItems = items.filter((i) => i.status === 'SOLD')
-  const totalRevenue = soldItems.reduce((sum, i) => sum + Number(i.price), 0)
-  const commissionOwed = totalRevenue * Number(event.commissionRate)
+  const totalRevenue = soldItems.reduce((sum, i) => sum.add(i.price), new Prisma.Decimal(0))
+  const commissionOwed = totalRevenue.mul(event.commissionRate)
 
   return {
     ok: true,
