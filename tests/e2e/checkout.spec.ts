@@ -9,14 +9,7 @@ test.afterAll(async () => {
   await testPrisma.$disconnect()
 })
 
-// Skipped: E2E login is currently broken by a placeholder Upstash rate-limit config unrelated to this
-// test (tracked for a Session 11 fix). actions/auth.ts's login() calls the real rate-limit check
-// unconditionally before signIn, and the .env credentials for it are a placeholder Upstash endpoint that
-// only exists to satisfy module-import-time checks under Vitest (where the rate limiter is mocked) — the
-// Playwright E2E suite runs against the real dev server, so every UI login attempt fails with
-// getaddrinfo ENOTFOUND. This is a known, tracked regression, not a defect in this test or the barcode
-// checkout flow it exercises.
-test.skip('staff scans a barcode, confirms with Enter, and the item becomes sold', async ({ page }) => {
+test('staff scans a barcode, confirms with Enter, and the item becomes sold', async ({ page }) => {
   const owner = await testPrisma.user.create({
     data: { name: 'Owner', email: 'owner@example.com', isOwner: true, passwordHash: await hashPassword('owner-pw-12345') },
   })
@@ -58,10 +51,7 @@ test.skip('staff scans a barcode, confirms with Enter, and the item becomes sold
   expect(updated.status).toBe('SOLD')
 })
 
-// Skipped: E2E login is currently broken by a placeholder Upstash rate-limit config unrelated to this
-// test (tracked for a Session 11 fix) — see the comment on the test above. This is a known, tracked
-// regression, not a defect in this test or the already-sold error handling it exercises.
-test.skip('scanning an already-sold item shows a distinct error message', async ({ page }) => {
+test('scanning an already-sold item shows a distinct error message', async ({ page }) => {
   const owner = await testPrisma.user.create({
     data: { name: 'Owner', email: 'owner@example.com', isOwner: true, passwordHash: await hashPassword('owner-pw-12345') },
   })

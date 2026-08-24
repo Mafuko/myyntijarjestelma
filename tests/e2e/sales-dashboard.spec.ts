@@ -9,14 +9,7 @@ test.afterAll(async () => {
   await testPrisma.$disconnect()
 })
 
-// Skipped: E2E login is currently broken by a placeholder Upstash rate-limit config unrelated to this
-// test (tracked for a Session 11 fix). actions/auth.ts's login() calls the real rate-limit check
-// unconditionally before signIn, and the .env credentials for it are a placeholder Upstash endpoint that
-// only exists to satisfy module-import-time checks under Vitest (where the rate limiter is mocked) — the
-// Playwright E2E suite runs against the real dev server, so every UI login attempt fails with
-// getaddrinfo ENOTFOUND. This test logs in twice (seller and staff), both blocked. This is a known,
-// tracked regression, not a defect in this test or the live-update sales dashboard it exercises.
-test.skip('a sale confirmed at checkout appears on the seller sales dashboard without a manual reload', async ({ browser }) => {
+test('a sale confirmed at checkout appears on the seller sales dashboard without a manual reload', async ({ browser }) => {
   const owner = await testPrisma.user.create({
     data: { name: 'Owner', email: 'owner@example.com', isOwner: true, passwordHash: await hashPassword('owner-pw-12345') },
   })

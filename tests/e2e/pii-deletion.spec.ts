@@ -9,13 +9,7 @@ test.afterAll(async () => {
   await testPrisma.$disconnect()
 })
 
-// Skipped: E2E login is currently broken by a placeholder Upstash rate-limit config unrelated to this
-// test (tracked for a Session 11 fix) — this affects the ENTIRE E2E suite including auth.spec.ts's own
-// revocation test, not just this one. The underlying deleteUserPii logic is proven by the integration
-// tests above, and reuses the identical tokenVersion increment that lib/auth.ts's jwt callback checks on
-// every session read (see lib/auth.ts) — the same mechanism, verified by source inspection, not by a
-// currently-passing E2E test.
-test.skip("owner deletes a user's PII, and that user can no longer log in", async ({ page }) => {
+test("owner deletes a user's PII, and that user can no longer log in", async ({ page }) => {
   await testPrisma.user.create({
     data: { name: 'Owner', email: 'owner@example.com', isOwner: true, passwordHash: await hashPassword('owner-pw-12345') },
   })
