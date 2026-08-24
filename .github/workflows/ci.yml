@@ -30,14 +30,17 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Generate ephemeral CI secrets
+      - name: Configure CI environment
+        env:
+          UPSTASH_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
         run: |
           echo "AUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
           echo "PII_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
           echo "DATABASE_URL=postgresql://postgres:password@localhost:5432/myyntijarjestelma_test?schema=public" >> "$GITHUB_ENV"
           echo "DATABASE_URL_TEST=postgresql://postgres:password@localhost:5432/myyntijarjestelma_test?schema=public" >> "$GITHUB_ENV"
-          echo "UPSTASH_REDIS_REST_URL=https://ci-unused.upstash.io" >> "$GITHUB_ENV"
-          echo "UPSTASH_REDIS_REST_TOKEN=ci-unused-token" >> "$GITHUB_ENV"
+          echo "UPSTASH_REDIS_REST_URL=$UPSTASH_URL" >> "$GITHUB_ENV"
+          echo "UPSTASH_REDIS_REST_TOKEN=$UPSTASH_TOKEN" >> "$GITHUB_ENV"
 
       - run: npm ci
       - run: npx prisma migrate deploy
