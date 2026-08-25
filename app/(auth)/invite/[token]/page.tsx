@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { acceptInvite } from '@/actions/auth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function InvitePage() {
   const params = useParams<{ token: string }>()
@@ -19,16 +24,26 @@ export default function InvitePage() {
   }
 
   return (
-    <form action={handleSubmit} className="mx-auto mt-20 flex max-w-sm flex-col gap-4">
-      <h1 className="text-xl font-semibold">Set your password</h1>
-      <label className="flex flex-col gap-1">
-        Password
-        <input name="password" type="password" required minLength={10} className="rounded border px-2 py-1" />
-      </label>
-      {error && <p className="text-red-600">{error}</p>}
-      <button type="submit" className="rounded bg-black px-4 py-2 text-white">
-        Set password
-      </button>
-    </form>
+    <div className="flex flex-1 items-center justify-center px-6">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Set your password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" name="password" type="password" required minLength={10} />
+            </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit">Set password</Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
