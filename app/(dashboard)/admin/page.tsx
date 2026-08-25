@@ -4,6 +4,8 @@ import { auth } from '@/lib/auth'
 import { requireOwner } from '@/lib/services/authz'
 import { prisma } from '@/lib/db'
 import { deleteUserPii } from '@/actions/users'
+import { Button } from '@/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export default async function AdminPage() {
   const session = await auth()
@@ -13,26 +15,28 @@ export default async function AdminPage() {
   const users = await prisma.user.findMany({ orderBy: { createdAt: 'desc' } })
 
   return (
-    <div className="p-8">
-      <h1 className="text-xl font-semibold">Admin</h1>
-      <Link href="/audit" className="underline">
-        View audit log
-      </Link>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-foreground">Admin</h1>
+        <Link href="/audit" className="text-sm text-primary underline-offset-4 hover:underline">
+          View audit log
+        </Link>
+      </div>
 
-      <table className="mt-4 text-sm">
-        <thead>
-          <tr>
-            <th className="pr-4 text-left">Name</th>
-            <th className="pr-4 text-left">Email</th>
-            <th className="text-left">Action</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {users.map((u) => (
-            <tr key={u.id}>
-              <td className="pr-4">{u.name}</td>
-              <td className="pr-4">{u.email}</td>
-              <td>
+            <TableRow key={u.id}>
+              <TableCell>{u.name}</TableCell>
+              <TableCell>{u.email}</TableCell>
+              <TableCell>
                 {!u.isOwner && (
                   <form
                     action={async () => {
@@ -40,16 +44,16 @@ export default async function AdminPage() {
                       await deleteUserPii(u.id)
                     }}
                   >
-                    <button type="submit" className="text-sm text-red-600 underline">
+                    <Button type="submit" variant="destructive" size="sm">
                       Delete PII
-                    </button>
+                    </Button>
                   </form>
                 )}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }
