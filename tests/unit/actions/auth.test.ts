@@ -6,6 +6,7 @@ vi.mock('@/lib/auth', () => ({
 }))
 vi.mock('@/lib/services/users', () => ({
   activateInvite: vi.fn(),
+  bootstrapOwner: vi.fn(),
 }))
 vi.mock('@/lib/rate-limit', () => ({
   loginRateLimiter: {},
@@ -94,5 +95,52 @@ describe('acceptInvite action', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error.code).toBe('INVALID_TOKEN')
+  })
+})
+
+describe('signupOwner action', () => {
+  it('propagates a service error unchanged, without calling signIn', async () => {
+    const { signupOwner } = await import('@/actions/auth')
+    const { bootstrapOwner } = await import('@/lib/services/users')
+    const { signIn } = await import('@/lib/auth')
+    vi.mocked(bootstrapOwner).mockResolvedValueOnce({
+      ok: false,
+      error: { code: 'ALREADY_INITIALIZED', message: 'Setup has already been completed' },
+    })
+    vi.mocked(signIn).mockClear()
+
+    const formData = new FormData()
+    formData.set('name', 'First Owner')
+    formData.set('email', 'owner@example.com')
+    formData.set('password', 'a-secure-password-1')
+
+    const result = await signupOwner(formData)
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('ALREADY_INITIALIZED')
+    expect(signIn).not.toHaveBeenCalled()
+  })
+
+  it('signs in and returns a redirectTo of /events on success', async () => {
+    const { signupOwner } = await import('@/actions/auth')
+    const { bootstrapOwner } = await import('@/lib/services/users')
+    const { signIn } = await import('@/lib/auth')
+    vi.mocked(bootstrapOwner).mockResolvedValueOnce({ ok: true, data: { userId: 'user-1' } })
+    vi.mocked(signIn).mockResolvedValueOnce(undefined as never)
+
+    const formData = new FormData()
+    formData.set('name', 'First Owner')
+    formData.set('email', 'owner@example.com')
+    formData.set('password', 'a-secure-password-1')
+
+    const result = await signupOwner(formData)
+
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.data.redirectTo).toBe('/events')
+    expect(signIn).toHaveBeenCalledWith('credentials', {
+      email: 'owner@example.com',
+      password: 'a-secure-password-1',
+      redirect: false,
+    })
   })
 })

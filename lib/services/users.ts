@@ -1,7 +1,8 @@
 import { randomBytes } from 'node:crypto'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { hashPassword } from '@/lib/crypto'
-import { inviteUserSchema, acceptInviteSchema } from '@/lib/validation/user'
+import { inviteUserSchema, acceptInviteSchema, signupSchema } from '@/lib/validation/user'
 import { requireOwner } from '@/lib/services/authz'
 import { writeAuditLog } from '@/lib/services/audit'
 
@@ -102,3 +103,46 @@ export async function deleteUserPii(session: MinimalSession, targetUserId: strin
 
   return { ok: true, data: {} }
 }
+
+const ALREADY_INITIALIZED_ERROR = { code: 'ALREADY_INITIALIZED', message: 'Setup has already been completed' } as const
+
+export async function bootstrapOwner(input: unknown): Promise<Result<{ userId: string }>> {
+  const parsed = signupSchema.safeParse(input)
+  if (!parsed.success) {
+    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+  }
+  const { name, email, password } = parsed.data
+
+  try {
+    const userId = await prisma.$transaction(
+      async (tx) => {
+        // Serializable isolation, re-checked inside the transaction rather
+        // than trusting a check made before calling this function: two
+        // concurrent callers could otherwise both observe zero users and
+        // both create an owner. Under Serializable, Postgres detects that
+        // write skew and aborts the loser's COMMIT with a serialization
+        // failure (caught below as Prisma's P2034), so only one owner is
+        // ever created no matter how the two calls interleave.
+        const existingCount = await tx.user.count()
+        if (existingCount > 0) {
+          throw new AlreadyInitializedError()
+        }
+        const passwordHash = await hashPassword(password)
+        const user = await tx.user.create({ data: { name, email, passwordHash, isOwner: true } })
+        return user.id
+      },
+      { isolationLevel: 'Serializable' }
+    )
+    return { ok: true, data: { userId } }
+  } catch (err) {
+    if (err instanceof AlreadyInitializedError) {
+      return { ok: false, error: ALREADY_INITIALIZED_ERROR }
+    }
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2034') {
+      return { ok: false, error: ALREADY_INITIALIZED_ERROR }
+    }
+    throw err
+  }
+}
+
+class AlreadyInitializedError extends Error {}

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { testPrisma, resetDb } from './setup'
-import { inviteUser, activateInvite, deleteUserPii } from '@/lib/services/users'
+import { inviteUser, activateInvite, deleteUserPii, bootstrapOwner } from '@/lib/services/users'
 
 function sessionFor(userId: string) {
   return { user: { id: userId } }
@@ -166,5 +166,71 @@ describe('deleteUserPii', () => {
     const target = await testPrisma.user.create({ data: { name: 'Target', email: 'target2@example.com', passwordHash: 'x' } })
     const result = await deleteUserPii(sessionFor(admin.id), target.id)
     expect(result.ok).toBe(false)
+  })
+})
+
+describe('bootstrapOwner', () => {
+  beforeEach(async () => {
+    await resetDb()
+  })
+
+  afterAll(async () => {
+    await testPrisma.$disconnect()
+  })
+
+  it('creates an owner user with a hashed password when the database has zero users', async () => {
+    const result = await bootstrapOwner({ name: 'First Owner', email: 'first-owner@example.com', password: 'a-secure-password-1' })
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+
+    const user = await testPrisma.user.findUniqueOrThrow({ where: { id: result.data.userId } })
+    expect(user.isOwner).toBe(true)
+    expect(user.email).toBe('first-owner@example.com')
+    expect(user.passwordHash).toBeTruthy()
+    expect(user.passwordHash).not.toBe('a-secure-password-1')
+  })
+
+  it('rejects when a user already exists', async () => {
+    await testPrisma.user.create({ data: { name: 'Existing', email: 'existing@example.com', passwordHash: 'x' } })
+
+    const result = await bootstrapOwner({ name: 'Second Owner', email: 'second-owner@example.com', password: 'a-secure-password-1' })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('ALREADY_INITIALIZED')
+
+    const count = await testPrisma.user.count()
+    expect(count).toBe(1)
+  })
+
+  it('rejects a password shorter than 10 characters', async () => {
+    const result = await bootstrapOwner({ name: 'First Owner', email: 'first-owner@example.com', password: 'short' })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('VALIDATION_ERROR')
+
+    const count = await testPrisma.user.count()
+    expect(count).toBe(0)
+  })
+
+  it('lets only one of two concurrent bootstrap attempts succeed on an empty database', async () => {
+    const [first, second] = await Promise.all([
+      bootstrapOwner({ name: 'Racer A', email: 'racer-a@example.com', password: 'a-secure-password-1' }),
+      bootstrapOwner({ name: 'Racer B', email: 'racer-b@example.com', password: 'a-secure-password-2' }),
+    ])
+
+    const outcomes = [first, second]
+    const succeeded = outcomes.filter((r) => r.ok)
+    const failed = outcomes.filter((r) => !r.ok)
+
+    expect(succeeded).toHaveLength(1)
+    expect(failed).toHaveLength(1)
+    if (failed[0].ok) return
+    expect(failed[0].error.code).toBe('ALREADY_INITIALIZED')
+
+    const count = await testPrisma.user.count()
+    expect(count).toBe(1)
   })
 })

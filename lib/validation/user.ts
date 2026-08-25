@@ -23,6 +23,12 @@ export const acceptInviteSchema = z.object({
   password: z.string().min(10, 'Password must be at least 10 characters'),
 })
 
+export const signupSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  password: z.string().min(10, 'Password must be at least 10 characters'),
+})
+
 export function isValidIban(iban: string): boolean {
   const normalized = iban.replace(/\s+/g, '').toUpperCase()
   if (!/^[A-Z]{2}\d{2}[A-Z0-9]{1,30}$/.test(normalized)) return false

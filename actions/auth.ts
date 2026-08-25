@@ -2,7 +2,7 @@
 
 import { signIn, signOut } from '@/lib/auth'
 import { loginRateLimiter, checkRateLimit } from '@/lib/rate-limit'
-import { activateInvite } from '@/lib/services/users'
+import { activateInvite, bootstrapOwner } from '@/lib/services/users'
 import { loginSchema } from '@/lib/validation/user'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
@@ -40,4 +40,16 @@ export async function acceptInvite(formData: FormData): Promise<Result<{ redirec
   })
   if (!result.ok) return result
   return { ok: true, data: { redirectTo: '/login' } }
+}
+
+export async function signupOwner(formData: FormData): Promise<Result<{ redirectTo: string }>> {
+  const name = formData.get('name')
+  const email = formData.get('email')
+  const password = formData.get('password')
+
+  const result = await bootstrapOwner({ name, email, password })
+  if (!result.ok) return result
+
+  await signIn('credentials', { email, password, redirect: false })
+  return { ok: true, data: { redirectTo: '/events' } }
 }
