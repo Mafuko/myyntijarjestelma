@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 import { updateEvent } from '@/actions/events'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function UpdateCommissionForm({ eventId, commissionRate }: { eventId: string; commissionRate: string }) {
   const [error, setError] = useState<string | null>(null)
@@ -16,25 +20,21 @@ export function UpdateCommissionForm({ eventId, commissionRate }: { eventId: str
   }
 
   return (
-    <form action={handleSubmit} className="mt-6 flex max-w-xs flex-col gap-2">
+    <form action={handleSubmit} className="flex max-w-xs flex-col gap-2">
       <div className="flex items-end gap-2">
-        <label className="flex flex-col gap-1 text-sm">
-          Commission rate (0–1)
-          <input
-            name="commissionRate"
-            type="number"
-            step="0.01"
-            min="0"
-            max="1"
-            defaultValue={commissionRate}
-            className="rounded border px-2 py-1"
-          />
-        </label>
-        <button type="submit" className="rounded bg-black px-3 py-1.5 text-white">
+        <div className="flex flex-col gap-1.5 text-sm">
+          <Label htmlFor="commissionRate">Commission rate (0–1)</Label>
+          <Input id="commissionRate" name="commissionRate" type="number" step="0.01" min="0" max="1" defaultValue={commissionRate} />
+        </div>
+        <Button type="submit" size="sm">
           Update
-        </button>
+        </Button>
       </div>
-      {error && <p className="text-red-600">{error}</p>}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
     </form>
   )
 }

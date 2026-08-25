@@ -13,24 +13,25 @@ export default async function EventHomePage({ params }: { params: Promise<{ even
 
   const event = await prisma.event.findUniqueOrThrow({ where: { id: eventId } })
   const canManage = authz.role === 'ADMIN' || authz.role === 'OWNER'
+  const navLinkClass = 'text-primary underline-offset-4 hover:underline'
 
   return (
-    <div className="p-8">
-      <h1 className="text-xl font-semibold">{event.name}</h1>
-      <nav className="mt-4 flex flex-col gap-2">
-        <Link href={`/events/${eventId}/items`} className="underline">
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-semibold text-foreground">{event.name}</h1>
+      <nav className="flex flex-col gap-2">
+        <Link href={`/events/${eventId}/items`} className={navLinkClass}>
           My items
         </Link>
         {(authz.role === 'STAFF' || canManage) && (
-          <Link href={`/events/${eventId}/checkout`} className="underline">
+          <Link href={`/events/${eventId}/checkout`} className={navLinkClass}>
             Checkout
           </Link>
         )}
-        <Link href={`/events/${eventId}/sales`} className="underline">
+        <Link href={`/events/${eventId}/sales`} className={navLinkClass}>
           Sales
         </Link>
         {canManage && (
-          <Link href={`/events/${eventId}/members`} className="underline">
+          <Link href={`/events/${eventId}/members`} className={navLinkClass}>
             Members
           </Link>
         )}
