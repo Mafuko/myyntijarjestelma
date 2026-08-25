@@ -17,10 +17,13 @@
     "@node-rs/argon2": "^2.1.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "@radix-ui/react-label": "^2.1.15",
     "@react-pdf/renderer": "^4.7.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.2",
     "bwip-js": "^4.11.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "exceljs": "^4.4.0",
     "next": "^15.5.23",
     "next-auth": "^5.0.0-beta.32",
@@ -28,6 +31,7 @@
     "prisma": "^7.9.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
