@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 import { createEvent } from '@/actions/events'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function CreateEventForm() {
   const [error, setError] = useState<string | null>(null)
@@ -16,25 +20,26 @@ export function CreateEventForm() {
   }
 
   return (
-    <form action={handleSubmit} className="mt-8 flex max-w-sm flex-col gap-3">
-      <h2 className="font-medium">Create event</h2>
-      <input name="name" placeholder="Event name" required className="rounded border px-2 py-1" />
-      <label className="flex flex-col gap-1 text-sm">
-        Event date
-        <input name="eventDate" type="date" required className="rounded border px-2 py-1" />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Registration deadline
-        <input name="registrationDeadline" type="date" required className="rounded border px-2 py-1" />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Item edit cutoff
-        <input name="itemEditCutoffDate" type="date" required className="rounded border px-2 py-1" />
-      </label>
-      {error && <p className="text-red-600">{error}</p>}
-      <button type="submit" className="rounded bg-black px-4 py-2 text-white">
-        Create event
-      </button>
+    <form action={handleSubmit} className="flex flex-col gap-3">
+      <Input name="name" placeholder="Event name" required />
+      <div className="flex flex-col gap-1.5 text-sm">
+        <Label htmlFor="eventDate">Event date</Label>
+        <Input id="eventDate" name="eventDate" type="date" required />
+      </div>
+      <div className="flex flex-col gap-1.5 text-sm">
+        <Label htmlFor="registrationDeadline">Registration deadline</Label>
+        <Input id="registrationDeadline" name="registrationDeadline" type="date" required />
+      </div>
+      <div className="flex flex-col gap-1.5 text-sm">
+        <Label htmlFor="itemEditCutoffDate">Item edit cutoff</Label>
+        <Input id="itemEditCutoffDate" name="itemEditCutoffDate" type="date" required />
+      </div>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <Button type="submit">Create event</Button>
     </form>
   )
 }

@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { listEventsForUser } from '@/lib/services/events'
 import { CreateEventForm } from './CreateEventForm'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function EventsPage() {
   const session = await auth()
@@ -19,20 +20,31 @@ export default async function EventsPage() {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: session.user.id } })
 
   return (
-    <div className="p-8">
-      <h1 className="text-xl font-semibold">Events</h1>
-      <ul className="mt-4 flex flex-col gap-2">
-        {events.map((e) => (
-          <li key={e.id}>
-            <Link href={`/events/${e.id}`} className="underline">
-              {e.name}
-            </Link>{' '}
-            — {e.role}
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="text-xl font-semibold text-foreground">Events</h1>
+        <ul className="mt-4 flex flex-col gap-2">
+          {events.map((e) => (
+            <li key={e.id}>
+              <Link href={`/events/${e.id}`} className="text-primary underline-offset-4 hover:underline">
+                {e.name}
+              </Link>{' '}
+              <span className="text-muted-foreground">— {e.role}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-      {user.isOwner && <CreateEventForm />}
+      {user.isOwner && (
+        <Card className="max-w-sm">
+          <CardHeader>
+            <CardTitle>Create event</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CreateEventForm />
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
