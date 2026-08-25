@@ -21,7 +21,6 @@ export default async function EventsPage() {
   return (
     <div className="p-8">
       <h1 className="text-xl font-semibold">Events</h1>
-      <p>Signed in as {session.user.email}</p>
       <ul className="mt-4 flex flex-col gap-2">
         {events.map((e) => (
           <li key={e.id}>
