@@ -2,6 +2,10 @@
 
 import { useActionState, useEffect, useRef } from 'react'
 import { handleImportForm, type ImportFormState } from '@/actions/imports'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const initialState: ImportFormState = { status: 'idle' }
 
@@ -27,55 +31,58 @@ export function ImportForm({ eventId }: { eventId: string }) {
 
   return (
     <form action={formAction} className="flex max-w-md flex-col gap-4">
-      <input
+      <Input
         ref={fileInputRef}
         name="file"
         type="file"
         accept=".csv,.xlsx"
         required
-        className="rounded border px-2 py-1"
         onChange={(e) => {
           selectedFileRef.current = e.target.files?.[0] ?? null
         }}
       />
       <div className="flex gap-2">
-        <button type="submit" name="intent" value="preview" disabled={isPending} className="rounded border px-4 py-2">
+        <Button type="submit" name="intent" value="preview" disabled={isPending} variant="outline">
           Preview
-        </button>
-        <button type="submit" name="intent" value="commit" disabled={isPending} className="rounded bg-black px-4 py-2 text-white">
+        </Button>
+        <Button type="submit" name="intent" value="commit" disabled={isPending}>
           Confirm import
-        </button>
+        </Button>
       </div>
 
-      {state.status === 'error' && <p className="text-red-600">{state.message}</p>}
+      {state.status === 'error' && (
+        <Alert variant="destructive">
+          <AlertDescription>{state.message}</AlertDescription>
+        </Alert>
+      )}
 
       {state.status === 'preview' && (
         <div>
-          <p>{state.validCount} valid row(s) ready to import.</p>
+          <p className="text-sm text-foreground">{state.validCount} valid row(s) ready to import.</p>
           {state.rowErrors.length > 0 && (
-            <table className="mt-2 text-sm">
-              <thead>
-                <tr>
-                  <th className="pr-4 text-left">Row</th>
-                  <th className="pr-4 text-left">Field</th>
-                  <th className="text-left">Problem</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table className="mt-2">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Row</TableHead>
+                  <TableHead>Field</TableHead>
+                  <TableHead>Problem</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {state.rowErrors.map((e, i) => (
-                  <tr key={i}>
-                    <td className="pr-4">{e.row}</td>
-                    <td className="pr-4">{e.field}</td>
-                    <td>{e.message}</td>
-                  </tr>
+                  <TableRow key={i}>
+                    <TableCell>{e.row}</TableCell>
+                    <TableCell>{e.field}</TableCell>
+                    <TableCell>{e.message}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
         </div>
       )}
 
-      {state.status === 'committed' && <p className="text-green-700">Imported {state.createdCount} item(s).</p>}
+      {state.status === 'committed' && <p className="text-sm text-success">Imported {state.createdCount} item(s).</p>}
     </form>
   )
 }
