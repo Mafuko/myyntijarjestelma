@@ -2,6 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { lookupCode, confirmSale } from '@/actions/sales'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 type LookupResult = { itemId: string; name: string; price: string; sellerAlias: string; status: string }
 
@@ -44,9 +48,11 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-xl font-semibold">Checkout</h1>
-      <input
+    <div className="flex flex-col gap-4">
+      <h1 className="text-xl font-semibold text-foreground">Checkout</h1>
+      {/* Inline Card, not a Dialog: focus must stay in this input across both
+          lookup and confirm so a second Enter reaches handleConfirm below. */}
+      <Input
         ref={inputRef}
         value={code}
         onChange={(e) => setCode(e.target.value)}
@@ -56,22 +62,28 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
           else handleCodeSubmit()
         }}
         autoFocus
-        className="mt-4 w-full max-w-sm rounded border px-3 py-2 text-lg"
+        className="max-w-sm text-lg"
         placeholder="Scan or type code, then Enter"
       />
 
       {lookup && (
-        <div className="mt-4 rounded border p-4">
-          <p>
-            Selling <strong>{lookup.name}</strong> ({lookup.price} €, {lookup.sellerAlias}). Confirm?
-          </p>
-          <button onClick={handleConfirm} disabled={pending} className="mt-2 rounded bg-black px-4 py-2 text-white">
-            Confirm (Enter)
-          </button>
-        </div>
+        <Card className="max-w-sm">
+          <CardContent className="pt-6">
+            <p className="text-foreground">
+              Selling <strong>{lookup.name}</strong> ({lookup.price} €, {lookup.sellerAlias}). Confirm?
+            </p>
+            <Button onClick={handleConfirm} disabled={pending} className="mt-3">
+              Confirm (Enter)
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
-      {message && <p className="mt-4">{message}</p>}
+      {message && (
+        <Alert className="max-w-sm">
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }
