@@ -42,6 +42,11 @@ test('invited user sets a password, logs in, and unauthenticated access is redir
   await expect(page).toHaveURL(/\/events/)
   await expect(page.getByText('seller@example.com')).toBeVisible()
 
+  await page.getByRole('button', { name: /sign out/i }).click()
+  await expect(page).toHaveURL(/\/login/)
+  await page.goto('/events')
+  await expect(page).toHaveURL(/\/login/)
+
   await page.context().clearCookies()
   await page.goto('/events')
   await expect(page).toHaveURL(/\/login/)

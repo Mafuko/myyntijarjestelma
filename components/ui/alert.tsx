@@ -6,8 +6,9 @@ export const alertVariants = cva('relative w-full rounded-lg border p-4 text-sm'
   variants: {
     variant: {
       default: 'border-border bg-card text-card-foreground',
-      destructive: 'border-destructive/50 bg-destructive/10 text-destructive',
+      destructive: 'border-destructive/50 bg-destructive/10 text-destructive-text',
       warning: 'border-warning/50 bg-warning/10 text-warning',
+      success: 'border-success/50 bg-success/10 text-success',
     },
   },
   defaultVariants: { variant: 'default' },

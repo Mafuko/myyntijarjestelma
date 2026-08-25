@@ -62,7 +62,7 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
           else handleCodeSubmit()
         }}
         autoFocus
-        className="max-w-sm text-lg"
+        className="h-11 max-w-sm text-lg"
         placeholder="Scan or type code, then Enter"
       />
 

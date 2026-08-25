@@ -82,7 +82,11 @@ export function ImportForm({ eventId }: { eventId: string }) {
         </div>
       )}
 
-      {state.status === 'committed' && <p className="text-sm text-success">Imported {state.createdCount} item(s).</p>}
+      {state.status === 'committed' && (
+        <Alert variant="success">
+          <AlertDescription>Imported {state.createdCount} item(s).</AlertDescription>
+        </Alert>
+      )}
     </form>
   )
 }

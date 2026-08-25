@@ -23,7 +23,7 @@ export default async function MembersPage({ params }: { params: Promise<{ eventI
               <span>
                 {m.user.name} ({m.user.email}) — {m.role}
               </span>
-              <Badge variant={m.status === 'ACTIVE' ? 'success' : 'secondary'}>{m.status}</Badge>
+              <Badge variant={m.status === 'ACTIVE' ? 'success' : 'destructive'}>{m.status}</Badge>
             </li>
           ))}
         </ul>

@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --background: #0b0e14;
   --foreground: #e6e8ec;
   --card: #12161f;
   --card-foreground: #e6e8ec;
-  --border: #232838;
-  --input: #232838;
+  --border: #6b7488;
+  --input: #6b7488;
   --ring: #f59e0b;
   --muted: #1a1f2b;
   --muted-foreground: #8891a5;
@@ -14,8 +15,9 @@
   --primary-foreground: #0b0e14;
   --secondary: #1a1f2b;
   --secondary-foreground: #e6e8ec;
-  --destructive: #dc2626;
+  --destructive: #d92222;
   --destructive-foreground: #fef2f2;
+  --destructive-text: #f87171;
   --success: #22c55e;
   --success-foreground: #052e13;
   --warning: #f59e0b;
@@ -38,6 +40,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-text: var(--destructive-text);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);

@@ -7,6 +7,7 @@ export const badgeVariants = cva('inline-flex items-center rounded-md border bor
     variant: {
       secondary: 'bg-secondary text-secondary-foreground',
       success: 'bg-success text-success-foreground',
+      destructive: 'bg-destructive/15 text-destructive-text',
     },
   },
   defaultVariants: { variant: 'secondary' },
