@@ -2,6 +2,11 @@
 
 import { useRef, useState } from 'react'
 import { createItem } from '@/actions/items'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/lib/utils'
 
 type Category = { id: string; name: string }
 
@@ -38,45 +43,52 @@ export function AddItemForm({ eventId, categories }: { eventId: string; categori
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 flex max-w-sm flex-col gap-3">
-      <h2 className="font-medium">Add an item</h2>
-      <input ref={nameRef} name="name" placeholder="Item name" required className="rounded border px-2 py-1" />
-      <input
-        ref={priceRef}
-        name="price"
-        type="number"
-        step="0.01"
-        min="0.01"
-        placeholder="Price"
-        required
-        className="rounded border px-2 py-1"
-      />
-      <select
-        name="categoryId"
-        required
-        value={categoryId}
-        onChange={(e) => setCategoryId(e.target.value)}
-        className="rounded border px-2 py-1"
-      >
-        {categories.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          name="isAgeRestricted"
-          type="checkbox"
-          checked={isAgeRestricted}
-          onChange={(e) => setIsAgeRestricted(e.target.checked)}
-        />
-        K-18
-      </label>
-      {error && <p className="text-red-600">{error}</p>}
-      <button type="submit" className="rounded bg-black px-4 py-2 text-white">
-        Add item
-      </button>
-    </form>
+    <Card className="max-w-sm">
+      <CardHeader>
+        <CardTitle>Add an item</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <Input ref={nameRef} name="name" placeholder="Item name" required />
+          <Input ref={priceRef} name="price" type="number" step="0.01" min="0.01" placeholder="Price" required />
+          {/* Native <select>, not a Select component — items-quickrepeat.spec.ts
+              drives this via page.selectOption('select[name="categoryId"]', ...). */}
+          <select
+            name="categoryId"
+            required
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className={cn(
+              'h-9 rounded-md border border-input bg-card px-3 text-sm text-foreground',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+            )}
+          >
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            {/* Native checkbox, not a Checkbox component — same test drives
+                this via page.locator('input[name="isAgeRestricted"]').check(). */}
+            <input
+              name="isAgeRestricted"
+              type="checkbox"
+              checked={isAgeRestricted}
+              onChange={(e) => setIsAgeRestricted(e.target.checked)}
+              className="h-4 w-4 rounded border-input accent-primary"
+            />
+            K-18
+          </label>
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <Button type="submit">Add item</Button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }
