@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 
 type SalesSnapshotItem = { id: string; name: string; price: string; status: string; sellerAlias: string }
 type SalesSnapshot = { items: SalesSnapshotItem[]; totalRevenue: string; commissionOwed: string }
@@ -25,30 +27,43 @@ export function SalesDashboard({ eventId, initialSnapshot }: { eventId: string; 
   const listed = snapshot.items.filter((i) => i.status === 'LISTED')
 
   return (
-    <div className="p-8">
-      <h1 className="text-xl font-semibold">Sales</h1>
-      {!connected && <p className="text-amber-600">Reconnecting…</p>}
-      <p className="mt-2">
-        Total revenue: {snapshot.totalRevenue} € — Commission owed: {snapshot.commissionOwed} €
-      </p>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-xl font-semibold text-foreground">Sales</h1>
+        {!connected && (
+          <Alert variant="warning" className="mt-2 max-w-sm">
+            <AlertDescription>Reconnecting…</AlertDescription>
+          </Alert>
+        )}
+        <p className="mt-2 text-foreground">
+          Total revenue: {snapshot.totalRevenue} € — Commission owed: {snapshot.commissionOwed} €
+        </p>
+      </div>
 
-      <h2 className="mt-4 font-medium">Sold ({sold.length})</h2>
-      <ul>
-        {sold.map((i) => (
-          <li key={i.id}>
-            {i.name} — {i.price} € — {i.sellerAlias}
-          </li>
-        ))}
-      </ul>
+      <div>
+        <h2 className="font-medium text-foreground">Sold ({sold.length})</h2>
+        <ul className="mt-2 flex flex-col gap-1">
+          {sold.map((i) => (
+            <li key={i.id} className="flex items-center gap-2 text-foreground">
+              <span>
+                {i.name} — {i.price} € — {i.sellerAlias}
+              </span>
+              <Badge variant="success">Sold</Badge>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-      <h2 className="mt-4 font-medium">Unsold ({listed.length})</h2>
-      <ul>
-        {listed.map((i) => (
-          <li key={i.id}>
-            {i.name} — {i.price} € — {i.sellerAlias}
-          </li>
-        ))}
-      </ul>
+      <div>
+        <h2 className="font-medium text-foreground">Unsold ({listed.length})</h2>
+        <ul className="mt-2 flex flex-col gap-1">
+          {listed.map((i) => (
+            <li key={i.id} className="text-foreground">
+              {i.name} — {i.price} € — {i.sellerAlias}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
