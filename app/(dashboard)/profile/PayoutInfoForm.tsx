@@ -2,6 +2,11 @@
 
 import { useState } from 'react'
 import { updatePayoutInfo } from '@/actions/profile'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/lib/utils'
 
 export function PayoutInfoForm({
   currentPayoutMethod,
@@ -22,26 +27,32 @@ export function PayoutInfoForm({
   }
 
   return (
-    <form action={handleSubmit} className="mt-4 flex max-w-sm flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm">
-        Payout method
+    <form action={handleSubmit} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5 text-sm">
+        <Label htmlFor="payoutMethod">Payout method</Label>
         <select
+          id="payoutMethod"
           name="payoutMethod"
           defaultValue={currentPayoutMethod ?? 'CASH'}
-          className="rounded border px-2 py-1"
+          className={cn(
+            'h-9 rounded-md border border-input bg-card px-3 text-sm text-foreground',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+          )}
         >
           <option value="CASH">Cash</option>
           <option value="BANK_TRANSFER">Bank transfer</option>
         </select>
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        IBAN (required for bank transfer)
-        <input name="iban" defaultValue={currentIban ?? ''} className="rounded border px-2 py-1" />
-      </label>
-      {error && <p className="text-red-600">{error}</p>}
-      <button type="submit" className="rounded bg-black px-4 py-2 text-white">
-        Save
-      </button>
+      </div>
+      <div className="flex flex-col gap-1.5 text-sm">
+        <Label htmlFor="iban">IBAN (required for bank transfer)</Label>
+        <Input id="iban" name="iban" defaultValue={currentIban ?? ''} />
+      </div>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <Button type="submit">Save</Button>
     </form>
   )
 }
