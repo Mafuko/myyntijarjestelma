@@ -21,56 +21,67 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
   ])
   const items = itemsResult.ok ? itemsResult.data : []
   const listedIds = items.filter((i) => i.status === 'LISTED').map((i) => i.id)
+  const rowCols = 'grid-cols-[2fr_0.6fr_0.8fr_1fr]'
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-foreground">My items</h1>
-
         {listedIds.length > 0 && (
           <a
             href={`/api/price-tags/${eventId}?itemIds=${listedIds.join(',')}`}
-            className="mt-2 inline-block text-sm text-primary underline-offset-4 hover:underline"
+            className="text-sm text-primary underline-offset-4 hover:underline"
           >
             Print all price tags
           </a>
         )}
-
-        <ul className="mt-4 flex flex-col gap-2">
-          {items.map((item) => (
-            <li key={item.id} className="flex items-center gap-3">
-              <span className="text-foreground">
-                {item.name} — {item.price} €
-              </span>
-              <Badge variant={item.status === 'SOLD' ? 'success' : 'secondary'}>{item.status}</Badge>
-              {item.status === 'LISTED' && (
-                <form
-                  action={async () => {
-                    'use server'
-                    await deleteItem(item.id, eventId)
-                  }}
-                >
-                  <Button type="submit" variant="destructive" size="sm">
-                    Delete
-                  </Button>
-                </form>
-              )}
-              {item.status === 'LISTED' && (
-                <a
-                  href={`/api/price-tags/${eventId}?itemIds=${item.id}`}
-                  className="text-sm text-primary underline-offset-4 hover:underline"
-                >
-                  Price tag
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
       </div>
 
-      <div className="flex flex-wrap gap-6">
-        <AddItemForm eventId={eventId} categories={categories} />
-        <AddSeriesForm eventId={eventId} categories={categories} />
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.6fr_1fr]">
+        <div className="flex flex-col gap-1">
+          <div className={`grid ${rowCols} gap-3 px-3 pb-2`}>
+            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Item</span>
+            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Price</span>
+            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Status</span>
+            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Actions</span>
+          </div>
+          {items.map((item) => (
+            <div key={item.id} className={`grid ${rowCols} items-center gap-3 rounded-md px-3 py-2.5`}>
+              <span className="text-foreground">{item.name}</span>
+              <span className="text-foreground">{item.price} €</span>
+              <Badge variant={item.status === 'SOLD' ? 'success' : 'secondary'} className="w-fit">
+                {item.status}
+              </Badge>
+              <div className="flex items-center gap-3">
+                {item.status === 'LISTED' && (
+                  <form
+                    action={async () => {
+                      'use server'
+                      await deleteItem(item.id, eventId)
+                    }}
+                  >
+                    <Button type="submit" variant="destructive" size="sm">
+                      Delete
+                    </Button>
+                  </form>
+                )}
+                {item.status === 'LISTED' && (
+                  <a
+                    href={`/api/price-tags/${eventId}?itemIds=${item.id}`}
+                    className="text-sm text-primary underline-offset-4 hover:underline"
+                  >
+                    Price tag
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-6 lg:border-l lg:border-border lg:pl-8">
+          <AddItemForm eventId={eventId} categories={categories} />
+          <AddSeriesForm eventId={eventId} categories={categories} />
+        </div>
       </div>
     </div>
   )
