@@ -21,7 +21,8 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
   ])
   const items = itemsResult.ok ? itemsResult.data : []
   const listedIds = items.filter((i) => i.status === 'LISTED').map((i) => i.id)
-  const rowCols = 'grid-cols-[2fr_0.6fr_0.8fr_1fr]'
+  const rowCols = 'sm:grid-cols-[2fr_0.6fr_0.8fr_1fr]'
+  const headerCellClass = 'font-mono text-[11px] uppercase tracking-wide text-muted-foreground'
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,20 +40,23 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.6fr_1fr]">
         <div className="flex flex-col gap-1">
-          <div className={`grid ${rowCols} gap-3 px-3 pb-2`}>
-            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Item</span>
-            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Price</span>
-            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Status</span>
-            <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Actions</span>
+          <div className={`grid grid-cols-1 gap-1 ${rowCols} sm:items-center sm:gap-3 px-3 pb-2`}>
+            <span className={headerCellClass}>Item</span>
+            <span className={headerCellClass}>Price</span>
+            <span className={headerCellClass}>Status</span>
+            <span className={headerCellClass}>Actions</span>
           </div>
           {items.map((item) => (
-            <div key={item.id} className={`grid ${rowCols} items-center gap-3 rounded-md px-3 py-2.5`}>
-              <span className="text-foreground">{item.name}</span>
+            <div
+              key={item.id}
+              className={`grid grid-cols-1 gap-1 ${rowCols} sm:items-center sm:gap-3 rounded-md px-3 py-2.5`}
+            >
+              <span className="min-w-0 break-words text-foreground">{item.name}</span>
               <span className="text-foreground">{item.price} €</span>
               <Badge variant={item.status === 'SOLD' ? 'success' : 'secondary'} className="w-fit">
                 {item.status}
               </Badge>
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-3">
                 {item.status === 'LISTED' && (
                   <form
                     action={async () => {
