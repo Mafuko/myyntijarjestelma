@@ -16,7 +16,7 @@ export function CreateEventForm() {
       setError(result.error.message)
       return
     }
-    setError(null)
+    window.location.href = `/events/${result.data.eventId}`
   }
 
   return (

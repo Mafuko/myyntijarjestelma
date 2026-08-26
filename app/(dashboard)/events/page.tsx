@@ -3,8 +3,6 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { listEventsForUser } from '@/lib/services/events'
-import { CreateEventForm } from './CreateEventForm'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function EventsPage() {
   const session = await auth()
@@ -19,10 +17,23 @@ export default async function EventsPage() {
   const events = await listEventsForUser(session.user.id)
   const user = await prisma.user.findUniqueOrThrow({ where: { id: session.user.id } })
 
+  // An owner with no events yet has nothing to list — send them straight to
+  // event creation instead of showing an empty page. Every other case
+  // (owner with events, or any other role regardless of count) shows the
+  // list below.
+  if (user.isOwner && events.length === 0) redirect('/events/new')
+
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Events</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">Events</h1>
+          {user.isOwner && (
+            <Link href="/events/new" className="text-sm text-primary underline-offset-4 hover:underline">
+              New event
+            </Link>
+          )}
+        </div>
         <ul className="mt-4 flex flex-col gap-2">
           {events.map((e) => (
             <li key={e.id}>
@@ -34,17 +45,6 @@ export default async function EventsPage() {
           ))}
         </ul>
       </div>
-
-      {user.isOwner && (
-        <Card className="max-w-sm">
-          <CardHeader>
-            <CardTitle>Create event</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CreateEventForm />
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
