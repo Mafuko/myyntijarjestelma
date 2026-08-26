@@ -11,12 +11,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-6 py-3">
-          <Link href="/events" className="font-semibold text-foreground">
+          <Link href="/events" className="font-mono text-sm font-semibold uppercase tracking-wide text-foreground">
             Myyntijärjestelmä
           </Link>
           {session?.user && (
             <div className="flex items-center gap-4 text-sm">
-              <span className="text-muted-foreground">{session.user.email}</span>
+              <span className="font-mono text-muted-foreground">{session.user.email}</span>
               <form action={logout}>
                 <Button type="submit" variant="outline" size="sm">
                   Sign out
