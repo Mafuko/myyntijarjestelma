@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Myyntijärjestelmä
 
-## Getting Started
+A web app for organizing flea-market ("pihakirppis") sales events — replaces a manual Google Sheets workflow with seller item listings, generated price tags with barcodes, a scanner-driven checkout, and real-time sales tracking.
 
-First, run the development server:
+Built with Next.js 15, TypeScript, Postgres/Prisma, and Auth.js.
+
+## Getting started
+
+1. Copy `.env.example` to `.env` and fill in real values:
+   - `AUTH_SECRET` — generate with `npx auth secret`
+   - `PII_ENCRYPTION_KEY` — a 32-byte base64 key (used to encrypt stored IBANs)
+   - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — from an [Upstash](https://upstash.com) Redis database (used for rate limiting)
+2. Start local Postgres: `docker-compose up -d`
+3. Install dependencies and set up the database:
+   ```bash
+   npm install
+   npx prisma migrate deploy
+   ```
+4. Run the dev server:
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000).
+
+A fresh database has no users — visiting `/signup` creates the first owner account (that route becomes unreachable once any user exists).
+
+## Testing
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NODE_OPTIONS='--require dotenv/config' npm test           # unit + integration tests (Vitest, hits the DATABASE_URL_TEST database)
+NODE_OPTIONS='--require dotenv/config' npm run test:e2e   # end-to-end tests (Playwright, runs the app against the same test database)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Neither Vitest nor Playwright load `.env` automatically the way `next dev`/`next build` do, so the `NODE_OPTIONS` prefix above is required every time — without it, the test database connection fails. (On Windows, the short flag form `-r dotenv/config` doesn't work — use the long form `--require`.) The test database needs its schema set up once via `npx prisma migrate deploy` against `DATABASE_URL_TEST`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploying
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Not yet documented — see `docs/next-steps.md` item 2 for what's needed (Vercel setup, environment variables, running migrations on deploy).
 
-## Learn More
+## Project docs
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `docs/next-steps.md` — what's left before a real deployment
+- `docs/superpowers/specs/` and `docs/superpowers/plans/` — design specs and implementation plans for the original build and every feature added since
+- `CLAUDE.md` — architecture notes and conventions for AI-assisted development in this repo
