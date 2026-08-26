@@ -46,8 +46,12 @@ test('a seller can add an item and delete it, but never sees another seller\'s i
   await page.goto(`/events/${event.id}/items`)
   await expect(page.getByText("Seller B's item")).toHaveCount(0)
 
-  await page.getByPlaceholder('Item name').fill('Manga Vol. 1')
-  await page.getByPlaceholder('Price').fill('5')
+  // Scoped to the "Add an item" form specifically: the items page also has
+  // a series/bundle form whose "Price per item" placeholder is a substring
+  // match for "Price", so an unscoped locator would be ambiguous.
+  const addItemForm = page.locator('form').filter({ has: page.getByPlaceholder('Item name') })
+  await addItemForm.getByPlaceholder('Item name').fill('Manga Vol. 1')
+  await addItemForm.getByPlaceholder('Price', { exact: true }).fill('5')
   await page.getByRole('button', { name: /add item/i }).click()
   await expect(page.getByText('Manga Vol. 1')).toBeVisible()
 

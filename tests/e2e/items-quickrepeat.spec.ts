@@ -37,24 +37,29 @@ test('quick-repeat: category and K-18 persist across submissions, name/price cle
 
   await page.goto(`/events/${event.id}/items`)
 
+  // Scoped to the "Add an item" form specifically: the items page also has
+  // a series/bundle form with its own categoryId select and isAgeRestricted
+  // checkbox, so an unscoped page-wide locator would be ambiguous.
+  const addItemForm = page.locator('form').filter({ has: page.getByPlaceholder('Item name') })
+
   // First submission: pick category B and check K-18.
-  await page.getByPlaceholder('Item name').fill('Item One')
-  await page.getByPlaceholder('Price').fill('5')
-  await page.selectOption('select[name="categoryId"]', catB.id)
-  await page.locator('input[name="isAgeRestricted"]').check()
+  await addItemForm.getByPlaceholder('Item name').fill('Item One')
+  await addItemForm.getByPlaceholder('Price', { exact: true }).fill('5')
+  await addItemForm.locator('select[name="categoryId"]').selectOption(catB.id)
+  await addItemForm.locator('input[name="isAgeRestricted"]').check()
   await page.getByRole('button', { name: /add item/i }).click()
   await expect(page.getByText('Item One')).toBeVisible()
 
   // After the first successful submit: name/price should be cleared,
   // category/K-18 should still reflect the previous choice (quick-repeat).
-  await expect(page.getByPlaceholder('Item name')).toHaveValue('')
-  await expect(page.getByPlaceholder('Price')).toHaveValue('')
-  await expect(page.locator('select[name="categoryId"]')).toHaveValue(catB.id)
-  await expect(page.locator('input[name="isAgeRestricted"]')).toBeChecked()
+  await expect(addItemForm.getByPlaceholder('Item name')).toHaveValue('')
+  await expect(addItemForm.getByPlaceholder('Price', { exact: true })).toHaveValue('')
+  await expect(addItemForm.locator('select[name="categoryId"]')).toHaveValue(catB.id)
+  await expect(addItemForm.locator('input[name="isAgeRestricted"]')).toBeChecked()
 
   // Second submission using the retained category/checkbox state.
-  await page.getByPlaceholder('Item name').fill('Item Two')
-  await page.getByPlaceholder('Price').fill('7')
+  await addItemForm.getByPlaceholder('Item name').fill('Item Two')
+  await addItemForm.getByPlaceholder('Price', { exact: true }).fill('7')
   await page.getByRole('button', { name: /add item/i }).click()
   await expect(page.getByText('Item Two')).toBeVisible()
 
@@ -64,6 +69,6 @@ test('quick-repeat: category and K-18 persist across submissions, name/price cle
     { name: 'Item Two', categoryId: catB.id, isAgeRestricted: true },
   ])
 
-  await expect(page.locator('select[name="categoryId"]')).toHaveValue(catB.id)
-  await expect(page.locator('input[name="isAgeRestricted"]')).toBeChecked()
+  await expect(addItemForm.locator('select[name="categoryId"]')).toHaveValue(catB.id)
+  await expect(addItemForm.locator('input[name="isAgeRestricted"]')).toBeChecked()
 })

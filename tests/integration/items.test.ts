@@ -6,6 +6,7 @@ import {
   deleteItem,
   listItemsForSeller,
   listAllItemsForEvent,
+  createItemBatch,
 } from '@/lib/services/items'
 
 function sessionFor(userId: string) {
@@ -152,5 +153,95 @@ describe('listItemsForSeller / listAllItemsForEvent', () => {
     const { sellerA, event } = await setup()
     const result = await listAllItemsForEvent(sessionFor(sellerA.id), event.id)
     expect(result.ok).toBe(false)
+  })
+})
+
+const BATCH_INPUT = (categoryId: string, overrides: Record<string, unknown> = {}) => ({
+  baseName: 'Naruto',
+  startVolume: 1,
+  endVolume: 4,
+  price: 5,
+  categoryId,
+  isAgeRestricted: false,
+  mode: 'series',
+  ...overrides,
+})
+
+describe('createItemBatch', () => {
+  beforeEach(async () => { await resetDb() })
+  afterAll(async () => { await testPrisma.$disconnect() })
+
+  it('creates one item per volume in series mode, named "{baseName} Vol. {n}", sharing price and category', async () => {
+    const { sellerA, event, category } = await setup()
+
+    const result = await createItemBatch(sessionFor(sellerA.id), event.id, BATCH_INPUT(category.id))
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.data.itemIds).toHaveLength(4)
+
+    const items = await testPrisma.item.findMany({ where: { id: { in: result.data.itemIds } }, orderBy: { name: 'asc' } })
+    expect(items.map((i) => i.name)).toEqual(['Naruto Vol. 1', 'Naruto Vol. 2', 'Naruto Vol. 3', 'Naruto Vol. 4'])
+    for (const item of items) {
+      expect(item.price.toString()).toBe('5')
+      expect(item.categoryId).toBe(category.id)
+      expect(item.sellerId).toBe(sellerA.id)
+      expect(item.status).toBe('LISTED')
+    }
+  })
+
+  it('creates exactly one item in bundle mode, named "{baseName} Vol. {start}–{end}"', async () => {
+    const { sellerA, event, category } = await setup()
+
+    const result = await createItemBatch(sessionFor(sellerA.id), event.id, BATCH_INPUT(category.id, { mode: 'bundle', price: 15 }))
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.data.itemIds).toHaveLength(1)
+
+    const item = await testPrisma.item.findUniqueOrThrow({ where: { id: result.data.itemIds[0] } })
+    expect(item.name).toBe('Naruto Vol. 1–4')
+    expect(item.price.toString()).toBe('15')
+  })
+
+  it('rejects when endVolume is less than startVolume', async () => {
+    const { sellerA, event, category } = await setup()
+
+    const result = await createItemBatch(sessionFor(sellerA.id), event.id, BATCH_INPUT(category.id, { startVolume: 5, endVolume: 2 }))
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('VALIDATION_ERROR')
+
+    const count = await testPrisma.item.count()
+    expect(count).toBe(0)
+  })
+
+  it('rejects a range larger than 50 volumes', async () => {
+    const { sellerA, event, category } = await setup()
+
+    const result = await createItemBatch(sessionFor(sellerA.id), event.id, BATCH_INPUT(category.id, { startVolume: 1, endVolume: 52 }))
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('VALIDATION_ERROR')
+  })
+
+  it('rejects creation by staff (staff cannot list items)', async () => {
+    const { staff, event, category } = await setup()
+
+    const result = await createItemBatch(sessionFor(staff.id), event.id, BATCH_INPUT(category.id))
+
+    expect(result.ok).toBe(false)
+  })
+
+  it('rejects creation after the edit cutoff date has passed', async () => {
+    const { sellerA, closedEvent, closedCategory } = await setup()
+
+    const result = await createItemBatch(sessionFor(sellerA.id), closedEvent.id, BATCH_INPUT(closedCategory.id))
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('CUTOFF_PASSED')
   })
 })

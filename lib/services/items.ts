@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
 import { requireEventAccess } from '@/lib/services/authz'
 import { writeAuditLog } from '@/lib/services/audit'
-import { createItemSchema, updateItemSchema } from '@/lib/validation/item'
+import { createItemSchema, updateItemSchema, createItemBatchSchema } from '@/lib/validation/item'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
@@ -29,6 +29,42 @@ export async function createItem(
   })
 
   return { ok: true, data: { itemId: item.id } }
+}
+
+export async function createItemBatch(
+  session: MinimalSession,
+  eventId: string,
+  input: unknown
+): Promise<Result<{ itemIds: string[] }>> {
+  const authz = await requireEventAccess(session, eventId, ['SELLER'])
+  if (!authz.ok) return authz
+
+  const event = await prisma.event.findUniqueOrThrow({ where: { id: eventId } })
+  if (new Date() > event.itemEditCutoffDate) {
+    return { ok: false, error: { code: 'CUTOFF_PASSED', message: 'The item edit cutoff date has passed' } }
+  }
+
+  const parsed = createItemBatchSchema.safeParse(input)
+  if (!parsed.success) {
+    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+  }
+  const { baseName, startVolume, endVolume, price, categoryId, isAgeRestricted, mode } = parsed.data
+
+  if (mode === 'bundle') {
+    const item = await prisma.item.create({
+      data: { name: `${baseName} Vol. ${startVolume}–${endVolume}`, price, categoryId, isAgeRestricted, eventId, sellerId: authz.userId },
+    })
+    return { ok: true, data: { itemIds: [item.id] } }
+  }
+
+  const items = await prisma.$transaction(
+    Array.from({ length: endVolume - startVolume + 1 }, (_, i) =>
+      prisma.item.create({
+        data: { name: `${baseName} Vol. ${startVolume + i}`, price, categoryId, isAgeRestricted, eventId, sellerId: authz.userId },
+      })
+    )
+  )
+  return { ok: true, data: { itemIds: items.map((i) => i.id) } }
 }
 
 async function assertOwnsItemOrIsManager(

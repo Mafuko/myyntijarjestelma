@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { listItemsForSeller } from '@/lib/services/items'
 import { deleteItem } from '@/actions/items'
 import { AddItemForm } from './AddItemForm'
+import { AddSeriesForm } from './AddSeriesForm'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
@@ -67,7 +68,10 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
         </ul>
       </div>
 
-      <AddItemForm eventId={eventId} categories={categories} />
+      <div className="flex flex-wrap gap-6">
+        <AddItemForm eventId={eventId} categories={categories} />
+        <AddSeriesForm eventId={eventId} categories={categories} />
+      </div>
     </div>
   )
 }
