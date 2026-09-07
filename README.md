@@ -35,10 +35,11 @@ Neither Vitest nor Playwright load `.env` automatically the way `next dev`/`next
 
 ## Deploying
 
-Not yet documented — see `docs/next-steps.md` item 2 for what's needed (Vercel setup, environment variables, running migrations on deploy).
+See `docs/deployment.md` for the full first-time Vercel setup (Postgres provisioning, environment variables, running migrations on deploy, and creating the first owner account).
 
 ## Project docs
 
+- `docs/deployment.md` — how to deploy this app for the first time
 - `docs/next-steps.md` — what's left before a real deployment
 - `docs/superpowers/specs/` and `docs/superpowers/plans/` — design specs and implementation plans for the original build and every feature added since
 - `CLAUDE.md` — architecture notes and conventions for AI-assisted development in this repo
