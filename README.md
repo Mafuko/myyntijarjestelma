@@ -2,6 +2,10 @@
 
 A web app for organizing flea-market ("pihakirppis") sales events — replaces a manual Google Sheets workflow with seller item listings, generated price tags with barcodes, a scanner-driven checkout, and real-time sales tracking.
 
+## Purpose
+
+The purpose of this project is to have a web application to organize personal second-hand shops and sell locally-made DIY products, for example. It's also a way to try out ideas for a second-hand shop system where a user can sign up to sell their used products at an event, with the event organizers running the sale.
+
 Built with Next.js 15, TypeScript, Postgres/Prisma, and Auth.js.
 
 ## Getting started
