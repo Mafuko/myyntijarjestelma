@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { requireEventAccess } from '@/lib/services/authz'
 import { InviteMemberForm } from './InviteMemberForm'
+import { CopyInviteLink } from './CopyInviteLink'
 import { Badge } from '@/components/ui/badge'
 
 export default async function MembersPage({ params }: { params: Promise<{ eventId: string }> }) {
@@ -35,9 +36,14 @@ export default async function MembersPage({ params }: { params: Promise<{ eventI
               <span className="text-foreground">{m.user.name}</span>
               <span className="min-w-0 break-all text-muted-foreground">{m.user.email}</span>
               <span className="text-foreground">{m.role}</span>
-              <Badge variant={m.status === 'ACTIVE' ? 'success' : 'destructive'} className="w-fit">
-                {m.status}
-              </Badge>
+              <div className="flex flex-col items-start gap-1.5">
+                <Badge variant={m.status === 'ACTIVE' ? 'success' : 'destructive'} className="w-fit">
+                  {m.status}
+                </Badge>
+                {m.status === 'PENDING' && m.user.inviteToken && (
+                  <CopyInviteLink path={`/invite/${m.user.inviteToken}`} />
+                )}
+              </div>
             </div>
           ))}
         </div>
