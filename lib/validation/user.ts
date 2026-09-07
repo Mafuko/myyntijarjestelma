@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
 export const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(1),
 })
 
 export const inviteUserSchema = z
   .object({
     name: z.string().min(1).max(100),
-    email: z.string().email(),
+    email: z.string().trim().toLowerCase().email(),
     role: z.enum(['SELLER', 'STAFF', 'ADMIN']),
     eventId: z.string().min(1),
     sellerAlias: z.string().min(1).max(50).optional(),
@@ -25,7 +25,7 @@ export const acceptInviteSchema = z.object({
 
 export const signupSchema = z.object({
   name: z.string().min(1).max(100),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(10, 'Password must be at least 10 characters'),
 })
 

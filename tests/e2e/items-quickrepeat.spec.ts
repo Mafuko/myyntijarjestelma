@@ -23,14 +23,14 @@ test('quick-repeat: category and K-18 persist across submissions, name/price cle
   const catB = await testPrisma.category.create({ data: { eventId: event.id, name: 'Kirjat' } })
 
   const sellerA = await testPrisma.user.create({
-    data: { name: 'Seller A', email: 'sellerA@example.com', passwordHash: await hashPassword('seller-a-pw-123') },
+    data: { name: 'Seller A', email: 'sellera@example.com', passwordHash: await hashPassword('seller-a-pw-123') },
   })
   await testPrisma.eventMembership.create({
     data: { userId: sellerA.id, eventId: event.id, role: 'SELLER', sellerAlias: 'A', status: 'ACTIVE' },
   })
 
   await page.goto('/login')
-  await page.getByLabel('Email').fill('sellerA@example.com')
+  await page.getByLabel('Email').fill('sellera@example.com')
   await page.getByLabel('Password').fill('seller-a-pw-123')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
