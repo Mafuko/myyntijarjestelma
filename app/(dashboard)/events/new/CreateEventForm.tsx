@@ -7,13 +7,31 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
+function dayAfter(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10)
+}
+
 export function CreateEventForm() {
   const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
+  const [eventDate, setEventDate] = useState('')
+  const [multiDay, setMultiDay] = useState(false)
+  const [eventEndDate, setEventEndDate] = useState('')
+
+  function handleMultiDayChange(checked: boolean) {
+    setMultiDay(checked)
+    if (checked) {
+      setEventEndDate(eventDate ? dayAfter(eventDate) : '')
+    }
+  }
 
   async function handleSubmit(formData: FormData) {
+    setPending(true)
     const result = await createEvent(formData)
     if (!result.ok) {
       setError(result.error.message)
+      setPending(false)
       return
     }
     window.location.href = `/events/${result.data.eventId}`
@@ -24,8 +42,36 @@ export function CreateEventForm() {
       <Input name="name" placeholder="Event name" required />
       <div className="flex flex-col gap-1.5 text-sm">
         <Label htmlFor="eventDate">Event date</Label>
-        <Input id="eventDate" name="eventDate" type="date" required />
+        <Input
+          id="eventDate"
+          name="eventDate"
+          type="date"
+          required
+          value={eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
+        />
       </div>
+      <label className="flex items-center gap-2 text-sm text-foreground">
+        <input
+          type="checkbox"
+          checked={multiDay}
+          onChange={(e) => handleMultiDayChange(e.target.checked)}
+        />
+        Multiple days
+      </label>
+      {multiDay && (
+        <div className="flex flex-col gap-1.5 text-sm">
+          <Label htmlFor="eventEndDate">Event end date</Label>
+          <Input
+            id="eventEndDate"
+            name="eventEndDate"
+            type="date"
+            required
+            value={eventEndDate}
+            onChange={(e) => setEventEndDate(e.target.value)}
+          />
+        </div>
+      )}
       <div className="flex flex-col gap-1.5 text-sm">
         <Label htmlFor="registrationDeadline">Registration deadline</Label>
         <Input id="registrationDeadline" name="registrationDeadline" type="date" required />
@@ -39,7 +85,7 @@ export function CreateEventForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <Button type="submit">Create event</Button>
+      <Button type="submit" disabled={pending}>Create event</Button>
     </form>
   )
 }

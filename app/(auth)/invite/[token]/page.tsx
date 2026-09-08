@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { acceptInvite } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -33,7 +33,7 @@ export default function InvitePage() {
           <form action={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required minLength={10} />
+              <PasswordInput id="password" name="password" required minLength={10} />
             </div>
             {error && (
               <Alert variant="destructive">

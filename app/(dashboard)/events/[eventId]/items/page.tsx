@@ -3,10 +3,9 @@ import { auth } from '@/lib/auth'
 import { requireEventAccess } from '@/lib/services/authz'
 import { prisma } from '@/lib/db'
 import { listItemsForSeller } from '@/lib/services/items'
-import { deleteItem } from '@/actions/items'
 import { AddItemForm } from './AddItemForm'
 import { AddSeriesForm } from './AddSeriesForm'
-import { Button } from '@/components/ui/button'
+import { DeleteItemButton } from './DeleteItemButton'
 import { Badge } from '@/components/ui/badge'
 
 export default async function ItemsPage({ params }: { params: Promise<{ eventId: string }> }) {
@@ -57,18 +56,7 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
                 {item.status}
               </Badge>
               <div className="flex min-w-0 flex-wrap items-center gap-3">
-                {item.status === 'LISTED' && (
-                  <form
-                    action={async () => {
-                      'use server'
-                      await deleteItem(item.id, eventId)
-                    }}
-                  >
-                    <Button type="submit" variant="destructive" size="sm">
-                      Delete
-                    </Button>
-                  </form>
-                )}
+                {item.status === 'LISTED' && <DeleteItemButton itemId={item.id} eventId={eventId} />}
                 {item.status === 'LISTED' && (
                   <a
                     href={`/api/price-tags/${eventId}?itemIds=${item.id}`}

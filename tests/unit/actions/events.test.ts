@@ -25,7 +25,27 @@ describe('createEvent action', () => {
     expect(result.ok).toBe(true)
     expect(createEventService).toHaveBeenCalledWith(
       { user: { id: 'user-1' } },
-      expect.objectContaining({ name: 'Kesäkirppis' })
+      expect.objectContaining({ name: 'Kesäkirppis', eventEndDate: undefined })
+    )
+  })
+
+  it('forwards eventEndDate when the multi-day field is present', async () => {
+    const { createEvent: createEventAction } = await import('@/actions/events')
+    const { createEvent: createEventService } = await import('@/lib/services/events')
+    vi.mocked(createEventService).mockResolvedValueOnce({ ok: true, data: { eventId: 'evt-1' } })
+
+    const formData = new FormData()
+    formData.set('name', 'Kesäkirppis')
+    formData.set('eventDate', '2026-09-01')
+    formData.set('eventEndDate', '2026-09-02')
+    formData.set('registrationDeadline', '2026-08-25')
+    formData.set('itemEditCutoffDate', '2026-08-30')
+
+    await createEventAction(formData)
+
+    expect(createEventService).toHaveBeenCalledWith(
+      { user: { id: 'user-1' } },
+      expect.objectContaining({ eventEndDate: '2026-09-02' })
     )
   })
 })

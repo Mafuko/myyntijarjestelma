@@ -32,12 +32,12 @@ test('invited user sets a password, logs in, and unauthenticated access is redir
   })
 
   await page.goto(`/invite/${inviteToken}`)
-  await page.getByLabel('Password').fill('a-very-secure-password')
+  await page.getByLabel('Password', { exact: true }).fill('a-very-secure-password')
   await page.getByRole('button', { name: /set password/i }).click()
   await expect(page).toHaveURL(/\/login/)
 
   await page.getByLabel('Email').fill('seller@example.com')
-  await page.getByLabel('Password').fill('a-very-secure-password')
+  await page.getByLabel('Password', { exact: true }).fill('a-very-secure-password')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
   await expect(page.getByText('seller@example.com')).toBeVisible()
@@ -82,7 +82,7 @@ test('bumping tokenVersion revokes an already-issued session', async ({ page }) 
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('revoke-seller@example.com')
-  await page.getByLabel('Password').fill('a-very-secure-password')
+  await page.getByLabel('Password', { exact: true }).fill('a-very-secure-password')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
   await expect(page.getByText('revoke-seller@example.com')).toBeVisible()

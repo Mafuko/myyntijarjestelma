@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { auth } from '@/lib/auth'
 import { logout } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
+import { BackButton } from '@/components/BackButton'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await auth()
@@ -11,9 +12,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex w-full max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-3">
-          <Link href="/events" className="font-mono text-sm font-semibold uppercase tracking-wide text-foreground">
-            Myyntijärjestelmä
-          </Link>
+          <div className="flex items-center gap-2">
+            {session?.user && <BackButton />}
+            <Link href="/events" className="font-mono text-sm font-semibold uppercase tracking-wide text-foreground">
+              Myyntijärjestelmä
+            </Link>
+          </div>
           {session?.user && (
             <div className="flex min-w-0 items-center gap-4 text-sm">
               <span className="min-w-0 truncate font-mono text-muted-foreground">{session.user.email}</span>

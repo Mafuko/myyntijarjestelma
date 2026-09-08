@@ -98,6 +98,7 @@ model Event {
   id                  String   @id @default(cuid())
   name                String
   eventDate           DateTime
+  eventEndDate        DateTime?
   registrationDeadline DateTime
   itemEditCutoffDate  DateTime
   commissionRate      Decimal  @default(0.10) @db.Decimal(5, 4)

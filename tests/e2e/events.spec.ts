@@ -15,7 +15,7 @@ test('owner creates an event and invites a seller who can then see it', async ({
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('owner@example.com')
-  await page.getByLabel('Password').fill('owner-password-123')
+  await page.getByLabel('Password', { exact: true }).fill('owner-password-123')
   await page.getByRole('button', { name: /log in/i }).click()
   // A zero-event owner is auto-redirected to /events/new — see the dedicated
   // redirect test below for that behavior in isolation.
@@ -49,12 +49,12 @@ test('owner creates an event and invites a seller who can then see it', async ({
 
   await context.clearCookies()
   await page.goto(`/invite/${invitedUser.inviteToken}`)
-  await page.getByLabel('Password').fill('seller-password-123')
+  await page.getByLabel('Password', { exact: true }).fill('seller-password-123')
   await page.getByRole('button', { name: /set password/i }).click()
   await expect(page).toHaveURL(/\/login/)
 
   await page.getByLabel('Email').fill('invitedseller@example.com')
-  await page.getByLabel('Password').fill('seller-password-123')
+  await page.getByLabel('Password', { exact: true }).fill('seller-password-123')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
   await expect(page.getByText('Syyskirppis')).toBeVisible()
@@ -66,7 +66,7 @@ test('an owner with zero events is redirected to /events/new; once one exists, /
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('fresh-owner@example.com')
-  await page.getByLabel('Password').fill('owner-password-456')
+  await page.getByLabel('Password', { exact: true }).fill('owner-password-456')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events\/new/)
   // /events/new is being visited (and thus compiled by the dev server) for
@@ -95,7 +95,7 @@ test('a non-owner never lands on /events/new, even with zero events, and cannot 
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('staff-noevents@example.com')
-  await page.getByLabel('Password').fill('staff-pw-12345')
+  await page.getByLabel('Password', { exact: true }).fill('staff-pw-12345')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events$/)
 

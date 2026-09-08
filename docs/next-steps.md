@@ -18,6 +18,7 @@
 
 ## Done since MVP
 
+- **UX improvement backlog** — back arrow in the dashboard header (browser-history-style, `components/BackButton.tsx`); item category list swapped to `Pelit`/`Figuurit`/`Mangat`/`Pehmolelut`/`Oheistuotteet`/`Cosplay` (dropping `Elektroniikka`/`Kodintavarat`); multi-day events via a nullable `Event.eventEndDate` column and a "Multiple days" checkbox on event creation; show/hide toggle on all password fields (`components/ui/password-input.tsx`); tactile press feedback on every button plus a pending "Deleting…" state on the item delete button.
 - **Deployment runbook** — `docs/deployment.md` covers Vercel setup, Postgres (Neon) provisioning, all required env vars, wiring `prisma migrate deploy` into the build (`package.json`'s `build` script), first-time `/signup` bootstrap, and a post-deploy smoke check.
 - **Admin/owner bootstrap** — `/signup` route, zero-user gated, `bootstrapOwner()` re-checks under a Serializable transaction to prevent a race between concurrent first-visitors. (`fb8d402`)
 - **Login as the app's starting page** — `/` redirects to `/login` or `/events`. (`6a7e5bb`)

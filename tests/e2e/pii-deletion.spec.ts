@@ -19,7 +19,7 @@ test("owner deletes a user's PII, and that user can no longer log in", async ({ 
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('owner@example.com')
-  await page.getByLabel('Password').fill('owner-pw-12345')
+  await page.getByLabel('Password', { exact: true }).fill('owner-pw-12345')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
 
@@ -34,7 +34,7 @@ test("owner deletes a user's PII, and that user can no longer log in", async ({ 
   await page.context().clearCookies()
   await page.goto('/login')
   await page.getByLabel('Email').fill('target@example.com')
-  await page.getByLabel('Password').fill('target-pw-12345')
+  await page.getByLabel('Password', { exact: true }).fill('target-pw-12345')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/login/)
 })

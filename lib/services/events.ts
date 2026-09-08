@@ -7,7 +7,18 @@ import { createEventSchema, updateEventSchema } from '@/lib/validation/event'
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
-const DEFAULT_CATEGORIES = ['Vaatteet', 'Kirjat ja lehdet', 'Lelut', 'Elektroniikka', 'Kodintavarat', 'Muu']
+const DEFAULT_CATEGORIES = [
+  'Vaatteet',
+  'Kirjat ja lehdet',
+  'Lelut',
+  'Pelit',
+  'Figuurit',
+  'Mangat',
+  'Pehmolelut',
+  'Oheistuotteet',
+  'Cosplay',
+  'Muu',
+]
 
 export async function createEvent(session: MinimalSession, input: unknown): Promise<Result<{ eventId: string }>> {
   const authz = await requireOwner(session)

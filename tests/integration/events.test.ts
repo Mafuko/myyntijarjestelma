@@ -46,6 +46,33 @@ describe('createEvent', () => {
     expect(result.ok).toBe(false)
   })
 
+  it('accepts a multi-day event when eventEndDate is on or after eventDate', async () => {
+    const { owner } = await makeUsers()
+    const result = await createEvent(sessionFor(owner.id), { ...EVENT_INPUT, eventEndDate: '2026-09-02' })
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const event = await testPrisma.event.findUniqueOrThrow({ where: { id: result.data.eventId } })
+    expect(event.eventEndDate).toEqual(new Date('2026-09-02'))
+  })
+
+  it('rejects a multi-day event when eventEndDate is before eventDate', async () => {
+    const { owner } = await makeUsers()
+    const result = await createEvent(sessionFor(owner.id), { ...EVENT_INPUT, eventEndDate: '2026-08-31' })
+
+    expect(result.ok).toBe(false)
+  })
+
+  it('leaves eventEndDate null for a single-day event', async () => {
+    const { owner } = await makeUsers()
+    const result = await createEvent(sessionFor(owner.id), EVENT_INPUT)
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const event = await testPrisma.event.findUniqueOrThrow({ where: { id: result.data.eventId } })
+    expect(event.eventEndDate).toBeNull()
+  })
+
   it('rejects an unauthenticated caller', async () => {
     const result = await createEvent(null, EVENT_INPUT)
     expect(result.ok).toBe(false)

@@ -29,7 +29,7 @@ async function loginAsSeller(page: import('@playwright/test').Page) {
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('seller@example.com')
-  await page.getByLabel('Password').fill('seller-pw-12345')
+  await page.getByLabel('Password', { exact: true }).fill('seller-pw-12345')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
   await page.goto(`/events/${event.id}/items`)

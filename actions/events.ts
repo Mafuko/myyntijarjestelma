@@ -15,6 +15,7 @@ export async function createEvent(formData: FormData): Promise<Result<{ eventId:
   const result = await createEventService(session, {
     name: formData.get('name'),
     eventDate: formData.get('eventDate'),
+    eventEndDate: formData.get('eventEndDate') || undefined,
     registrationDeadline: formData.get('registrationDeadline'),
     itemEditCutoffDate: formData.get('itemEditCutoffDate'),
     commissionRate: formData.get('commissionRate') || undefined,

@@ -34,7 +34,7 @@ test('staff scans a barcode, confirms with Enter, and the item becomes sold', as
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('staff@example.com')
-  await page.getByLabel('Password').fill('staff-pw-12345')
+  await page.getByLabel('Password', { exact: true }).fill('staff-pw-12345')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
 
@@ -76,7 +76,7 @@ test('scanning an already-sold item shows a distinct error message', async ({ pa
 
   await page.goto('/login')
   await page.getByLabel('Email').fill('staff2@example.com')
-  await page.getByLabel('Password').fill('staff-pw-12345')
+  await page.getByLabel('Password', { exact: true }).fill('staff-pw-12345')
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
 

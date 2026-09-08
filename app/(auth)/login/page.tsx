@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { login } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -34,7 +35,7 @@ export default function LoginPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
+              <PasswordInput id="password" name="password" required />
             </div>
             {error && (
               <Alert variant="destructive">

@@ -14,7 +14,7 @@ test('a fresh database lets the first visitor create the owner account and land 
   await page.goto('/signup')
   await page.getByLabel('Name').fill('First Owner')
   await page.getByLabel('Email').fill('first-owner@example.com')
-  await page.getByLabel('Password').fill('a-secure-password-1')
+  await page.getByLabel('Password', { exact: true }).fill('a-secure-password-1')
   await page.getByRole('button', { name: /create owner account/i }).click()
 
   await expect(page).toHaveURL(/\/events/)
