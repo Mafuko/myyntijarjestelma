@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-"Myyntijärjestelmä" (sales system) is a web application replacing a manual Google Sheets-based workflow for organizing flea-market ("pihakirppis") sales events. It's a school/thesis project (opinnäytetyö). Source requirements: [Myyntijärjestelmä.pdf](Myyntijärjestelmä.pdf) (Finnish).
+"Myyntijärjestelmä" (sales system) is a web application replacing a manual Google Sheets-based workflow for organizing flea-market ("pihakirppis") sales events. Source requirements: [Myyntijärjestelmä.pdf](Myyntijärjestelmä.pdf) (Finnish).
 
 Roles: **Myyjä** (Seller) lists/edits/deletes only their own items; **Työvoima** (Staff) sees all sellers' items and runs checkout; **Ylläpitäjä/Owner** (Admin) has full visibility and manages events/members. Roles are scoped per-event (a `EventMembership`), except the single `User.isOwner` flag, which is implicitly admin everywhere.
 
