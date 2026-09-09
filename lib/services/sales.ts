@@ -100,13 +100,22 @@ export async function undoSale(session: MinimalSession, itemId: string): Promise
     return { ok: false, error: { code: 'NOT_SOLD', message: 'This item is not currently sold' } }
   }
 
-  await writeAuditLog({
-    actorUserId: authz.userId,
-    action: 'SALE_REVERSED',
-    targetType: 'Item',
-    targetId: itemId,
-    metadata: { originalSaleId: sale.id, originalSoldByUserId: sale.soldByUserId, method: sale.method },
-  })
+  try {
+    await writeAuditLog({
+      actorUserId: authz.userId,
+      action: 'SALE_REVERSED',
+      targetType: 'Item',
+      targetId: itemId,
+      metadata: { originalSaleId: sale.id, originalSoldByUserId: sale.soldByUserId, method: sale.method },
+    })
+  } catch {
+    // The undo itself already committed successfully above -- a failure to
+    // write the audit trail must not be reported to the caller as a failed
+    // undo (the item would show LISTED but the UI would say "something
+    // went wrong"). Intentionally swallowed, matching this service's
+    // convention of throwing only for genuine bugs -- a logging hiccup
+    // here is not one.
+  }
 
   return { ok: true, data: { itemId } }
 }

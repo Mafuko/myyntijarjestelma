@@ -68,20 +68,24 @@ export function SellBySeller({
 }) {
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null)
 
+  const labelBySellerId = useMemo(() => new Map(sellers.map((s) => [s.userId, s.label])), [sellers])
+
   const sellerRows = useMemo(() => {
-    return sellers
-      .map((s) => {
-        const theirItems = items.filter((i) => i.sellerId === s.userId)
-        return {
-          userId: s.userId,
-          label: s.label,
-          listedCount: theirItems.filter((i) => i.status === 'LISTED').length,
-          soldCount: theirItems.filter((i) => i.status === 'SOLD').length,
-        }
-      })
-      .filter((s) => s.listedCount + s.soldCount > 0)
+    const grouped = new Map<string, { listedCount: number; soldCount: number }>()
+    for (const item of items) {
+      const entry = grouped.get(item.sellerId) ?? { listedCount: 0, soldCount: 0 }
+      if (item.status === 'LISTED') entry.listedCount++
+      else if (item.status === 'SOLD') entry.soldCount++
+      grouped.set(item.sellerId, entry)
+    }
+    return [...grouped.entries()]
+      .map(([sellerId, counts]) => ({
+        userId: sellerId,
+        label: labelBySellerId.get(sellerId) ?? 'Unknown',
+        ...counts,
+      }))
       .sort((a, b) => a.label.localeCompare(b.label))
-  }, [sellers, items])
+  }, [items, labelBySellerId])
 
   if (selectedSellerId === null) {
     return (
@@ -106,7 +110,7 @@ export function SellBySeller({
     )
   }
 
-  const selectedSeller = sellers.find((s) => s.userId === selectedSellerId)
+  const selectedLabel = labelBySellerId.get(selectedSellerId) ?? 'Unknown'
   const theirItems = items.filter((i) => i.sellerId === selectedSellerId)
 
   return (
@@ -120,7 +124,7 @@ export function SellBySeller({
       >
         ← Back to sellers
       </Button>
-      <h2 className="text-lg font-semibold text-foreground">{selectedSeller?.label}</h2>
+      <h2 className="text-lg font-semibold text-foreground">{selectedLabel}</h2>
       <div className="flex flex-col gap-1">
         {theirItems.map((item) => (
           <SellableItemRow key={item.id} eventId={eventId} item={item} />

@@ -158,4 +158,21 @@ describe('undoSale', () => {
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error.code).toBe('NOT_FOUND')
   })
+
+  it('still returns ok:true if writing the audit log fails after the undo already committed', async () => {
+    const { staff, item } = await setup()
+    const sold = await recordSale(sessionFor(staff.id), item.id, 'BARCODE_SCAN')
+    if (!sold.ok) throw new Error('setup failed')
+
+    const auditModule = await import('@/lib/services/audit')
+    const spy = vi.spyOn(auditModule, 'writeAuditLog').mockRejectedValueOnce(new Error('boom'))
+
+    const result = await undoSale(sessionFor(staff.id), item.id)
+    expect(result.ok).toBe(true)
+
+    const updated = await testPrisma.item.findUniqueOrThrow({ where: { id: item.id } })
+    expect(updated.status).toBe('LISTED')
+
+    spy.mockRestore()
+  })
 })
