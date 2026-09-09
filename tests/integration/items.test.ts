@@ -71,10 +71,13 @@ describe('createItem', () => {
     expect(item.status).toBe('LISTED')
   })
 
-  it('rejects item creation by staff (staff cannot list items)', async () => {
+  it('lets staff create an item for themselves too (any event member can sell)', async () => {
     const { staff, event, category } = await setup()
     const result = await createItem(sessionFor(staff.id), event.id, ITEM_INPUT(category.id))
-    expect(result.ok).toBe(false)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const item = await testPrisma.item.findUniqueOrThrow({ where: { id: result.data.itemId } })
+    expect(item.sellerId).toBe(staff.id)
   })
 
   it('rejects item creation after the edit cutoff date has passed', async () => {
@@ -97,6 +100,52 @@ describe('updateItem / deleteItem', () => {
 
     const result = await updateItem(sessionFor(sellerB.id), created.data.itemId, { price: 10 })
     expect(result.ok).toBe(false)
+  })
+
+  it('lets a seller edit their own item before the cutoff', async () => {
+    const { sellerA, event, category } = await setup()
+    const created = await createItem(sessionFor(sellerA.id), event.id, ITEM_INPUT(category.id))
+    if (!created.ok) throw new Error('setup failed')
+
+    const result = await updateItem(sessionFor(sellerA.id), created.data.itemId, { price: 10 })
+    expect(result.ok).toBe(true)
+    const item = await testPrisma.item.findUniqueOrThrow({ where: { id: created.data.itemId } })
+    expect(item.price.toString()).toBe('10')
+  })
+
+  it('lets staff edit an item they listed themselves, but not another seller\'s item', async () => {
+    const { staff, sellerA, event, category } = await setup()
+    const own = await createItem(sessionFor(staff.id), event.id, ITEM_INPUT(category.id))
+    const others = await createItem(sessionFor(sellerA.id), event.id, ITEM_INPUT(category.id))
+    if (!own.ok || !others.ok) throw new Error('setup failed')
+
+    const ownResult = await updateItem(sessionFor(staff.id), own.data.itemId, { price: 10 })
+    expect(ownResult.ok).toBe(true)
+
+    const othersResult = await updateItem(sessionFor(staff.id), others.data.itemId, { price: 10 })
+    expect(othersResult.ok).toBe(false)
+  })
+
+  it('rejects a seller editing their own item after the cutoff has passed', async () => {
+    const { sellerA, closedEvent, closedCategory } = await setup()
+    const created = await testPrisma.item.create({
+      data: { eventId: closedEvent.id, sellerId: sellerA.id, name: 'Old item', price: 5, categoryId: closedCategory.id },
+    })
+
+    const result = await updateItem(sessionFor(sellerA.id), created.id, { price: 10 })
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('CUTOFF_PASSED')
+  })
+
+  it('lets an admin (or owner) edit an item after the cutoff has passed', async () => {
+    const { owner, sellerA, closedEvent, closedCategory } = await setup()
+    const created = await testPrisma.item.create({
+      data: { eventId: closedEvent.id, sellerId: sellerA.id, name: 'Old item', price: 5, categoryId: closedCategory.id },
+    })
+
+    const result = await updateItem(sessionFor(owner.id), created.id, { price: 10 })
+    expect(result.ok).toBe(true)
   })
 
   it('allows an admin to delete any item and writes an audit log', async () => {
@@ -137,6 +186,18 @@ describe('listItemsForSeller / listAllItemsForEvent', () => {
     const result = await listItemsForSeller(sessionFor(sellerA.id), event.id)
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.data).toHaveLength(1)
+  })
+
+  it('lets staff list their own items via listItemsForSeller, including fields needed to edit them', async () => {
+    const { staff, event, category } = await setup()
+    await createItem(sessionFor(staff.id), event.id, ITEM_INPUT(category.id))
+
+    const result = await listItemsForSeller(sessionFor(staff.id), event.id)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.data).toHaveLength(1)
+    expect(result.data[0].categoryId).toBe(category.id)
+    expect(result.data[0].isAgeRestricted).toBe(false)
   })
 
   it('lets staff see every item in the event via listAllItemsForEvent', async () => {
@@ -227,12 +288,12 @@ describe('createItemBatch', () => {
     expect(result.error.code).toBe('VALIDATION_ERROR')
   })
 
-  it('rejects creation by staff (staff cannot list items)', async () => {
+  it('lets staff create a batch for themselves too (any event member can sell)', async () => {
     const { staff, event, category } = await setup()
 
     const result = await createItemBatch(sessionFor(staff.id), event.id, BATCH_INPUT(category.id))
 
-    expect(result.ok).toBe(false)
+    expect(result.ok).toBe(true)
   })
 
   it('rejects creation after the edit cutoff date has passed', async () => {

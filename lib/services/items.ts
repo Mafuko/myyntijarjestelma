@@ -11,7 +11,7 @@ export async function createItem(
   eventId: string,
   input: unknown
 ): Promise<Result<{ itemId: string }>> {
-  const authz = await requireEventAccess(session, eventId, ['SELLER'])
+  const authz = await requireEventAccess(session, eventId, ['SELLER', 'STAFF', 'ADMIN'])
   if (!authz.ok) return authz
 
   const event = await prisma.event.findUniqueOrThrow({ where: { id: eventId } })
@@ -36,7 +36,7 @@ export async function createItemBatch(
   eventId: string,
   input: unknown
 ): Promise<Result<{ itemIds: string[] }>> {
-  const authz = await requireEventAccess(session, eventId, ['SELLER'])
+  const authz = await requireEventAccess(session, eventId, ['SELLER', 'STAFF', 'ADMIN'])
   if (!authz.ok) return authz
 
   const event = await prisma.event.findUniqueOrThrow({ where: { id: eventId } })
@@ -76,10 +76,10 @@ async function assertOwnsItemOrIsManager(
     return { ok: false, error: { code: 'NOT_FOUND', message: 'Item not found' } }
   }
 
-  const authz = await requireEventAccess(session, item.eventId, ['SELLER', 'ADMIN'])
+  const authz = await requireEventAccess(session, item.eventId, ['SELLER', 'STAFF', 'ADMIN'])
   if (!authz.ok) return authz
 
-  const isOwnItem = authz.role === 'SELLER' && item.sellerId === authz.userId
+  const isOwnItem = item.sellerId === authz.userId
   const isManager = authz.role === 'ADMIN' || authz.role === 'OWNER'
   if (!isOwnItem && !isManager) {
     return { ok: false, error: { code: 'FORBIDDEN', message: 'You cannot modify this item' } }
@@ -113,7 +113,7 @@ export async function deleteItem(session: MinimalSession, itemId: string): Promi
 
   await prisma.item.update({ where: { id: itemId }, data: { status: 'REMOVED' } })
 
-  const isOwnItem = access.data.role === 'SELLER' && access.data.item.sellerId === access.data.userId
+  const isOwnItem = access.data.item.sellerId === access.data.userId
   if (!isOwnItem) {
     await writeAuditLog({
       actorUserId: access.data.userId,
@@ -127,8 +127,11 @@ export async function deleteItem(session: MinimalSession, itemId: string): Promi
   return { ok: true, data: { itemId } }
 }
 
-export async function listItemsForSeller(session: MinimalSession, eventId: string): Promise<Result<Array<{ id: string; name: string; price: string; status: string }>>> {
-  const authz = await requireEventAccess(session, eventId, ['SELLER'])
+export async function listItemsForSeller(
+  session: MinimalSession,
+  eventId: string
+): Promise<Result<Array<{ id: string; name: string; price: string; status: string; categoryId: string; isAgeRestricted: boolean }>>> {
+  const authz = await requireEventAccess(session, eventId, ['SELLER', 'STAFF', 'ADMIN'])
   if (!authz.ok) return authz
 
   const items = await prisma.item.findMany({
@@ -136,7 +139,17 @@ export async function listItemsForSeller(session: MinimalSession, eventId: strin
     orderBy: { createdAt: 'desc' },
   })
 
-  return { ok: true, data: items.map((i) => ({ id: i.id, name: i.name, price: i.price.toString(), status: i.status })) }
+  return {
+    ok: true,
+    data: items.map((i) => ({
+      id: i.id,
+      name: i.name,
+      price: i.price.toString(),
+      status: i.status,
+      categoryId: i.categoryId,
+      isAgeRestricted: i.isAgeRestricted,
+    })),
+  }
 }
 
 export async function listAllItemsForEvent(session: MinimalSession, eventId: string): Promise<Result<Array<{ id: string; name: string; price: string; status: string; sellerId: string }>>> {
