@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db'
 import { barcodeLookupRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import { requireEventAccess } from '@/lib/services/authz'
+import { writeAuditLog } from '@/lib/services/audit'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
@@ -69,4 +70,52 @@ export async function recordSale(
     const sale = await tx.sale.create({ data: { itemId, soldByUserId: authz.userId, method } })
     return { ok: true, data: { saleId: sale.id } } as Result<{ saleId: string }>
   })
+}
+
+export async function undoSale(session: MinimalSession, itemId: string): Promise<Result<{ itemId: string }>> {
+  const item = await prisma.item.findUnique({ where: { id: itemId } })
+  if (!item) {
+    return { ok: false, error: { code: 'NOT_FOUND', message: 'Item not found' } }
+  }
+
+  const authz = await requireEventAccess(session, item.eventId, ['STAFF', 'ADMIN'])
+  if (!authz.ok) return authz
+
+  const sale = await prisma.$transaction(async (tx) => {
+    // Atomic conditional update, mirroring recordSale's own guard: only flips
+    // SOLD -> LISTED if it is still SOLD, so a concurrent double-undo sees
+    // count === 0 and returns NOT_SOLD instead of racing.
+    const updateResult = await tx.item.updateMany({
+      where: { id: itemId, status: 'SOLD' },
+      data: { status: 'LISTED' },
+    })
+    if (updateResult.count === 0) return null
+
+    const existing = await tx.sale.findUniqueOrThrow({ where: { itemId } })
+    await tx.sale.delete({ where: { itemId } })
+    return existing
+  })
+
+  if (!sale) {
+    return { ok: false, error: { code: 'NOT_SOLD', message: 'This item is not currently sold' } }
+  }
+
+  try {
+    await writeAuditLog({
+      actorUserId: authz.userId,
+      action: 'SALE_REVERSED',
+      targetType: 'Item',
+      targetId: itemId,
+      metadata: { originalSaleId: sale.id, originalSoldByUserId: sale.soldByUserId, method: sale.method },
+    })
+  } catch {
+    // The undo itself already committed successfully above -- a failure to
+    // write the audit trail must not be reported to the caller as a failed
+    // undo (the item would show LISTED but the UI would say "something
+    // went wrong"). Intentionally swallowed, matching this service's
+    // convention of throwing only for genuine bugs -- a logging hiccup
+    // here is not one.
+  }
+
+  return { ok: true, data: { itemId } }
 }

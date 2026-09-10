@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('@/lib/auth', () => ({ auth: vi.fn().mockResolvedValue({ user: { id: 'staff-1' } }) }))
-vi.mock('@/lib/services/sales', () => ({ lookupItemByCode: vi.fn(), recordSale: vi.fn() }))
+vi.mock('@/lib/services/sales', () => ({ lookupItemByCode: vi.fn(), recordSale: vi.fn(), undoSale: vi.fn() }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 describe('lookupCode action', () => {
@@ -46,6 +46,36 @@ describe('confirmSale action', () => {
     if (!result.ok) {
       expect(result.error.code).toBe('UNEXPECTED_ERROR')
       expect(result.error.message).toBe('Something went wrong recording the sale. Please try again.')
+    }
+  })
+})
+
+describe('undoSale action', () => {
+  it('forwards the session and itemId to the service, and revalidates checkout + sales on success', async () => {
+    const { undoSale } = await import('@/actions/sales')
+    const { undoSale: undoSaleService } = await import('@/lib/services/sales')
+    const { revalidatePath } = await import('next/cache')
+    vi.mocked(undoSaleService).mockResolvedValueOnce({ ok: true, data: { itemId: 'item-1' } })
+
+    const result = await undoSale('evt-1', 'item-1')
+
+    expect(result.ok).toBe(true)
+    expect(undoSaleService).toHaveBeenCalledWith({ user: { id: 'staff-1' } }, 'item-1')
+    expect(revalidatePath).toHaveBeenCalledWith('/events/evt-1/checkout')
+    expect(revalidatePath).toHaveBeenCalledWith('/events/evt-1/sales')
+  })
+
+  it('returns UNEXPECTED_ERROR instead of throwing when the service rejects', async () => {
+    const { undoSale } = await import('@/actions/sales')
+    const { undoSale: undoSaleService } = await import('@/lib/services/sales')
+    vi.mocked(undoSaleService).mockRejectedValueOnce(new Error('boom'))
+
+    const result = await undoSale('evt-1', 'item-1')
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe('UNEXPECTED_ERROR')
+      expect(result.error.message).toBe('Something went wrong undoing that sale. Please try again.')
     }
   })
 })

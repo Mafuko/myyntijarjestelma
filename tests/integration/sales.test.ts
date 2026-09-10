@@ -6,7 +6,7 @@ vi.mock('@/lib/rate-limit', () => ({
 }))
 
 import { testPrisma, resetDb } from './setup'
-import { lookupItemByCode, recordSale } from '@/lib/services/sales'
+import { lookupItemByCode, recordSale, undoSale } from '@/lib/services/sales'
 
 function sessionFor(userId: string) {
   return { user: { id: userId } } as any
@@ -111,5 +111,68 @@ describe('recordSale', () => {
     const { seller, item } = await setup()
     const result = await recordSale(sessionFor(seller.id), item.id, 'MANUAL_OVERRIDE')
     expect(result.ok).toBe(false)
+  })
+})
+
+describe('undoSale', () => {
+  beforeEach(async () => { await resetDb() })
+  afterAll(async () => { await testPrisma.$disconnect() })
+
+  it('reverts a sold item back to LISTED, deletes the Sale, and writes an audit log', async () => {
+    const { staff, item } = await setup()
+    const sold = await recordSale(sessionFor(staff.id), item.id, 'BARCODE_SCAN')
+    if (!sold.ok) throw new Error('setup failed')
+
+    const result = await undoSale(sessionFor(staff.id), item.id)
+    expect(result.ok).toBe(true)
+
+    const updated = await testPrisma.item.findUniqueOrThrow({ where: { id: item.id } })
+    expect(updated.status).toBe('LISTED')
+
+    const sale = await testPrisma.sale.findUnique({ where: { itemId: item.id } })
+    expect(sale).toBeNull()
+
+    const log = await testPrisma.auditLog.findFirst({ where: { action: 'SALE_REVERSED', targetId: item.id } })
+    expect(log?.actorUserId).toBe(staff.id)
+  })
+
+  it('rejects undoing a sale for an item that was never sold', async () => {
+    const { staff, item } = await setup()
+    const result = await undoSale(sessionFor(staff.id), item.id)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('NOT_SOLD')
+  })
+
+  it('rejects a seller trying to undo a sale (staff/admin only)', async () => {
+    const { seller, staff, item } = await setup()
+    const sold = await recordSale(sessionFor(staff.id), item.id, 'BARCODE_SCAN')
+    if (!sold.ok) throw new Error('setup failed')
+
+    const result = await undoSale(sessionFor(seller.id), item.id)
+    expect(result.ok).toBe(false)
+  })
+
+  it('returns NOT_FOUND for a nonexistent item', async () => {
+    const { staff } = await setup()
+    const result = await undoSale(sessionFor(staff.id), 'does-not-exist')
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('NOT_FOUND')
+  })
+
+  it('still returns ok:true if writing the audit log fails after the undo already committed', async () => {
+    const { staff, item } = await setup()
+    const sold = await recordSale(sessionFor(staff.id), item.id, 'BARCODE_SCAN')
+    if (!sold.ok) throw new Error('setup failed')
+
+    const auditModule = await import('@/lib/services/audit')
+    const spy = vi.spyOn(auditModule, 'writeAuditLog').mockRejectedValueOnce(new Error('boom'))
+
+    const result = await undoSale(sessionFor(staff.id), item.id)
+    expect(result.ok).toBe(true)
+
+    const updated = await testPrisma.item.findUniqueOrThrow({ where: { id: item.id } })
+    expect(updated.status).toBe('LISTED')
+
+    spy.mockRestore()
   })
 })

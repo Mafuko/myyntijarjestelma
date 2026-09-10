@@ -83,6 +83,7 @@ test('an owner with zero events is redirected to /events/new; once one exists, /
   await page.getByLabel('Item edit cutoff').fill('2026-09-10')
   await page.getByRole('button', { name: /create event/i }).click()
   await expect(page).toHaveURL(/\/events\/[^/]+$/)
+  await page.waitForLoadState('networkidle')
 
   await page.goto('/events')
   await expect(page).toHaveURL(/\/events$/)
