@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { testPrisma, resetDb } from './setup'
-import { inviteUser, activateInvite, deleteUserPii, bootstrapOwner } from '@/lib/services/users'
+import { inviteUser, activateInvite, deleteUserPii, bootstrapOwner, updateUserLocale, getUserLocale } from '@/lib/services/users'
 
 function sessionFor(userId: string) {
   return { user: { id: userId } }
@@ -232,5 +232,33 @@ describe('bootstrapOwner', () => {
 
     const count = await testPrisma.user.count()
     expect(count).toBe(1)
+  })
+})
+
+describe('updateUserLocale / getUserLocale', () => {
+  beforeEach(async () => {
+    await resetDb()
+  })
+
+  afterAll(async () => {
+    await testPrisma.$disconnect()
+  })
+
+  it('defaults a new user to en', async () => {
+    const user = await testPrisma.user.create({ data: { name: 'Fresh User', email: 'fresh@example.com', passwordHash: 'x' } })
+    const locale = await getUserLocale(user.email)
+    expect(locale).toBe('en')
+  })
+
+  it('persists an updated locale and reflects it via getUserLocale', async () => {
+    const user = await testPrisma.user.create({ data: { name: 'Fresh User', email: 'fresh2@example.com', passwordHash: 'x' } })
+    await updateUserLocale(user.id, 'fi')
+    const locale = await getUserLocale(user.email)
+    expect(locale).toBe('fi')
+  })
+
+  it('returns en for an email with no matching user', async () => {
+    const locale = await getUserLocale('does-not-exist@example.com')
+    expect(locale).toBe('en')
   })
 })
