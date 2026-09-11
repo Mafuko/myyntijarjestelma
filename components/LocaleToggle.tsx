@@ -21,8 +21,16 @@ export function LocaleToggle() {
   }
 
   return (
-    <Button type="button" variant="outline" size="sm" disabled={pending} onClick={handleClick}>
-      {locale === 'en' ? '🇫🇮' : '🇬🇧'} {t('switchToOther')}
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      disabled={pending}
+      onClick={handleClick}
+      title={t('switchToOther')}
+      aria-label={t('switchToOther')}
+    >
+      {locale === 'en' ? '🇫🇮' : '🇬🇧'}
     </Button>
   )
 }
