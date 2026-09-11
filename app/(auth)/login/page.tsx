@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { login } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,9 +9,11 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { LocaleToggle } from '@/components/LocaleToggle'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
+  const t = useTranslations('Login')
 
   async function handleSubmit(formData: FormData) {
     const result = await login(formData)
@@ -24,17 +27,18 @@ export default function LoginPage() {
   return (
     <div className="flex flex-1 items-center justify-center px-6">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Log in</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <CardTitle>{t('title')}</CardTitle>
+          <LocaleToggle />
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('emailLabel')}</Label>
               <Input id="email" name="email" type="email" required />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('passwordLabel')}</Label>
               <PasswordInput id="password" name="password" required />
             </div>
             {error && (
@@ -42,7 +46,7 @@ export default function LoginPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit">Log in</Button>
+            <Button type="submit">{t('submitButton')}</Button>
           </form>
         </CardContent>
       </Card>
