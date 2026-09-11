@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { handleImportForm, type ImportFormState } from '@/actions/imports'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 const initialState: ImportFormState = { status: 'idle' }
 
 export function ImportForm({ eventId }: { eventId: string }) {
+  const t = useTranslations('ImportForm')
   const [state, formAction, isPending] = useActionState(handleImportForm.bind(null, eventId), initialState)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const selectedFileRef = useRef<File | null>(null)
@@ -43,10 +45,10 @@ export function ImportForm({ eventId }: { eventId: string }) {
       />
       <div className="flex gap-2">
         <Button type="submit" name="intent" value="preview" disabled={isPending} variant="outline">
-          Preview
+          {t('preview')}
         </Button>
         <Button type="submit" name="intent" value="commit" disabled={isPending}>
-          Confirm import
+          {t('confirmImport')}
         </Button>
       </div>
 
@@ -58,14 +60,14 @@ export function ImportForm({ eventId }: { eventId: string }) {
 
       {state.status === 'preview' && (
         <div>
-          <p className="text-sm text-foreground">{state.validCount} valid row(s) ready to import.</p>
+          <p className="text-sm text-foreground">{t('validRows', { count: state.validCount })}</p>
           {state.rowErrors.length > 0 && (
             <Table className="mt-2">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Row</TableHead>
-                  <TableHead>Field</TableHead>
-                  <TableHead>Problem</TableHead>
+                  <TableHead>{t('rowHeader')}</TableHead>
+                  <TableHead>{t('fieldHeader')}</TableHead>
+                  <TableHead>{t('problemHeader')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -84,7 +86,7 @@ export function ImportForm({ eventId }: { eventId: string }) {
 
       {state.status === 'committed' && (
         <Alert variant="success">
-          <AlertDescription>Imported {state.createdCount} item(s).</AlertDescription>
+          <AlertDescription>{t('imported', { count: state.createdCount })}</AlertDescription>
         </Alert>
       )}
     </form>
