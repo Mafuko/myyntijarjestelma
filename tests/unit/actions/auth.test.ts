@@ -7,10 +7,14 @@ vi.mock('@/lib/auth', () => ({
 vi.mock('@/lib/services/users', () => ({
   activateInvite: vi.fn(),
   bootstrapOwner: vi.fn(),
+  getUserLocale: vi.fn().mockResolvedValue('en'),
 }))
 vi.mock('@/lib/rate-limit', () => ({
   loginRateLimiter: {},
   checkRateLimit: vi.fn().mockResolvedValue({ allowed: true }),
+}))
+vi.mock('next/headers', () => ({
+  cookies: vi.fn().mockResolvedValue({ set: vi.fn(), get: vi.fn() }),
 }))
 
 describe('login action', () => {
@@ -57,6 +61,27 @@ describe('login action', () => {
 
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.data.redirectTo).toBe('/events')
+  })
+
+  it('hydrates the NEXT_LOCALE cookie from the signed-in user\'s stored locale', async () => {
+    const { login } = await import('@/actions/auth')
+    const { signIn } = await import('@/lib/auth')
+    const { getUserLocale } = await import('@/lib/services/users')
+    const { cookies } = await import('next/headers')
+    vi.mocked(signIn).mockResolvedValueOnce(undefined as never)
+    vi.mocked(getUserLocale).mockResolvedValueOnce('fi')
+    const setCookie = vi.fn()
+    vi.mocked(cookies).mockResolvedValueOnce({ set: setCookie, get: vi.fn() } as any)
+
+    const formData = new FormData()
+    formData.set('email', 'fi-user@example.com')
+    formData.set('password', 'correct-horse-battery-staple')
+
+    const result = await login(formData)
+
+    expect(result.ok).toBe(true)
+    expect(getUserLocale).toHaveBeenCalledWith('fi-user@example.com')
+    expect(setCookie).toHaveBeenCalledWith('NEXT_LOCALE', 'fi', expect.objectContaining({ path: '/' }))
   })
 
   it('rejects login attempts once rate-limited, without calling signIn', async () => {
