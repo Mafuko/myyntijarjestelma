@@ -1,0 +1,20 @@
+{
+  "Login": {
+    "title": "Kirjaudu sisään",
+    "emailLabel": "Sähköposti",
+    "passwordLabel": "Salasana",
+    "submitButton": "Kirjaudu sisään"
+  },
+  "Nav": {
+    "myItems": "Omat tuotteet",
+    "checkout": "Kassa",
+    "sales": "Myynnit",
+    "members": "Jäsenet"
+  },
+  "DashboardLayout": {
+    "signOut": "Kirjaudu ulos"
+  },
+  "LocaleToggle": {
+    "switchToOther": "Vaihda englanniksi"
+  }
+}

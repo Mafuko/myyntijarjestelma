@@ -1,8 +1,9 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { signIn, signOut } from '@/lib/auth'
 import { loginRateLimiter, checkRateLimit } from '@/lib/rate-limit'
-import { activateInvite, bootstrapOwner } from '@/lib/services/users'
+import { activateInvite, bootstrapOwner, getUserLocale } from '@/lib/services/users'
 import { loginSchema } from '@/lib/validation/user'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
@@ -23,6 +24,11 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
 
   try {
     await signIn('credentials', { ...parsed.data, redirect: false })
+    const cookieStore = await cookies()
+    if (!cookieStore.get('NEXT_LOCALE')) {
+      const locale = await getUserLocale(parsed.data.email)
+      cookieStore.set('NEXT_LOCALE', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+    }
     return { ok: true, data: { redirectTo: '/events' } }
   } catch {
     return { ok: false, error: { code: 'INVALID_CREDENTIALS', message: 'Incorrect email or password' } }
@@ -30,6 +36,8 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
 }
 
 export async function logout(): Promise<void> {
+  const cookieStore = await cookies()
+  cookieStore.delete('NEXT_LOCALE')
   await signOut({ redirectTo: '/login' })
 }
 

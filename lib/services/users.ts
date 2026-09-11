@@ -146,3 +146,12 @@ export async function bootstrapOwner(input: unknown): Promise<Result<{ userId: s
 }
 
 class AlreadyInitializedError extends Error {}
+
+export async function updateUserLocale(userId: string, locale: 'en' | 'fi'): Promise<void> {
+  await prisma.user.update({ where: { id: userId }, data: { locale } })
+}
+
+export async function getUserLocale(email: string): Promise<'en' | 'fi'> {
+  const user = await prisma.user.findUnique({ where: { email }, select: { locale: true } })
+  return (user?.locale as 'en' | 'fi') ?? 'en'
+}

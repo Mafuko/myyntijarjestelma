@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   // @node-rs/argon2 is a native N-API module; letting webpack bundle it
@@ -7,4 +8,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@node-rs/argon2'],
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin();
+
+export default withNextIntl(nextConfig);

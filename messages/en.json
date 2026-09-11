@@ -1,0 +1,20 @@
+{
+  "Login": {
+    "title": "Log in",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submitButton": "Log in"
+  },
+  "Nav": {
+    "myItems": "My items",
+    "checkout": "Checkout",
+    "sales": "Sales",
+    "members": "Members"
+  },
+  "DashboardLayout": {
+    "signOut": "Sign out"
+  },
+  "LocaleToggle": {
+    "switchToOther": "Switch to Finnish"
+  }
+}
