@@ -122,5 +122,13 @@
     "listedAndSold": "{listedCount} listattu, {soldCount} myyty",
     "backToSellers": "← Takaisin myyjiin",
     "unknownSeller": "Tuntematon"
+  },
+  "SalesDashboard": {
+    "title": "Myynnit",
+    "reconnecting": "Yhdistetään uudelleen…",
+    "revenueSummary": "Myynti yhteensä: {revenue} € — Välityspalkkio: {owed} €",
+    "soldHeading": "Myyty ({count})",
+    "soldBadge": "Myyty",
+    "unsoldHeading": "Myymättä ({count})"
   }
 }

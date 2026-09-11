@@ -122,5 +122,13 @@
     "listedAndSold": "{listedCount} listed, {soldCount} sold",
     "backToSellers": "← Back to sellers",
     "unknownSeller": "Unknown"
+  },
+  "SalesDashboard": {
+    "title": "Sales",
+    "reconnecting": "Reconnecting…",
+    "revenueSummary": "Total revenue: {revenue} € — Commission owed: {owed} €",
+    "soldHeading": "Sold ({count})",
+    "soldBadge": "Sold",
+    "unsoldHeading": "Unsold ({count})"
   }
 }
