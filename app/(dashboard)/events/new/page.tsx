@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { CreateEventForm } from './CreateEventForm'
@@ -11,10 +12,12 @@ export default async function NewEventPage() {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: session.user.id } })
   if (!user.isOwner) redirect('/events')
 
+  const t = await getTranslations('CreateEventPage')
+
   return (
     <Card className="max-w-sm">
       <CardHeader>
-        <CardTitle>Create event</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <CreateEventForm />
