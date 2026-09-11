@@ -42,7 +42,7 @@ export async function generatePriceTagData(
   eventId: string,
   itemIds: string[]
 ): Promise<Result<PriceTagData[]>> {
-  const authz = await requireEventAccess(session, eventId, ['SELLER', 'ADMIN'])
+  const authz = await requireEventAccess(session, eventId, ['SELLER', 'STAFF', 'ADMIN'])
   if (!authz.ok) return authz
 
   const items = await prisma.item.findMany({ where: { id: { in: itemIds }, eventId } })
@@ -50,7 +50,10 @@ export async function generatePriceTagData(
     return { ok: false, error: { code: 'NO_ITEMS', message: 'No items found for the given ids' } }
   }
 
-  const isManager = authz.role === 'ADMIN' || authz.role === 'OWNER'
+  // STAFF runs checkout and may need to reprint any seller's tag, not just
+  // their own -- treat them as a manager for this purpose, same as they
+  // already see every item via listAllItemsForEvent/checkout.
+  const isManager = authz.role === 'STAFF' || authz.role === 'ADMIN' || authz.role === 'OWNER'
   for (const item of items) {
     if (!isManager && item.sellerId !== authz.userId) {
       return { ok: false, error: { code: 'FORBIDDEN', message: 'You can only generate tags for your own items' } }

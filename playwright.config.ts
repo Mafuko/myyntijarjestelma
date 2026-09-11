@@ -11,6 +11,14 @@ export default defineConfig({
   // created milliseconds apart. Forcing a single worker serializes every
   // test against the shared database.
   workers: 1,
+  // CI-only retry for the known Next.js dev-mode gotcha documented in
+  // CLAUDE.md: a route's first-visit compilation in this server process can
+  // race a test's navigation/interaction (ERR_ABORTED on the goto, or a
+  // click swallowed mid-Fast-Refresh-remount). Every occurrence observed so
+  // far has resolved cleanly on an immediate retry with no code changes --
+  // it's dev-server timing, not a real regression. Local runs stay at 0
+  // retries so a genuinely broken test still fails loudly and immediately.
+  retries: process.env.CI ? 2 : 0,
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',

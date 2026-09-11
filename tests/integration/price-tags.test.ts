@@ -10,6 +10,7 @@ async function setup() {
   const owner = await testPrisma.user.create({ data: { name: 'Owner', email: 'owner@example.com', isOwner: true, passwordHash: 'x' } })
   const sellerA = await testPrisma.user.create({ data: { name: 'Seller A', email: 'sellerA@example.com', passwordHash: 'x' } })
   const sellerB = await testPrisma.user.create({ data: { name: 'Seller B', email: 'sellerB@example.com', passwordHash: 'x' } })
+  const staff = await testPrisma.user.create({ data: { name: 'Staff', email: 'staff@example.com', passwordHash: 'x' } })
   const event = await testPrisma.event.create({
     data: {
       name: 'Event', eventDate: new Date(Date.now() + 7 * 86400000), registrationDeadline: new Date(Date.now() + 86400000),
@@ -21,11 +22,12 @@ async function setup() {
     data: [
       { userId: sellerA.id, eventId: event.id, role: 'SELLER', sellerAlias: 'Kalle', status: 'ACTIVE' },
       { userId: sellerB.id, eventId: event.id, role: 'SELLER', sellerAlias: 'Liisa', status: 'ACTIVE' },
+      { userId: staff.id, eventId: event.id, role: 'STAFF', status: 'ACTIVE' },
     ],
   })
   const itemA = await testPrisma.item.create({ data: { eventId: event.id, sellerId: sellerA.id, name: 'Item A', price: 5, categoryId: category.id } })
   const itemB = await testPrisma.item.create({ data: { eventId: event.id, sellerId: sellerB.id, name: 'Item B', price: 3, categoryId: category.id } })
-  return { owner, sellerA, sellerB, event, itemA, itemB }
+  return { owner, sellerA, sellerB, staff, event, itemA, itemB }
 }
 
 describe('generatePriceTagData', () => {
@@ -61,6 +63,13 @@ describe('generatePriceTagData', () => {
   it('allows an admin/owner to generate tags for any item', async () => {
     const { owner, event, itemA, itemB } = await setup()
     const result = await generatePriceTagData(sessionFor(owner.id), event.id, [itemA.id, itemB.id])
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.data).toHaveLength(2)
+  })
+
+  it('allows staff to generate tags for any item, not just their own', async () => {
+    const { staff, event, itemA, itemB } = await setup()
+    const result = await generatePriceTagData(sessionFor(staff.id), event.id, [itemA.id, itemB.id])
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.data).toHaveLength(2)
   })
