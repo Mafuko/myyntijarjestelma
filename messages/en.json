@@ -16,5 +16,31 @@
   },
   "LocaleToggle": {
     "switchToOther": "Switch to Finnish"
+  },
+  "EventsPage": {
+    "title": "Events",
+    "newEvent": "New event"
+  },
+  "CreateEventPage": {
+    "title": "Create event"
+  },
+  "CreateEventForm": {
+    "eventNamePlaceholder": "Event name",
+    "eventDateLabel": "Event date",
+    "multipleDaysLabel": "Multiple days",
+    "eventEndDateLabel": "Event end date",
+    "registrationDeadlineLabel": "Registration deadline",
+    "itemEditCutoffLabel": "Item edit cutoff",
+    "submitButton": "Create event"
+  },
+  "UpdateCommissionForm": {
+    "commissionRateLabel": "Commission rate (0–1)",
+    "updateButton": "Update"
+  },
+  "Roles": {
+    "SELLER": "Seller",
+    "STAFF": "Staff",
+    "ADMIN": "Admin",
+    "OWNER": "Owner"
   }
 }

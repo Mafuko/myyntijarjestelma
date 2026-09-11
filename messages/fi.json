@@ -16,5 +16,31 @@
   },
   "LocaleToggle": {
     "switchToOther": "Vaihda englanniksi"
+  },
+  "EventsPage": {
+    "title": "Tapahtumat",
+    "newEvent": "Uusi tapahtuma"
+  },
+  "CreateEventPage": {
+    "title": "Luo tapahtuma"
+  },
+  "CreateEventForm": {
+    "eventNamePlaceholder": "Tapahtuman nimi",
+    "eventDateLabel": "Tapahtuman päivämäärä",
+    "multipleDaysLabel": "Useita päiviä",
+    "eventEndDateLabel": "Tapahtuman päättymispäivä",
+    "registrationDeadlineLabel": "Ilmoittautumisen määräaika",
+    "itemEditCutoffLabel": "Tuotteiden muokkauksen määräaika",
+    "submitButton": "Luo tapahtuma"
+  },
+  "UpdateCommissionForm": {
+    "commissionRateLabel": "Välityspalkkio (0–1)",
+    "updateButton": "Päivitä"
+  },
+  "Roles": {
+    "SELLER": "Myyjä",
+    "STAFF": "Työvoima",
+    "ADMIN": "Ylläpitäjä",
+    "OWNER": "Omistaja"
   }
 }
