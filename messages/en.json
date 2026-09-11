@@ -155,5 +155,42 @@
   "CopyInviteLink": {
     "copied": "Copied!",
     "copyLink": "Copy invite link"
+  },
+  "AdminPage": {
+    "title": "Admin",
+    "viewAuditLog": "View audit log",
+    "columnName": "Name",
+    "columnEmail": "Email",
+    "columnAction": "Action",
+    "deletePii": "Delete PII"
+  },
+  "AuditPage": {
+    "title": "Audit log",
+    "columnWhen": "When",
+    "columnActor": "Actor",
+    "columnAction": "Action",
+    "columnTarget": "Target"
+  },
+  "ProfilePage": {
+    "title": "Payout information"
+  },
+  "PayoutInfoForm": {
+    "payoutMethodLabel": "Payout method",
+    "cashOption": "Cash",
+    "bankTransferOption": "Bank transfer",
+    "ibanLabel": "IBAN (required for bank transfer)",
+    "saveButton": "Save"
+  },
+  "SignupForm": {
+    "title": "Create owner account",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submitButton": "Create owner account"
+  },
+  "InvitePage": {
+    "title": "Set your password",
+    "passwordLabel": "Password",
+    "submitButton": "Set password"
   }
 }

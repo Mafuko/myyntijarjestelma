@@ -155,5 +155,42 @@
   "CopyInviteLink": {
     "copied": "Kopioitu!",
     "copyLink": "Kopioi kutsulinkki"
+  },
+  "AdminPage": {
+    "title": "Ylläpito",
+    "viewAuditLog": "Näytä lokitiedot",
+    "columnName": "Nimi",
+    "columnEmail": "Sähköposti",
+    "columnAction": "Toiminto",
+    "deletePii": "Poista henkilötiedot"
+  },
+  "AuditPage": {
+    "title": "Lokitiedot",
+    "columnWhen": "Ajankohta",
+    "columnActor": "Tekijä",
+    "columnAction": "Toiminto",
+    "columnTarget": "Kohde"
+  },
+  "ProfilePage": {
+    "title": "Maksutiedot"
+  },
+  "PayoutInfoForm": {
+    "payoutMethodLabel": "Maksutapa",
+    "cashOption": "Käteinen",
+    "bankTransferOption": "Tilisiirto",
+    "ibanLabel": "IBAN (vaaditaan tilisiirrolle)",
+    "saveButton": "Tallenna"
+  },
+  "SignupForm": {
+    "title": "Luo ylläpitäjän tili",
+    "nameLabel": "Nimi",
+    "emailLabel": "Sähköposti",
+    "passwordLabel": "Salasana",
+    "submitButton": "Luo ylläpitäjän tili"
+  },
+  "InvitePage": {
+    "title": "Aseta salasanasi",
+    "passwordLabel": "Salasana",
+    "submitButton": "Aseta salasana"
   }
 }

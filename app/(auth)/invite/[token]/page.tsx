@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { acceptInvite } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { PasswordInput } from '@/components/ui/password-input'
@@ -10,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function InvitePage() {
+  const t = useTranslations('InvitePage')
   const params = useParams<{ token: string }>()
   const [error, setError] = useState<string | null>(null)
 
@@ -27,12 +29,12 @@ export default function InvitePage() {
     <div className="flex flex-1 items-center justify-center px-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Set your password</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('passwordLabel')}</Label>
               <PasswordInput id="password" name="password" required minLength={10} />
             </div>
             {error && (
@@ -40,7 +42,7 @@ export default function InvitePage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit">Set password</Button>
+            <Button type="submit">{t('submitButton')}</Button>
           </form>
         </CardContent>
       </Card>

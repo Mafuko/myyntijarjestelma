@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { auth } from '@/lib/auth'
 import { requireOwner } from '@/lib/services/authz'
 import { prisma } from '@/lib/db'
@@ -10,17 +11,18 @@ export default async function AuditLogPage() {
   if (!authz.ok) redirect('/events')
 
   const logs = await prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 200, include: { actor: true } })
+  const t = await getTranslations('AuditPage')
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-foreground">Audit log</h1>
+      <h1 className="text-xl font-semibold text-foreground">{t('title')}</h1>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>When</TableHead>
-            <TableHead>Actor</TableHead>
-            <TableHead>Action</TableHead>
-            <TableHead>Target</TableHead>
+            <TableHead>{t('columnWhen')}</TableHead>
+            <TableHead>{t('columnActor')}</TableHead>
+            <TableHead>{t('columnAction')}</TableHead>
+            <TableHead>{t('columnTarget')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
