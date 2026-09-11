@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createItemBatch } from '@/actions/items'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils'
 type Category = { id: string; name: string }
 
 export function AddSeriesForm({ eventId, categories }: { eventId: string; categories: Category[] }) {
+  const t = useTranslations('AddSeriesForm')
   const [error, setError] = useState<string | null>(null)
   // Category, K-18, and mode stay controlled/sticky across submissions,
   // matching AddItemForm's quick-repeat behavior — a seller adding several
@@ -45,7 +47,7 @@ export function AddSeriesForm({ eventId, categories }: { eventId: string; catego
   return (
     <Card className="max-w-sm">
       <CardHeader>
-        <CardTitle>Add a series or bundle</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -59,7 +61,7 @@ export function AddSeriesForm({ eventId, categories }: { eventId: string; catego
                 onChange={() => setMode('series')}
                 className="accent-primary"
               />
-              Series (one item per volume)
+              {t('seriesModeLabel')}
             </label>
             <label className="flex items-center gap-1.5">
               <input
@@ -70,15 +72,15 @@ export function AddSeriesForm({ eventId, categories }: { eventId: string; catego
                 onChange={() => setMode('bundle')}
                 className="accent-primary"
               />
-              Bundle (one item for the range)
+              {t('bundleModeLabel')}
             </label>
           </div>
-          <Input ref={baseNameRef} name="baseName" placeholder="Base name (e.g. Naruto)" required />
+          <Input ref={baseNameRef} name="baseName" placeholder={t('baseNamePlaceholder')} required />
           <div className="flex gap-2">
-            <Input ref={startVolumeRef} name="startVolume" type="number" min="1" placeholder="Start vol." required />
-            <Input ref={endVolumeRef} name="endVolume" type="number" min="1" placeholder="End vol." required />
+            <Input ref={startVolumeRef} name="startVolume" type="number" min="1" placeholder={t('startVolPlaceholder')} required />
+            <Input ref={endVolumeRef} name="endVolume" type="number" min="1" placeholder={t('endVolPlaceholder')} required />
           </div>
-          <Input ref={priceRef} name="price" type="number" step="0.01" min="0.01" placeholder="Price per item" required />
+          <Input ref={priceRef} name="price" type="number" step="0.01" min="0.01" placeholder={t('pricePerItemPlaceholder')} required />
           <select
             name="categoryId"
             required
@@ -103,14 +105,14 @@ export function AddSeriesForm({ eventId, categories }: { eventId: string; catego
               onChange={(e) => setIsAgeRestricted(e.target.checked)}
               className="h-4 w-4 rounded border-input accent-primary"
             />
-            K-18
+            {t('k18Label')}
           </label>
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Button type="submit">{mode === 'series' ? 'Create series' : 'Create bundle'}</Button>
+          <Button type="submit">{mode === 'series' ? t('submitButtonSeries') : t('submitButtonBundle')}</Button>
         </form>
       </CardContent>
     </Card>

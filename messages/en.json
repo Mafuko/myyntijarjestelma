@@ -42,5 +42,50 @@
     "STAFF": "Staff",
     "ADMIN": "Admin",
     "OWNER": "Owner"
+  },
+  "ItemsPage": {
+    "title": "My items",
+    "printAllPriceTags": "Print all price tags",
+    "columnItem": "Item",
+    "columnPrice": "Price",
+    "columnStatus": "Status",
+    "columnActions": "Actions"
+  },
+  "ItemStatus": {
+    "LISTED": "Listed",
+    "SOLD": "Sold"
+  },
+  "AddItemForm": {
+    "title": "Add an item",
+    "namePlaceholder": "Item name",
+    "pricePlaceholder": "Price",
+    "k18Label": "K-18",
+    "submitButton": "Add item"
+  },
+  "AddSeriesForm": {
+    "title": "Add a series or bundle",
+    "seriesModeLabel": "Series (one item per volume)",
+    "bundleModeLabel": "Bundle (one item for the range)",
+    "baseNamePlaceholder": "Base name (e.g. Naruto)",
+    "startVolPlaceholder": "Start vol.",
+    "endVolPlaceholder": "End vol.",
+    "pricePerItemPlaceholder": "Price per item",
+    "k18Label": "K-18",
+    "submitButtonSeries": "Create series",
+    "submitButtonBundle": "Create bundle"
+  },
+  "ItemRow": {
+    "namePlaceholder": "Item name",
+    "pricePlaceholder": "Price",
+    "k18Label": "K-18",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "priceTagLink": "Price tag"
+  },
+  "DeleteItemButton": {
+    "deleting": "Deleting…",
+    "delete": "Delete"
   }
 }

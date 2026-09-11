@@ -42,5 +42,50 @@
     "STAFF": "Työvoima",
     "ADMIN": "Ylläpitäjä",
     "OWNER": "Omistaja"
+  },
+  "ItemsPage": {
+    "title": "Omat tuotteet",
+    "printAllPriceTags": "Tulosta kaikki hintalaput",
+    "columnItem": "Tuote",
+    "columnPrice": "Hinta",
+    "columnStatus": "Tila",
+    "columnActions": "Toiminnot"
+  },
+  "ItemStatus": {
+    "LISTED": "Listattu",
+    "SOLD": "Myyty"
+  },
+  "AddItemForm": {
+    "title": "Lisää tuote",
+    "namePlaceholder": "Tuotteen nimi",
+    "pricePlaceholder": "Hinta",
+    "k18Label": "K-18",
+    "submitButton": "Lisää tuote"
+  },
+  "AddSeriesForm": {
+    "title": "Lisää sarja tai erä",
+    "seriesModeLabel": "Sarja (yksi tuote per osa)",
+    "bundleModeLabel": "Erä (yksi tuote koko välille)",
+    "baseNamePlaceholder": "Perusnimi (esim. Naruto)",
+    "startVolPlaceholder": "Aloitusosa",
+    "endVolPlaceholder": "Lopetusosa",
+    "pricePerItemPlaceholder": "Hinta per tuote",
+    "k18Label": "K-18",
+    "submitButtonSeries": "Luo sarja",
+    "submitButtonBundle": "Luo erä"
+  },
+  "ItemRow": {
+    "namePlaceholder": "Tuotteen nimi",
+    "pricePlaceholder": "Hinta",
+    "k18Label": "K-18",
+    "saving": "Tallennetaan…",
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "edit": "Muokkaa",
+    "priceTagLink": "Hintalappu"
+  },
+  "DeleteItemButton": {
+    "deleting": "Poistetaan…",
+    "delete": "Poista"
   }
 }

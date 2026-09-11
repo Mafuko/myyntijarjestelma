@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createItem } from '@/actions/items'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils'
 type Category = { id: string; name: string }
 
 export function AddItemForm({ eventId, categories }: { eventId: string; categories: Category[] }) {
+  const t = useTranslations('AddItemForm')
   const [error, setError] = useState<string | null>(null)
   // Category and K-18 are kept as controlled state so they persist across
   // submissions (quick-repeat entry) regardless of any browser/React form
@@ -45,12 +47,12 @@ export function AddItemForm({ eventId, categories }: { eventId: string; categori
   return (
     <Card className="max-w-sm">
       <CardHeader>
-        <CardTitle>Add an item</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <Input ref={nameRef} name="name" placeholder="Item name" required />
-          <Input ref={priceRef} name="price" type="number" step="0.01" min="0.01" placeholder="Price" required />
+          <Input ref={nameRef} name="name" placeholder={t('namePlaceholder')} required />
+          <Input ref={priceRef} name="price" type="number" step="0.01" min="0.01" placeholder={t('pricePlaceholder')} required />
           {/* Native <select>, not a Select component — items-quickrepeat.spec.ts
               drives this via page.selectOption('select[name="categoryId"]', ...). */}
           <select
@@ -79,14 +81,14 @@ export function AddItemForm({ eventId, categories }: { eventId: string; categori
               onChange={(e) => setIsAgeRestricted(e.target.checked)}
               className="h-4 w-4 rounded border-input accent-primary"
             />
-            K-18
+            {t('k18Label')}
           </label>
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Button type="submit">Add item</Button>
+          <Button type="submit">{t('submitButton')}</Button>
         </form>
       </CardContent>
     </Card>
