@@ -100,5 +100,27 @@
     "fieldHeader": "Field",
     "problemHeader": "Problem",
     "imported": "Imported {count} item(s)."
+  },
+  "CheckoutTabs": {
+    "scanTab": "Scan",
+    "browseTab": "Sell by seller"
+  },
+  "CheckoutScanner": {
+    "title": "Checkout",
+    "scanPlaceholder": "Scan or type code, then Enter",
+    "alreadySold": "Already sold: {name}",
+    "sellingConfirm": "Selling <b>{name}</b> ({price} €, {sellerAlias}). Confirm?",
+    "confirmButton": "Confirm (Enter)",
+    "sold": "Sold: {name}"
+  },
+  "SellBySeller": {
+    "sell": "Sell",
+    "selling": "Selling…",
+    "undoSale": "Undo sale",
+    "undoing": "Undoing…",
+    "noItemsYet": "No items listed yet.",
+    "listedAndSold": "{listedCount} listed, {soldCount} sold",
+    "backToSellers": "← Back to sellers",
+    "unknownSeller": "Unknown"
   }
 }

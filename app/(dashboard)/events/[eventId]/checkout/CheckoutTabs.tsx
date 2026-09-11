@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { CheckoutScanner } from './CheckoutScanner'
 import { SellBySeller, type Item, type SellerLabel } from './SellBySeller'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ export function CheckoutTabs({
   items: Item[]
   sellers: SellerLabel[]
 }) {
+  const t = useTranslations('CheckoutTabs')
   const [mode, setMode] = useState<'scan' | 'browse'>('scan')
 
   return (
@@ -25,7 +27,7 @@ export function CheckoutTabs({
           size="sm"
           onClick={() => setMode('scan')}
         >
-          Scan
+          {t('scanTab')}
         </Button>
         <Button
           type="button"
@@ -33,7 +35,7 @@ export function CheckoutTabs({
           size="sm"
           onClick={() => setMode('browse')}
         >
-          Sell by seller
+          {t('browseTab')}
         </Button>
       </div>
       {mode === 'scan' ? (

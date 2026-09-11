@@ -100,5 +100,27 @@
     "fieldHeader": "Kenttä",
     "problemHeader": "Ongelma",
     "imported": "Tuotiin {count} tuote(tta)."
+  },
+  "CheckoutTabs": {
+    "scanTab": "Skannaa",
+    "browseTab": "Myy myyjän mukaan"
+  },
+  "CheckoutScanner": {
+    "title": "Kassa",
+    "scanPlaceholder": "Skannaa tai kirjoita koodi ja paina Enter",
+    "alreadySold": "Jo myyty: {name}",
+    "sellingConfirm": "Myydään <b>{name}</b> ({price} €, {sellerAlias}). Vahvista?",
+    "confirmButton": "Vahvista (Enter)",
+    "sold": "Myyty: {name}"
+  },
+  "SellBySeller": {
+    "sell": "Myy",
+    "selling": "Myydään…",
+    "undoSale": "Peru myynti",
+    "undoing": "Perutaan…",
+    "noItemsYet": "Ei vielä listattuja tuotteita.",
+    "listedAndSold": "{listedCount} listattu, {soldCount} myyty",
+    "backToSellers": "← Takaisin myyjiin",
+    "unknownSeller": "Tuntematon"
   }
 }
