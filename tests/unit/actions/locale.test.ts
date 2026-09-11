@@ -11,7 +11,7 @@ describe('setLocale action', () => {
     const { setLocale } = await import('@/actions/locale')
     const { auth } = await import('@/lib/auth')
     const { cookies } = await import('next/headers')
-    vi.mocked(auth).mockResolvedValueOnce(null)
+    vi.mocked(auth).mockResolvedValueOnce(null as any)
     const setCookie = vi.fn()
     vi.mocked(cookies).mockResolvedValueOnce({ set: setCookie, get: vi.fn() } as any)
 
@@ -35,7 +35,7 @@ describe('setLocale action', () => {
     const { setLocale } = await import('@/actions/locale')
     const { auth } = await import('@/lib/auth')
     const { updateUserLocale } = await import('@/lib/services/users')
-    vi.mocked(auth).mockResolvedValueOnce(null)
+    vi.mocked(auth).mockResolvedValueOnce(null as any)
     vi.mocked(updateUserLocale).mockClear()
 
     await setLocale('en')
