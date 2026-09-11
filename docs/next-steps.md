@@ -13,9 +13,9 @@
    - Wanted: a lightweight "what's new" notification (banner, toast, or small unread-dot on a release-notes page) shown to a user the next time they log in after a new release, based on release notes authored somewhere (a changelog file? tied to git tags?) and "seen" state tracked per user.
    - Not yet brainstormed: authoring format/workflow for the notes themselves, where per-user "last seen" state lives (a `User` column? separate table?), and whether this should be its own dismissible banner vs. a dedicated `/whats-new` page.
 
-3. **No language switching — English only, Finnish should be supported too**
-   - The app is currently English-only. Finnish should be selectable as well, toggled via a flag button (per the request that prompted this entry — exact placement, e.g. header vs. login page vs. per-user profile setting, not yet decided).
-   - Not yet brainstormed: i18n library/approach (`next-intl` is the common choice for App Router; a hand-rolled dictionary is also plausible given this app's small surface area), where the chosen language is persisted (cookie? `User` column, so it follows a signed-in user across devices?), translation coverage scope (every page including price-tag PDFs and email-adjacent copy, or just the main UI first), and who owns keeping Finnish strings correct/up to date as new features ship.
+3. **No language switching — Phase 1 shipped, Phases 2/3 remain**
+   - Phase 1 (infrastructure, `User.locale` persistence, the flag toggle, and translated `/login` + event-home nav) is done — see `docs/superpowers/specs/2026-09-10-i18n-language-switching-design.md` and `docs/superpowers/plans/2026-09-11-i18n-phase1.md`.
+   - Remaining: Phase 2 (every other page/form/validation message) and Phase 3 (price-tag PDF text), each to get its own implementation plan when picked up.
 
 4. **Price tags download immediately instead of showing a preview first**
    - Clicking "Price tag" (single item) or "Print all price tags" (list) on the items page immediately triggers a PDF download — there's no way to see what it looks like before committing to printing it.
