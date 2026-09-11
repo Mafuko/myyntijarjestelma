@@ -84,6 +84,28 @@ describe('login action', () => {
     expect(setCookie).toHaveBeenCalledWith('NEXT_LOCALE', 'fi', expect.objectContaining({ path: '/' }))
   })
 
+  it('leaves an already-set NEXT_LOCALE cookie alone, even if it differs from the user\'s stored locale', async () => {
+    const { login } = await import('@/actions/auth')
+    const { signIn } = await import('@/lib/auth')
+    const { getUserLocale } = await import('@/lib/services/users')
+    const { cookies } = await import('next/headers')
+    vi.mocked(signIn).mockResolvedValueOnce(undefined as never)
+    vi.mocked(getUserLocale).mockClear()
+    const setCookie = vi.fn()
+    const getCookie = vi.fn().mockReturnValue({ name: 'NEXT_LOCALE', value: 'fi' })
+    vi.mocked(cookies).mockResolvedValueOnce({ set: setCookie, get: getCookie } as any)
+
+    const formData = new FormData()
+    formData.set('email', 'already-toggled@example.com')
+    formData.set('password', 'correct-horse-battery-staple')
+
+    const result = await login(formData)
+
+    expect(result.ok).toBe(true)
+    expect(getUserLocale).not.toHaveBeenCalled()
+    expect(setCookie).not.toHaveBeenCalled()
+  })
+
   it('rejects login attempts once rate-limited, without calling signIn', async () => {
     const { login } = await import('@/actions/auth')
     const { checkRateLimit } = await import('@/lib/rate-limit')

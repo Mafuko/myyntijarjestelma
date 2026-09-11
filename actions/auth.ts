@@ -24,9 +24,11 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
 
   try {
     await signIn('credentials', { ...parsed.data, redirect: false })
-    const locale = await getUserLocale(parsed.data.email)
     const cookieStore = await cookies()
-    cookieStore.set('NEXT_LOCALE', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+    if (!cookieStore.get('NEXT_LOCALE')) {
+      const locale = await getUserLocale(parsed.data.email)
+      cookieStore.set('NEXT_LOCALE', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+    }
     return { ok: true, data: { redirectTo: '/events' } }
   } catch {
     return { ok: false, error: { code: 'INVALID_CREDENTIALS', message: 'Incorrect email or password' } }
@@ -34,6 +36,8 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
 }
 
 export async function logout(): Promise<void> {
+  const cookieStore = await cookies()
+  cookieStore.delete('NEXT_LOCALE')
   await signOut({ redirectTo: '/login' })
 }
 

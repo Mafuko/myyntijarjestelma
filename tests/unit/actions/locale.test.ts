@@ -42,4 +42,20 @@ describe('setLocale action', () => {
 
     expect(updateUserLocale).not.toHaveBeenCalled()
   })
+
+  it('rejects a locale value that is not en or fi, without touching the cookie or the database', async () => {
+    const { setLocale } = await import('@/actions/locale')
+    const { auth } = await import('@/lib/auth')
+    const { updateUserLocale } = await import('@/lib/services/users')
+    const { cookies } = await import('next/headers')
+    vi.mocked(auth).mockResolvedValueOnce({ user: { id: 'user-1' } } as any)
+    vi.mocked(updateUserLocale).mockClear()
+    const setCookie = vi.fn()
+    vi.mocked(cookies).mockResolvedValueOnce({ set: setCookie, get: vi.fn() } as any)
+
+    await setLocale('de')
+
+    expect(setCookie).not.toHaveBeenCalled()
+    expect(updateUserLocale).not.toHaveBeenCalled()
+  })
 })
