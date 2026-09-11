@@ -27,6 +27,7 @@
     "exceljs": "^4.4.0",
     "next": "^15.5.23",
     "next-auth": "^5.0.0-beta.32",
+    "next-intl": "^4.14.3",
     "papaparse": "^5.6.0",
     "prisma": "^7.9.1",
     "react": "19.2.8",
