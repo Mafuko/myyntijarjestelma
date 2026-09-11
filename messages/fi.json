@@ -130,5 +130,30 @@
     "soldHeading": "Myyty ({count})",
     "soldBadge": "Myyty",
     "unsoldHeading": "Myymättä ({count})"
+  },
+  "MembersPage": {
+    "title": "Jäsenet",
+    "columnName": "Nimi",
+    "columnEmail": "Sähköposti",
+    "columnRole": "Rooli",
+    "columnStatus": "Tila"
+  },
+  "MembershipStatus": {
+    "ACTIVE": "Aktiivinen",
+    "PENDING": "Odottaa",
+    "REMOVED": "Poistettu"
+  },
+  "InviteMemberForm": {
+    "title": "Kutsu jäsen",
+    "namePlaceholder": "Nimi",
+    "emailPlaceholder": "Sähköposti",
+    "sellerAliasPlaceholder": "Myyjän lempinimi (vaaditaan myyjille)",
+    "submitButton": "Kutsu",
+    "invitedWithLink": "Kutsuttu. Jaa tämä linkki heille tilin aktivoimiseksi:",
+    "invitedWithoutLink": "Lisätty. Heillä on jo tili, ja he pääsevät tähän tapahtumaan kirjautumalla sisään."
+  },
+  "CopyInviteLink": {
+    "copied": "Kopioitu!",
+    "copyLink": "Kopioi kutsulinkki"
   }
 }

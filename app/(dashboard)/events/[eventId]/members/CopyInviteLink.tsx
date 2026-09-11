@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 
 // The app has no email sending (see docs/superpowers/specs/2026-08-22-myyntijarjestelma-design.md#L144)
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button'
 // (rather than a server-known host) means it's always correct for whatever
 // domain the admin is currently browsing on.
 export function CopyInviteLink({ path }: { path: string }) {
+  const t = useTranslations('CopyInviteLink')
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
@@ -19,7 +21,7 @@ export function CopyInviteLink({ path }: { path: string }) {
 
   return (
     <Button type="button" variant="outline" size="sm" onClick={handleCopy}>
-      {copied ? 'Copied!' : 'Copy invite link'}
+      {copied ? t('copied') : t('copyLink')}
     </Button>
   )
 }

@@ -130,5 +130,30 @@
     "soldHeading": "Sold ({count})",
     "soldBadge": "Sold",
     "unsoldHeading": "Unsold ({count})"
+  },
+  "MembersPage": {
+    "title": "Members",
+    "columnName": "Name",
+    "columnEmail": "Email",
+    "columnRole": "Role",
+    "columnStatus": "Status"
+  },
+  "MembershipStatus": {
+    "ACTIVE": "Active",
+    "PENDING": "Pending",
+    "REMOVED": "Removed"
+  },
+  "InviteMemberForm": {
+    "title": "Invite a member",
+    "namePlaceholder": "Name",
+    "emailPlaceholder": "Email",
+    "sellerAliasPlaceholder": "Seller alias (required for sellers)",
+    "submitButton": "Invite",
+    "invitedWithLink": "Invited. Share this link with them to activate their account:",
+    "invitedWithoutLink": "Added. They already have an account and can access this event by logging in."
+  },
+  "CopyInviteLink": {
+    "copied": "Copied!",
+    "copyLink": "Copy invite link"
   }
 }
