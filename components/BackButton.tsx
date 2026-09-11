@@ -1,15 +1,17 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export function BackButton() {
   const router = useRouter()
+  const t = useTranslations('A11y')
 
   return (
     <button
       type="button"
       onClick={() => router.back()}
-      aria-label="Back"
+      aria-label={t('back')}
       className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-90"
     >
       <svg

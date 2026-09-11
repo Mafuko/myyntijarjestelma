@@ -192,5 +192,10 @@
     "title": "Set your password",
     "passwordLabel": "Password",
     "submitButton": "Set password"
+  },
+  "A11y": {
+    "back": "Back",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   }
 }

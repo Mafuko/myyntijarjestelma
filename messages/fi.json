@@ -192,5 +192,10 @@
     "title": "Aseta salasanasi",
     "passwordLabel": "Salasana",
     "submitButton": "Aseta salasana"
+  },
+  "A11y": {
+    "back": "Takaisin",
+    "showPassword": "Näytä salasana",
+    "hidePassword": "Piilota salasana"
   }
 }
