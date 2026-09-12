@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { confirmSale, undoSale } from '@/actions/sales'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +11,8 @@ export type Item = { id: string; name: string; price: string; status: string; se
 export type SellerLabel = { userId: string; label: string }
 
 function SellableItemRow({ eventId, item }: { eventId: string; item: Item }) {
+  const t = useTranslations('SellBySeller')
+  const tStatus = useTranslations('ItemStatus')
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -33,17 +36,17 @@ function SellableItemRow({ eventId, item }: { eventId: string; item: Item }) {
         <span className="min-w-0 break-words text-foreground">{item.name}</span>
         <span className="text-foreground">{item.price} €</span>
         <Badge variant={item.status === 'SOLD' ? 'success' : 'secondary'} className="w-fit">
-          {item.status}
+          {tStatus(item.status as 'LISTED' | 'SOLD')}
         </Badge>
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           {item.status === 'LISTED' && (
             <Button type="button" size="sm" disabled={pending} onClick={handleSell}>
-              {pending ? 'Selling…' : 'Sell'}
+              {pending ? t('selling') : t('sell')}
             </Button>
           )}
           {item.status === 'SOLD' && (
             <Button type="button" variant="outline" size="sm" disabled={pending} onClick={handleUndo}>
-              {pending ? 'Undoing…' : 'Undo sale'}
+              {pending ? t('undoing') : t('undoSale')}
             </Button>
           )}
         </div>
@@ -66,6 +69,7 @@ export function SellBySeller({
   items: Item[]
   sellers: SellerLabel[]
 }) {
+  const t = useTranslations('SellBySeller')
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null)
 
   const labelBySellerId = useMemo(() => new Map(sellers.map((s) => [s.userId, s.label])), [sellers])
@@ -81,17 +85,17 @@ export function SellBySeller({
     return [...grouped.entries()]
       .map(([sellerId, counts]) => ({
         userId: sellerId,
-        label: labelBySellerId.get(sellerId) ?? 'Unknown',
+        label: labelBySellerId.get(sellerId) ?? t('unknownSeller'),
         ...counts,
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
-  }, [items, labelBySellerId])
+  }, [items, labelBySellerId, t])
 
   if (selectedSellerId === null) {
     return (
       <div className="flex flex-col gap-1">
         {sellerRows.length === 0 && (
-          <p className="text-sm text-muted-foreground">No items listed yet.</p>
+          <p className="text-sm text-muted-foreground">{t('noItemsYet')}</p>
         )}
         {sellerRows.map((s) => (
           <button
@@ -102,7 +106,7 @@ export function SellBySeller({
           >
             <span>{s.label}</span>
             <span className="text-sm text-muted-foreground">
-              {s.listedCount} listed, {s.soldCount} sold
+              {t('listedAndSold', { listedCount: s.listedCount, soldCount: s.soldCount })}
             </span>
           </button>
         ))}
@@ -110,7 +114,7 @@ export function SellBySeller({
     )
   }
 
-  const selectedLabel = labelBySellerId.get(selectedSellerId) ?? 'Unknown'
+  const selectedLabel = labelBySellerId.get(selectedSellerId) ?? t('unknownSeller')
   const theirItems = items.filter((i) => i.sellerId === selectedSellerId)
 
   return (
@@ -122,7 +126,7 @@ export function SellBySeller({
         className="w-fit"
         onClick={() => setSelectedSellerId(null)}
       >
-        ← Back to sellers
+        {t('backToSellers')}
       </Button>
       <h2 className="text-lg font-semibold text-foreground">{selectedLabel}</h2>
       <div className="flex flex-col gap-1">

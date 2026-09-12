@@ -1,12 +1,14 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 export const PasswordInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => {
     const [visible, setVisible] = React.useState(false)
+    const t = useTranslations('A11y')
 
     return (
       <div className="relative">
@@ -14,7 +16,7 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, React.InputHTMLA
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? 'Hide password' : 'Show password'}
+          aria-label={visible ? t('hidePassword') : t('showPassword')}
           aria-pressed={visible}
           tabIndex={-1}
           className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground hover:text-foreground"

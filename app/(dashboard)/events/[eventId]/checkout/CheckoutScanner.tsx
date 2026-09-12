@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { lookupCode, confirmSale } from '@/actions/sales'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 type LookupResult = { itemId: string; name: string; price: string; sellerAlias: string; status: string }
 
 export function CheckoutScanner({ eventId }: { eventId: string }) {
+  const t = useTranslations('CheckoutScanner')
   const [code, setCode] = useState('')
   const [lookup, setLookup] = useState<LookupResult | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -31,7 +33,7 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
       return
     }
     if (result.data.status === 'SOLD') {
-      setMessage(`Already sold: ${result.data.name}`)
+      setMessage(t('alreadySold', { name: result.data.name }))
       setLookup(null)
       return
     }
@@ -43,13 +45,13 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
     setPending(true)
     const result = await confirmSale(eventId, lookup.itemId, 'BARCODE_SCAN')
     setPending(false)
-    setMessage(result.ok ? `Sold: ${lookup.name}` : result.error.message)
+    setMessage(result.ok ? t('sold', { name: lookup.name }) : result.error.message)
     setLookup(null)
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold text-foreground">Checkout</h1>
+      <h1 className="text-xl font-semibold text-foreground">{t('title')}</h1>
       {/* Inline Card, not a Dialog: focus must stay in this input across both
           lookup and confirm so a second Enter reaches handleConfirm below. */}
       <Input
@@ -63,17 +65,22 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
         }}
         autoFocus
         className="h-11 max-w-sm text-lg"
-        placeholder="Scan or type code, then Enter"
+        placeholder={t('scanPlaceholder')}
       />
 
       {lookup && (
         <Card className="max-w-sm">
           <CardContent className="pt-6">
             <p className="text-foreground">
-              Selling <strong>{lookup.name}</strong> ({lookup.price} €, {lookup.sellerAlias}). Confirm?
+              {t.rich('sellingConfirm', {
+                b: (chunks) => <strong>{chunks}</strong>,
+                name: lookup.name,
+                price: lookup.price,
+                sellerAlias: lookup.sellerAlias,
+              })}
             </p>
             <Button onClick={handleConfirm} disabled={pending} className="mt-3">
-              Confirm (Enter)
+              {t('confirmButton')}
             </Button>
           </CardContent>
         </Card>

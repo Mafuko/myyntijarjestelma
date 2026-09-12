@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { auth } from '@/lib/auth'
 import { requireOwner } from '@/lib/services/authz'
 import { prisma } from '@/lib/db'
@@ -13,22 +14,23 @@ export default async function AdminPage() {
   if (!authz.ok) redirect('/events')
 
   const users = await prisma.user.findMany({ orderBy: { createdAt: 'desc' } })
+  const t = await getTranslations('AdminPage')
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-foreground">Admin</h1>
+        <h1 className="text-xl font-semibold text-foreground">{t('title')}</h1>
         <Link href="/audit" className="text-sm text-primary underline-offset-4 hover:underline">
-          View audit log
+          {t('viewAuditLog')}
         </Link>
       </div>
 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Action</TableHead>
+            <TableHead>{t('columnName')}</TableHead>
+            <TableHead>{t('columnEmail')}</TableHead>
+            <TableHead>{t('columnAction')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,7 +47,7 @@ export default async function AdminPage() {
                     }}
                   >
                     <Button type="submit" variant="destructive" size="sm">
-                      Delete PII
+                      {t('deletePii')}
                     </Button>
                   </form>
                 )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createEvent } from '@/actions/events'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,6 +14,7 @@ function dayAfter(dateStr: string): string {
 }
 
 export function CreateEventForm() {
+  const t = useTranslations('CreateEventForm')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [eventDate, setEventDate] = useState('')
@@ -39,9 +41,9 @@ export function CreateEventForm() {
 
   return (
     <form action={handleSubmit} className="flex flex-col gap-3">
-      <Input name="name" placeholder="Event name" required />
+      <Input name="name" placeholder={t('eventNamePlaceholder')} required />
       <div className="flex flex-col gap-1.5 text-sm">
-        <Label htmlFor="eventDate">Event date</Label>
+        <Label htmlFor="eventDate">{t('eventDateLabel')}</Label>
         <Input
           id="eventDate"
           name="eventDate"
@@ -57,11 +59,11 @@ export function CreateEventForm() {
           checked={multiDay}
           onChange={(e) => handleMultiDayChange(e.target.checked)}
         />
-        Multiple days
+        {t('multipleDaysLabel')}
       </label>
       {multiDay && (
         <div className="flex flex-col gap-1.5 text-sm">
-          <Label htmlFor="eventEndDate">Event end date</Label>
+          <Label htmlFor="eventEndDate">{t('eventEndDateLabel')}</Label>
           <Input
             id="eventEndDate"
             name="eventEndDate"
@@ -73,11 +75,11 @@ export function CreateEventForm() {
         </div>
       )}
       <div className="flex flex-col gap-1.5 text-sm">
-        <Label htmlFor="registrationDeadline">Registration deadline</Label>
+        <Label htmlFor="registrationDeadline">{t('registrationDeadlineLabel')}</Label>
         <Input id="registrationDeadline" name="registrationDeadline" type="date" required />
       </div>
       <div className="flex flex-col gap-1.5 text-sm">
-        <Label htmlFor="itemEditCutoffDate">Item edit cutoff</Label>
+        <Label htmlFor="itemEditCutoffDate">{t('itemEditCutoffLabel')}</Label>
         <Input id="itemEditCutoffDate" name="itemEditCutoffDate" type="date" required />
       </div>
       {error && (
@@ -85,7 +87,7 @@ export function CreateEventForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <Button type="submit" disabled={pending}>Create event</Button>
+      <Button type="submit" disabled={pending}>{t('submitButton')}</Button>
     </form>
   )
 }

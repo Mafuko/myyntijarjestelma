@@ -16,5 +16,186 @@
   },
   "LocaleToggle": {
     "switchToOther": "Vaihda englanniksi"
+  },
+  "EventsPage": {
+    "title": "Tapahtumat",
+    "newEvent": "Uusi tapahtuma"
+  },
+  "CreateEventPage": {
+    "title": "Luo tapahtuma"
+  },
+  "CreateEventForm": {
+    "eventNamePlaceholder": "Tapahtuman nimi",
+    "eventDateLabel": "Tapahtuman päivämäärä",
+    "multipleDaysLabel": "Useita päiviä",
+    "eventEndDateLabel": "Tapahtuman päättymispäivä",
+    "registrationDeadlineLabel": "Ilmoittautumisen määräaika",
+    "itemEditCutoffLabel": "Tuotteiden muokkauksen määräaika",
+    "submitButton": "Luo tapahtuma"
+  },
+  "UpdateCommissionForm": {
+    "commissionRateLabel": "Välityspalkkio (0–1)",
+    "updateButton": "Päivitä"
+  },
+  "Roles": {
+    "SELLER": "Myyjä",
+    "STAFF": "Työvoima",
+    "ADMIN": "Ylläpitäjä",
+    "OWNER": "Omistaja"
+  },
+  "ItemsPage": {
+    "title": "Omat tuotteet",
+    "printAllPriceTags": "Tulosta kaikki hintalaput",
+    "columnItem": "Tuote",
+    "columnPrice": "Hinta",
+    "columnStatus": "Tila",
+    "columnActions": "Toiminnot"
+  },
+  "ItemStatus": {
+    "LISTED": "Listattu",
+    "SOLD": "Myyty"
+  },
+  "AddItemForm": {
+    "title": "Lisää tuote",
+    "namePlaceholder": "Tuotteen nimi",
+    "pricePlaceholder": "Hinta",
+    "k18Label": "K-18",
+    "submitButton": "Lisää tuote"
+  },
+  "AddSeriesForm": {
+    "title": "Lisää sarja tai erä",
+    "seriesModeLabel": "Sarja (yksi tuote per osa)",
+    "bundleModeLabel": "Erä (yksi tuote koko välille)",
+    "baseNamePlaceholder": "Perusnimi (esim. Naruto)",
+    "startVolPlaceholder": "Aloitusosa",
+    "endVolPlaceholder": "Lopetusosa",
+    "pricePerItemPlaceholder": "Hinta per tuote",
+    "k18Label": "K-18",
+    "submitButtonSeries": "Luo sarja",
+    "submitButtonBundle": "Luo erä"
+  },
+  "ItemRow": {
+    "namePlaceholder": "Tuotteen nimi",
+    "pricePlaceholder": "Hinta",
+    "k18Label": "K-18",
+    "saving": "Tallennetaan…",
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "edit": "Muokkaa",
+    "priceTagLink": "Hintalappu"
+  },
+  "DeleteItemButton": {
+    "deleting": "Poistetaan…",
+    "delete": "Poista"
+  },
+  "ImportPage": {
+    "title": "Tuo tuotteita taulukkolaskennasta",
+    "instructions": "Vie Google Sheet -tiedostosi CSV- tai XLSX-muodossa, jossa on sarakkeet: Tavara, Hinta, Tyyppi, K-18."
+  },
+  "ImportForm": {
+    "preview": "Esikatsele",
+    "confirmImport": "Vahvista tuonti",
+    "validRows": "{count} kelvollista riviä valmiina tuotavaksi.",
+    "rowHeader": "Rivi",
+    "fieldHeader": "Kenttä",
+    "problemHeader": "Ongelma",
+    "imported": "Tuotiin {count} tuote(tta)."
+  },
+  "CheckoutTabs": {
+    "scanTab": "Skannaa",
+    "browseTab": "Myy myyjän mukaan"
+  },
+  "CheckoutScanner": {
+    "title": "Kassa",
+    "scanPlaceholder": "Skannaa tai kirjoita koodi ja paina Enter",
+    "alreadySold": "Jo myyty: {name}",
+    "sellingConfirm": "Myydään <b>{name}</b> ({price} €, {sellerAlias}). Vahvista?",
+    "confirmButton": "Vahvista (Enter)",
+    "sold": "Myyty: {name}"
+  },
+  "SellBySeller": {
+    "sell": "Myy",
+    "selling": "Myydään…",
+    "undoSale": "Peru myynti",
+    "undoing": "Perutaan…",
+    "noItemsYet": "Ei vielä listattuja tuotteita.",
+    "listedAndSold": "{listedCount} listattu, {soldCount} myyty",
+    "backToSellers": "← Takaisin myyjiin",
+    "unknownSeller": "Tuntematon"
+  },
+  "SalesDashboard": {
+    "title": "Myynnit",
+    "reconnecting": "Yhdistetään uudelleen…",
+    "revenueSummary": "Myynti yhteensä: {revenue} € — Välityspalkkio: {owed} €",
+    "soldHeading": "Myyty ({count})",
+    "soldBadge": "Myyty",
+    "unsoldHeading": "Myymättä ({count})"
+  },
+  "MembersPage": {
+    "title": "Jäsenet",
+    "columnName": "Nimi",
+    "columnEmail": "Sähköposti",
+    "columnRole": "Rooli",
+    "columnStatus": "Tila"
+  },
+  "MembershipStatus": {
+    "ACTIVE": "Aktiivinen",
+    "PENDING": "Odottaa",
+    "REMOVED": "Poistettu"
+  },
+  "InviteMemberForm": {
+    "title": "Kutsu jäsen",
+    "namePlaceholder": "Nimi",
+    "emailPlaceholder": "Sähköposti",
+    "sellerAliasPlaceholder": "Myyjän lempinimi (vaaditaan myyjille)",
+    "submitButton": "Kutsu",
+    "invitedWithLink": "Kutsuttu. Jaa tämä linkki heille tilin aktivoimiseksi:",
+    "invitedWithoutLink": "Lisätty. Heillä on jo tili, ja he pääsevät tähän tapahtumaan kirjautumalla sisään."
+  },
+  "CopyInviteLink": {
+    "copied": "Kopioitu!",
+    "copyLink": "Kopioi kutsulinkki"
+  },
+  "AdminPage": {
+    "title": "Ylläpito",
+    "viewAuditLog": "Näytä lokitiedot",
+    "columnName": "Nimi",
+    "columnEmail": "Sähköposti",
+    "columnAction": "Toiminto",
+    "deletePii": "Poista henkilötiedot"
+  },
+  "AuditPage": {
+    "title": "Lokitiedot",
+    "columnWhen": "Ajankohta",
+    "columnActor": "Tekijä",
+    "columnAction": "Toiminto",
+    "columnTarget": "Kohde"
+  },
+  "ProfilePage": {
+    "title": "Maksutiedot"
+  },
+  "PayoutInfoForm": {
+    "payoutMethodLabel": "Maksutapa",
+    "cashOption": "Käteinen",
+    "bankTransferOption": "Tilisiirto",
+    "ibanLabel": "IBAN (vaaditaan tilisiirrolle)",
+    "saveButton": "Tallenna"
+  },
+  "SignupForm": {
+    "title": "Luo ylläpitäjän tili",
+    "nameLabel": "Nimi",
+    "emailLabel": "Sähköposti",
+    "passwordLabel": "Salasana",
+    "submitButton": "Luo ylläpitäjän tili"
+  },
+  "InvitePage": {
+    "title": "Aseta salasanasi",
+    "passwordLabel": "Salasana",
+    "submitButton": "Aseta salasana"
+  },
+  "A11y": {
+    "back": "Takaisin",
+    "showPassword": "Näytä salasana",
+    "hidePassword": "Piilota salasana"
   }
 }

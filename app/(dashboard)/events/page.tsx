@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { listEventsForUser } from '@/lib/services/events'
@@ -23,14 +24,17 @@ export default async function EventsPage() {
   // list below.
   if (user.isOwner && events.length === 0) redirect('/events/new')
 
+  const t = await getTranslations('EventsPage')
+  const tRoles = await getTranslations('Roles')
+
   return (
     <div className="flex flex-col gap-8">
       <div>
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">Events</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t('title')}</h1>
           {user.isOwner && (
             <Link href="/events/new" className="text-sm text-primary underline-offset-4 hover:underline">
-              New event
+              {t('newEvent')}
             </Link>
           )}
         </div>
@@ -40,7 +44,7 @@ export default async function EventsPage() {
               <Link href={`/events/${e.id}`} className="text-primary underline-offset-4 hover:underline">
                 {e.name}
               </Link>{' '}
-              <span className="text-muted-foreground">— {e.role}</span>
+              <span className="text-muted-foreground">— {tRoles(e.role as 'SELLER' | 'STAFF' | 'ADMIN' | 'OWNER')}</span>
             </li>
           ))}
         </ul>

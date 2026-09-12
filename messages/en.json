@@ -16,5 +16,186 @@
   },
   "LocaleToggle": {
     "switchToOther": "Switch to Finnish"
+  },
+  "EventsPage": {
+    "title": "Events",
+    "newEvent": "New event"
+  },
+  "CreateEventPage": {
+    "title": "Create event"
+  },
+  "CreateEventForm": {
+    "eventNamePlaceholder": "Event name",
+    "eventDateLabel": "Event date",
+    "multipleDaysLabel": "Multiple days",
+    "eventEndDateLabel": "Event end date",
+    "registrationDeadlineLabel": "Registration deadline",
+    "itemEditCutoffLabel": "Item edit cutoff",
+    "submitButton": "Create event"
+  },
+  "UpdateCommissionForm": {
+    "commissionRateLabel": "Commission rate (0–1)",
+    "updateButton": "Update"
+  },
+  "Roles": {
+    "SELLER": "Seller",
+    "STAFF": "Staff",
+    "ADMIN": "Admin",
+    "OWNER": "Owner"
+  },
+  "ItemsPage": {
+    "title": "My items",
+    "printAllPriceTags": "Print all price tags",
+    "columnItem": "Item",
+    "columnPrice": "Price",
+    "columnStatus": "Status",
+    "columnActions": "Actions"
+  },
+  "ItemStatus": {
+    "LISTED": "Listed",
+    "SOLD": "Sold"
+  },
+  "AddItemForm": {
+    "title": "Add an item",
+    "namePlaceholder": "Item name",
+    "pricePlaceholder": "Price",
+    "k18Label": "K-18",
+    "submitButton": "Add item"
+  },
+  "AddSeriesForm": {
+    "title": "Add a series or bundle",
+    "seriesModeLabel": "Series (one item per volume)",
+    "bundleModeLabel": "Bundle (one item for the range)",
+    "baseNamePlaceholder": "Base name (e.g. Naruto)",
+    "startVolPlaceholder": "Start vol.",
+    "endVolPlaceholder": "End vol.",
+    "pricePerItemPlaceholder": "Price per item",
+    "k18Label": "K-18",
+    "submitButtonSeries": "Create series",
+    "submitButtonBundle": "Create bundle"
+  },
+  "ItemRow": {
+    "namePlaceholder": "Item name",
+    "pricePlaceholder": "Price",
+    "k18Label": "K-18",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "priceTagLink": "Price tag"
+  },
+  "DeleteItemButton": {
+    "deleting": "Deleting…",
+    "delete": "Delete"
+  },
+  "ImportPage": {
+    "title": "Import items from a spreadsheet",
+    "instructions": "Export your Google Sheet as CSV or XLSX with columns: Tavara, Hinta, Tyyppi, K-18."
+  },
+  "ImportForm": {
+    "preview": "Preview",
+    "confirmImport": "Confirm import",
+    "validRows": "{count} valid row(s) ready to import.",
+    "rowHeader": "Row",
+    "fieldHeader": "Field",
+    "problemHeader": "Problem",
+    "imported": "Imported {count} item(s)."
+  },
+  "CheckoutTabs": {
+    "scanTab": "Scan",
+    "browseTab": "Sell by seller"
+  },
+  "CheckoutScanner": {
+    "title": "Checkout",
+    "scanPlaceholder": "Scan or type code, then Enter",
+    "alreadySold": "Already sold: {name}",
+    "sellingConfirm": "Selling <b>{name}</b> ({price} €, {sellerAlias}). Confirm?",
+    "confirmButton": "Confirm (Enter)",
+    "sold": "Sold: {name}"
+  },
+  "SellBySeller": {
+    "sell": "Sell",
+    "selling": "Selling…",
+    "undoSale": "Undo sale",
+    "undoing": "Undoing…",
+    "noItemsYet": "No items listed yet.",
+    "listedAndSold": "{listedCount} listed, {soldCount} sold",
+    "backToSellers": "← Back to sellers",
+    "unknownSeller": "Unknown"
+  },
+  "SalesDashboard": {
+    "title": "Sales",
+    "reconnecting": "Reconnecting…",
+    "revenueSummary": "Total revenue: {revenue} € — Commission owed: {owed} €",
+    "soldHeading": "Sold ({count})",
+    "soldBadge": "Sold",
+    "unsoldHeading": "Unsold ({count})"
+  },
+  "MembersPage": {
+    "title": "Members",
+    "columnName": "Name",
+    "columnEmail": "Email",
+    "columnRole": "Role",
+    "columnStatus": "Status"
+  },
+  "MembershipStatus": {
+    "ACTIVE": "Active",
+    "PENDING": "Pending",
+    "REMOVED": "Removed"
+  },
+  "InviteMemberForm": {
+    "title": "Invite a member",
+    "namePlaceholder": "Name",
+    "emailPlaceholder": "Email",
+    "sellerAliasPlaceholder": "Seller alias (required for sellers)",
+    "submitButton": "Invite",
+    "invitedWithLink": "Invited. Share this link with them to activate their account:",
+    "invitedWithoutLink": "Added. They already have an account and can access this event by logging in."
+  },
+  "CopyInviteLink": {
+    "copied": "Copied!",
+    "copyLink": "Copy invite link"
+  },
+  "AdminPage": {
+    "title": "Admin",
+    "viewAuditLog": "View audit log",
+    "columnName": "Name",
+    "columnEmail": "Email",
+    "columnAction": "Action",
+    "deletePii": "Delete PII"
+  },
+  "AuditPage": {
+    "title": "Audit log",
+    "columnWhen": "When",
+    "columnActor": "Actor",
+    "columnAction": "Action",
+    "columnTarget": "Target"
+  },
+  "ProfilePage": {
+    "title": "Payout information"
+  },
+  "PayoutInfoForm": {
+    "payoutMethodLabel": "Payout method",
+    "cashOption": "Cash",
+    "bankTransferOption": "Bank transfer",
+    "ibanLabel": "IBAN (required for bank transfer)",
+    "saveButton": "Save"
+  },
+  "SignupForm": {
+    "title": "Create owner account",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submitButton": "Create owner account"
+  },
+  "InvitePage": {
+    "title": "Set your password",
+    "passwordLabel": "Password",
+    "submitButton": "Set password"
+  },
+  "A11y": {
+    "back": "Back",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   }
 }
