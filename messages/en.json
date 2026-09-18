@@ -199,5 +199,8 @@
     "back": "Back",
     "showPassword": "Show password",
     "hidePassword": "Hide password"
+  },
+  "ReleaseNoteBanner": {
+    "dismiss": "Dismiss"
   }
 }
