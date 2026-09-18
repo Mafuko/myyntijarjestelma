@@ -70,6 +70,7 @@ export function SellBySeller({
   sellers: SellerLabel[]
 }) {
   const t = useTranslations('SellBySeller')
+  const tCommon = useTranslations('Common')
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null)
 
   const labelBySellerId = useMemo(() => new Map(sellers.map((s) => [s.userId, s.label])), [sellers])
@@ -85,11 +86,11 @@ export function SellBySeller({
     return [...grouped.entries()]
       .map(([sellerId, counts]) => ({
         userId: sellerId,
-        label: labelBySellerId.get(sellerId) ?? t('unknownSeller'),
+        label: labelBySellerId.get(sellerId) ?? tCommon('unknownSeller'),
         ...counts,
       }))
       .sort((a, b) => a.label.localeCompare(b.label))
-  }, [items, labelBySellerId, t])
+  }, [items, labelBySellerId, tCommon])
 
   if (selectedSellerId === null) {
     return (
@@ -114,7 +115,7 @@ export function SellBySeller({
     )
   }
 
-  const selectedLabel = labelBySellerId.get(selectedSellerId) ?? t('unknownSeller')
+  const selectedLabel = labelBySellerId.get(selectedSellerId) ?? tCommon('unknownSeller')
   const theirItems = items.filter((i) => i.sellerId === selectedSellerId)
 
   return (

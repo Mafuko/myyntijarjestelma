@@ -11,7 +11,7 @@ export async function lookupItemByCode(
   session: MinimalSession,
   eventId: string,
   code: string
-): Promise<Result<{ itemId: string; name: string; price: string; sellerAlias: string; status: string }>> {
+): Promise<Result<{ itemId: string; name: string; price: string; sellerAlias: string | null; status: string }>> {
   const authz = await requireEventAccess(session, eventId, ['STAFF', 'ADMIN'])
   if (!authz.ok) return authz
 
@@ -35,7 +35,7 @@ export async function lookupItemByCode(
       itemId: item.id,
       name: item.name,
       price: item.price.toString(),
-      sellerAlias: membership?.sellerAlias ?? 'Unknown',
+      sellerAlias: membership?.sellerAlias ?? null,
       status: item.status,
     },
   }

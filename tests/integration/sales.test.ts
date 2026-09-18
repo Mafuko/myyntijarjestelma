@@ -32,7 +32,7 @@ async function setup() {
   const item = await testPrisma.item.create({
     data: { eventId: event.id, sellerId: seller.id, name: 'Manga Vol. 1', price: 5, categoryId: category.id, barcodeValue: 'CODE123456' },
   })
-  return { owner, staff, seller, event, item }
+  return { owner, staff, seller, event, item, category }
 }
 
 describe('lookupItemByCode', () => {
@@ -61,6 +61,16 @@ describe('lookupItemByCode', () => {
     const { seller, event, item } = await setup()
     const result = await lookupItemByCode(sessionFor(seller.id), event.id, item.barcodeValue!)
     expect(result.ok).toBe(false)
+  })
+
+  it('returns a null sellerAlias when the seller has no alias set, instead of a hardcoded fallback string', async () => {
+    const { staff, event, category } = await setup()
+    const itemFromStaff = await testPrisma.item.create({
+      data: { eventId: event.id, sellerId: staff.id, name: 'Staff-owned item', price: 3, categoryId: category.id, barcodeValue: 'STAFFCODE1' },
+    })
+    const result = await lookupItemByCode(sessionFor(staff.id), event.id, itemFromStaff.barcodeValue!)
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.data.sellerAlias).toBeNull()
   })
 })
 

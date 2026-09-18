@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
-type LookupResult = { itemId: string; name: string; price: string; sellerAlias: string; status: string }
+type LookupResult = { itemId: string; name: string; price: string; sellerAlias: string | null; status: string }
 
 export function CheckoutScanner({ eventId }: { eventId: string }) {
   const t = useTranslations('CheckoutScanner')
+  const tCommon = useTranslations('Common')
   const [code, setCode] = useState('')
   const [lookup, setLookup] = useState<LookupResult | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -76,7 +77,7 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
                 b: (chunks) => <strong>{chunks}</strong>,
                 name: lookup.name,
                 price: lookup.price,
-                sellerAlias: lookup.sellerAlias,
+                sellerAlias: lookup.sellerAlias ?? tCommon('unknownSeller'),
               })}
             </p>
             <Button onClick={handleConfirm} disabled={pending} className="mt-3">

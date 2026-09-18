@@ -11,7 +11,7 @@ export type PriceTagData = {
   id: string
   name: string
   price: string
-  sellerAlias: string
+  sellerAlias: string | null
   isAgeRestricted: boolean
   barcodeValue: string
 }
@@ -70,7 +70,7 @@ export async function generatePriceTagData(
       id: item.id,
       name: item.name,
       price: item.price.toString(),
-      sellerAlias: membership?.sellerAlias ?? 'Unknown',
+      sellerAlias: membership?.sellerAlias ?? null,
       isAgeRestricted: item.isAgeRestricted,
       barcodeValue,
     })
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   code: { fontSize: 8, textAlign: 'center' },
 })
 
-export async function renderPriceTagsPdf(tags: PriceTagData[]): Promise<Buffer> {
+export async function renderPriceTagsPdf(tags: PriceTagData[], unknownSellerLabel: string): Promise<Buffer> {
   const withImages = await Promise.all(
     tags.map(async (tag) => ({ ...tag, barcodeImage: await renderBarcodePng(tag.barcodeValue) }))
   )
@@ -107,7 +107,7 @@ export async function renderPriceTagsPdf(tags: PriceTagData[]): Promise<Buffer> 
             <Text style={styles.name}>{tag.name}</Text>
             <Text style={styles.price}>{tag.price} €</Text>
             <Text style={styles.meta}>
-              {tag.sellerAlias}
+              {tag.sellerAlias ?? unknownSellerLabel}
               {tag.isAgeRestricted ? ' — K-18' : ''}
             </Text>
             <Image src={tag.barcodeImage} style={styles.barcode} />

@@ -9,7 +9,7 @@ type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; mes
 export async function lookupCode(
   eventId: string,
   code: string
-): Promise<Result<{ itemId: string; name: string; price: string; sellerAlias: string; status: string }>> {
+): Promise<Result<{ itemId: string; name: string; price: string; sellerAlias: string | null; status: string }>> {
   const session = await auth()
 
   try {

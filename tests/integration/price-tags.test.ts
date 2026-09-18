@@ -27,7 +27,8 @@ async function setup() {
   })
   const itemA = await testPrisma.item.create({ data: { eventId: event.id, sellerId: sellerA.id, name: 'Item A', price: 5, categoryId: category.id } })
   const itemB = await testPrisma.item.create({ data: { eventId: event.id, sellerId: sellerB.id, name: 'Item B', price: 3, categoryId: category.id } })
-  return { owner, sellerA, sellerB, staff, event, itemA, itemB }
+  const itemFromStaff = await testPrisma.item.create({ data: { eventId: event.id, sellerId: staff.id, name: 'Staff-owned item', price: 4, categoryId: category.id } })
+  return { owner, sellerA, sellerB, staff, event, itemA, itemB, itemFromStaff }
 }
 
 describe('generatePriceTagData', () => {
@@ -72,5 +73,12 @@ describe('generatePriceTagData', () => {
     const result = await generatePriceTagData(sessionFor(staff.id), event.id, [itemA.id, itemB.id])
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.data).toHaveLength(2)
+  })
+
+  it('returns a null sellerAlias for an item owned by a member with no alias set, instead of a hardcoded fallback string', async () => {
+    const { staff, event, itemFromStaff } = await setup()
+    const result = await generatePriceTagData(sessionFor(staff.id), event.id, [itemFromStaff.id])
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.data[0].sellerAlias).toBeNull()
   })
 })

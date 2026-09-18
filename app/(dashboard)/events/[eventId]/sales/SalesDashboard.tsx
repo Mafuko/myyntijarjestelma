@@ -5,11 +5,12 @@ import { useTranslations } from 'next-intl'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 
-type SalesSnapshotItem = { id: string; name: string; price: string; status: string; sellerAlias: string }
+type SalesSnapshotItem = { id: string; name: string; price: string; status: string; sellerAlias: string | null }
 type SalesSnapshot = { items: SalesSnapshotItem[]; totalRevenue: string; commissionOwed: string }
 
 export function SalesDashboard({ eventId, initialSnapshot }: { eventId: string; initialSnapshot: SalesSnapshot }) {
   const t = useTranslations('SalesDashboard')
+  const tCommon = useTranslations('Common')
   const [snapshot, setSnapshot] = useState<SalesSnapshot>(initialSnapshot)
   const [connected, setConnected] = useState(true)
 
@@ -48,7 +49,7 @@ export function SalesDashboard({ eventId, initialSnapshot }: { eventId: string; 
           {sold.map((i) => (
             <li key={i.id} className="flex items-center gap-2 text-foreground">
               <span>
-                {i.name} — {i.price} € — {i.sellerAlias}
+                {i.name} — {i.price} € — {i.sellerAlias ?? tCommon('unknownSeller')}
               </span>
               <Badge variant="success">{t('soldBadge')}</Badge>
             </li>
@@ -61,7 +62,7 @@ export function SalesDashboard({ eventId, initialSnapshot }: { eventId: string; 
         <ul className="mt-2 flex flex-col gap-1">
           {listed.map((i) => (
             <li key={i.id} className="text-foreground">
-              {i.name} — {i.price} € — {i.sellerAlias}
+              {i.name} — {i.price} € — {i.sellerAlias ?? tCommon('unknownSeller')}
             </li>
           ))}
         </ul>

@@ -1,4 +1,7 @@
 {
+  "Common": {
+    "unknownSeller": "Unknown"
+  },
   "Login": {
     "title": "Log in",
     "emailLabel": "Email",
@@ -120,8 +123,7 @@
     "undoing": "Undoing…",
     "noItemsYet": "No items listed yet.",
     "listedAndSold": "{listedCount} listed, {soldCount} sold",
-    "backToSellers": "← Back to sellers",
-    "unknownSeller": "Unknown"
+    "backToSellers": "← Back to sellers"
   },
   "SalesDashboard": {
     "title": "Sales",

@@ -1,4 +1,7 @@
 {
+  "Common": {
+    "unknownSeller": "Tuntematon"
+  },
   "Login": {
     "title": "Kirjaudu sisään",
     "emailLabel": "Sähköposti",
@@ -120,8 +123,7 @@
     "undoing": "Perutaan…",
     "noItemsYet": "Ei vielä listattuja tuotteita.",
     "listedAndSold": "{listedCount} listattu, {soldCount} myyty",
-    "backToSellers": "← Takaisin myyjiin",
-    "unknownSeller": "Tuntematon"
+    "backToSellers": "← Takaisin myyjiin"
   },
   "SalesDashboard": {
     "title": "Myynnit",

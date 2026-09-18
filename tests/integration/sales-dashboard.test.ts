@@ -34,7 +34,7 @@ async function setup() {
   const itemB1 = await testPrisma.item.create({ data: { eventId: event.id, sellerId: sellerB.id, name: 'B1', price: 20, categoryId: category.id, status: 'SOLD' } })
   await testPrisma.sale.create({ data: { itemId: itemB1.id, soldByUserId: staff.id, method: 'BARCODE_SCAN' } })
 
-  return { owner, sellerA, sellerB, staff, event }
+  return { owner, sellerA, sellerB, staff, event, category }
 }
 
 describe('getSalesSnapshot', () => {
@@ -65,5 +65,15 @@ describe('getSalesSnapshot', () => {
     const outsider = await testPrisma.user.create({ data: { name: 'Outsider', email: 'outsider2@example.com', passwordHash: 'x' } })
     const result = await getSalesSnapshot(sessionFor(outsider.id), event.id)
     expect(result.ok).toBe(false)
+  })
+
+  it('returns a null sellerAlias for an item owned by a member with no alias set, instead of a hardcoded fallback string', async () => {
+    const { staff, event, category } = await setup()
+    await testPrisma.item.create({ data: { eventId: event.id, sellerId: staff.id, name: 'Staff-owned item', price: 7, categoryId: category.id, status: 'LISTED' } })
+    const result = await getSalesSnapshot(sessionFor(staff.id), event.id)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const staffItem = result.data.items.find((i) => i.name === 'Staff-owned item')
+    expect(staffItem?.sellerAlias).toBeNull()
   })
 })

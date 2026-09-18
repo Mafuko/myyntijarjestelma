@@ -5,7 +5,7 @@ import { requireEventAccess } from '@/lib/services/authz'
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
-export type SalesSnapshotItem = { id: string; name: string; price: string; status: string; sellerAlias: string }
+export type SalesSnapshotItem = { id: string; name: string; price: string; status: string; sellerAlias: string | null }
 export type SalesSnapshot = { items: SalesSnapshotItem[]; totalRevenue: string; commissionOwed: string }
 
 export async function getSalesSnapshot(session: MinimalSession, eventId: string): Promise<Result<SalesSnapshot>> {
@@ -24,7 +24,7 @@ export async function getSalesSnapshot(session: MinimalSession, eventId: string)
   })
 
   const memberships = await prisma.eventMembership.findMany({ where: { eventId } })
-  const aliasBySellerId = new Map(memberships.map((m) => [m.userId, m.sellerAlias ?? 'Unknown']))
+  const aliasBySellerId = new Map(memberships.map((m) => [m.userId, m.sellerAlias]))
 
   const soldItems = items.filter((i) => i.status === 'SOLD')
   const totalRevenue = soldItems.reduce((sum, i) => sum.add(i.price), new Prisma.Decimal(0))
@@ -38,7 +38,7 @@ export async function getSalesSnapshot(session: MinimalSession, eventId: string)
         name: i.name,
         price: i.price.toString(),
         status: i.status,
-        sellerAlias: aliasBySellerId.get(i.sellerId) ?? 'Unknown',
+        sellerAlias: aliasBySellerId.get(i.sellerId) ?? null,
       })),
       totalRevenue: totalRevenue.toFixed(2),
       commissionOwed: commissionOwed.toFixed(2),
