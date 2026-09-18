@@ -1,0 +1,13 @@
+[
+  {
+    "date": "2026-09-18",
+    "minRole": "STAFF",
+    "en": "Staff can now view and print price tags for any seller's items, not just their own.",
+    "fi": "Työvoima voi nyt tarkastella ja tulostaa kaikkien myyjien hintalappuja, ei vain omiaan."
+  },
+  {
+    "date": "2026-09-11",
+    "en": "The app is now fully available in Finnish — look for the flag button next to your name.",
+    "fi": "Sovellus on nyt kokonaan saatavilla suomeksi — etsi lippupainiketta nimesi vierestä."
+  }
+]
