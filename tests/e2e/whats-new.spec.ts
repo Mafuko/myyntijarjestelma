@@ -30,6 +30,11 @@ test('a fresh user sees the latest visible release note and can dismiss it', asy
   await page.getByRole('button', { name: 'Dismiss' }).click()
   await expect(page.getByText('The app is now fully available in Finnish')).not.toBeVisible()
 
+  // The banner hides itself via local state the instant it's clicked, before
+  // the fire-and-forget dismissReleaseNote() write reaches the server --
+  // wait for that in-flight request to actually land before reloading, or
+  // reload can race it and the banner reappears.
+  await page.waitForLoadState('networkidle')
   await page.reload()
   await expect(page.getByText('The app is now fully available in Finnish')).not.toBeVisible()
 })
