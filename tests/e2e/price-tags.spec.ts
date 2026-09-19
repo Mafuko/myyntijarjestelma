@@ -42,6 +42,8 @@ test('seller can download a price tag PDF for their own item', async ({ page }) 
   const body = await response.body()
   expect(body.subarray(0, 4).toString('utf-8')).toBe('%PDF')
   expect(response.headers()['content-disposition']).toBe('inline; filename="price-tags.pdf"')
+  expect(response.headers()['x-frame-options']).toBe('SAMEORIGIN')
+  expect(response.headers()['content-security-policy']).toContain("frame-ancestors 'self'")
 
   const downloadResponse = await page.request.get(`/api/price-tags/${event.id}?itemIds=${item.id}&download=1`)
   expect(downloadResponse.headers()['content-disposition']).toBe('attachment; filename="price-tags.pdf"')

@@ -1,5 +1,10 @@
 [
   {
+    "date": "2026-09-19",
+    "en": "Price tags now open a preview page first, showing the actual tag before you download or print it.",
+    "fi": "Hintalaput avautuvat nyt ensin esikatselusivulle, jossa näet oikean hintalapun ennen lataamista tai tulostamista."
+  },
+  {
     "date": "2026-09-18",
     "minRole": "STAFF",
     "en": "Staff can now view and print price tags for any seller's items, not just their own — open an event's item list and use \"Price tag\" next to an item, or \"Print all price tags\" at the top.",

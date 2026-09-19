@@ -24,6 +24,17 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Content-Security-Policy': `default-src 'self'; script-src ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'`,
 }
 
+// The price-tag preview page embeds this route's own PDF response in a
+// same-origin <iframe> -- the blanket DENY/'none' above silently blocks
+// that embed even though nothing cross-origin is involved. Carve out
+// same-origin framing for this one path only; every other route keeps
+// the stricter defaults untouched.
+const PRICE_TAG_FRAME_HEADERS: Record<string, string> = {
+  ...SECURITY_HEADERS,
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Content-Security-Policy': SECURITY_HEADERS['Content-Security-Policy'].replace("frame-ancestors 'none'", "frame-ancestors 'self'"),
+}
+
 export default auth((req) => {
   const isLoggedIn = !!req.auth
   const isProtectedRoute = req.nextUrl.pathname.startsWith('/events')
@@ -33,7 +44,8 @@ export default auth((req) => {
       ? NextResponse.redirect(new URL('/login', req.nextUrl))
       : NextResponse.next()
 
-  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+  const headers = req.nextUrl.pathname.startsWith('/api/price-tags/') ? PRICE_TAG_FRAME_HEADERS : SECURITY_HEADERS
+  for (const [key, value] of Object.entries(headers)) {
     response.headers.set(key, value)
   }
   return response

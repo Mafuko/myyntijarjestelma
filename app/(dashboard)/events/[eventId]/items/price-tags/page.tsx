@@ -12,7 +12,8 @@ export default async function PriceTagPreviewPage({
 }) {
   const { eventId } = await params
   const { itemIds: itemIdsParam } = await searchParams
-  const itemIds = itemIdsParam ? itemIdsParam.split(',').filter(Boolean) : []
+  const normalizedParam = Array.isArray(itemIdsParam) ? itemIdsParam.join(',') : itemIdsParam
+  const itemIds = normalizedParam ? normalizedParam.split(',').filter(Boolean) : []
 
   if (itemIds.length === 0) redirect(`/events/${eventId}/items`)
 

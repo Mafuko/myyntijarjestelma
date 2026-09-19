@@ -44,7 +44,10 @@ test('seller previews then commits a CSV import using the same uploaded file', a
 
   await page.getByRole('button', { name: /^preview$/i }).click()
   await expect(page.getByText('1 valid row(s) ready to import.')).toBeVisible()
-  await expect(page.getByText('price')).toBeVisible()
+  // exact: true avoids colliding with the release-note banner's text, which
+  // (as of the 2026-09-19 entry) contains the substring "price" too -- see
+  // CLAUDE.md's guidance on getByText's default substring matching.
+  await expect(page.getByText('price', { exact: true })).toBeVisible()
 
   await page.getByRole('button', { name: /confirm import/i }).click()
   await expect(page.getByText('Imported 1 item(s).')).toBeVisible()

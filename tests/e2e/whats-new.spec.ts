@@ -22,13 +22,14 @@ test('a fresh user sees the latest visible release note and can dismiss it', asy
   await expect(page).toHaveURL(/\/events/)
   await page.waitForLoadState('networkidle')
 
-  // The newest entry (STAFF-only) is filtered out for a plain SELLER, so
-  // the older, general entry is their "latest visible" one.
-  await expect(page.getByText('The app is now fully available in Finnish — look for the flag button next to your name.')).toBeVisible()
+  // The newest entry overall is now general (no minRole), so it's this
+  // SELLER's "latest visible" one too -- the older STAFF-only entry stays
+  // hidden either way.
+  await expect(page.getByText('Price tags now open a preview page first')).toBeVisible()
   await expect(page.getByText('Staff can now view and print price tags')).not.toBeVisible()
 
   await page.getByRole('button', { name: 'Dismiss' }).click()
-  await expect(page.getByText('The app is now fully available in Finnish')).not.toBeVisible()
+  await expect(page.getByText('Price tags now open a preview page first')).not.toBeVisible()
 
   // The banner hides itself via local state the instant it's clicked, before
   // the fire-and-forget dismissReleaseNote() write reaches the server --
@@ -36,10 +37,10 @@ test('a fresh user sees the latest visible release note and can dismiss it', asy
   // reload can race it and the banner reappears.
   await page.waitForLoadState('networkidle')
   await page.reload()
-  await expect(page.getByText('The app is now fully available in Finnish')).not.toBeVisible()
+  await expect(page.getByText('Price tags now open a preview page first')).not.toBeVisible()
 })
 
-test('a STAFF member sees the STAFF-only note that a plain SELLER (Test 1, above) would not', async ({ page }) => {
+test('a STAFF member (real membership) also sees the same newest general note', async ({ page }) => {
   const owner = await testPrisma.user.create({
     data: { name: 'Owner', email: 'owner-whatsnew@example.com', isOwner: true, passwordHash: await hashPassword('owner-whatsnew-pw1') },
   })
@@ -61,8 +62,13 @@ test('a STAFF member sees the STAFF-only note that a plain SELLER (Test 1, above
   await page.getByRole('button', { name: /log in/i }).click()
   await expect(page).toHaveURL(/\/events/)
 
-  // The STAFF-only entry (2026-09-18) is the newest entry in the file at
-  // all, so it's this user's "latest visible" one straight away — no prior
-  // dismissal needed to demonstrate the role gate.
-  await expect(page.getByText('Staff can now view and print price tags')).toBeVisible()
+  // The newest entry (general, no minRole) is visible to every role,
+  // computed here via a real ACTIVE STAFF membership -- exercising
+  // getEffectiveRole's real database path, not just the no-membership
+  // default-SELLER path the test above covers. Role-scoped filtering
+  // itself (a STAFF-only entry being invisible to a SELLER) is already
+  // covered exhaustively by tests/unit/release-notes.test.ts's fixture-based
+  // unit tests, which don't depend on which entry currently happens to be
+  // the real file's overall newest.
+  await expect(page.getByText('Price tags now open a preview page first')).toBeVisible()
 })

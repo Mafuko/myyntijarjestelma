@@ -49,10 +49,11 @@ describe('getLatestVisibleReleaseNote and markReleaseNoteSeen', () => {
     const { getLatestVisibleReleaseNote, markReleaseNoteSeen } = await import('@/lib/services/release-notes')
     const user = await testPrisma.user.create({ data: { name: 'Fresh', email: 'fresh@example.com', passwordHash: 'x' } })
 
-    // The newest entry in messages/release-notes.json is STAFF-only, so a
-    // plain SELLER's latest *visible* entry is the older, general one.
+    // The newest entry in messages/release-notes.json is now the
+    // 2026-09-19 general one (no minRole), so it's visible to a plain
+    // SELLER too, superseding the older STAFF-only 2026-09-18 entry.
     const first = await getLatestVisibleReleaseNote(user.id)
-    expect(first?.date).toBe('2026-09-11')
+    expect(first?.date).toBe('2026-09-19')
 
     await markReleaseNoteSeen(user.id, first!.date)
     const second = await getLatestVisibleReleaseNote(user.id)
