@@ -202,5 +202,10 @@
   },
   "ReleaseNoteBanner": {
     "dismiss": "Dismiss"
+  },
+  "PriceTagPreviewPage": {
+    "title": "Price tag preview",
+    "itemCount": "{count} item(s)",
+    "downloadButton": "Download"
   }
 }

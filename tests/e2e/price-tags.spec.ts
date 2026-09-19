@@ -41,6 +41,10 @@ test('seller can download a price tag PDF for their own item', async ({ page }) 
   expect(response.headers()['content-type']).toBe('application/pdf')
   const body = await response.body()
   expect(body.subarray(0, 4).toString('utf-8')).toBe('%PDF')
+  expect(response.headers()['content-disposition']).toBe('inline; filename="price-tags.pdf"')
+
+  const downloadResponse = await page.request.get(`/api/price-tags/${event.id}?itemIds=${item.id}&download=1`)
+  expect(downloadResponse.headers()['content-disposition']).toBe('attachment; filename="price-tags.pdf"')
 })
 
 test('an unauthenticated request is rejected', async ({ page }) => {

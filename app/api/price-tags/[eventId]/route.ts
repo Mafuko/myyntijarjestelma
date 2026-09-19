@@ -12,6 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'itemIds query parameter is required' }, { status: 400 })
   }
   const itemIds = itemIdsParam.split(',').filter(Boolean)
+  const forceDownload = request.nextUrl.searchParams.get('download') === '1'
 
   const result = await generatePriceTagData(session, eventId, itemIds)
   if (!result.ok) {
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   return new NextResponse(new Uint8Array(pdfBuffer), {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="price-tags.pdf"',
+      'Content-Disposition': `${forceDownload ? 'attachment' : 'inline'}; filename="price-tags.pdf"`,
     },
   })
 }

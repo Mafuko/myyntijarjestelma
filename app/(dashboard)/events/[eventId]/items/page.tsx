@@ -34,7 +34,7 @@ export default async function ItemsPage({ params }: { params: Promise<{ eventId:
         <h1 className="text-xl font-semibold text-foreground">{t('title')}</h1>
         {listedIds.length > 0 && (
           <a
-            href={`/api/price-tags/${eventId}?itemIds=${listedIds.join(',')}`}
+            href={`/events/${eventId}/items/price-tags?itemIds=${listedIds.join(',')}`}
             className="text-sm text-primary underline-offset-4 hover:underline"
           >
             {t('printAllPriceTags')}

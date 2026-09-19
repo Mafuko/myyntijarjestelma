@@ -141,7 +141,7 @@ export function ItemRow({
         {item.status === 'LISTED' && <DeleteItemButton itemId={item.id} eventId={eventId} />}
         {item.status === 'LISTED' && (
           <a
-            href={`/api/price-tags/${eventId}?itemIds=${item.id}`}
+            href={`/events/${eventId}/items/price-tags?itemIds=${item.id}`}
             className="text-sm text-primary underline-offset-4 hover:underline"
           >
             {t('priceTagLink')}

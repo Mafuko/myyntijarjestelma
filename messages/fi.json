@@ -202,5 +202,10 @@
   },
   "ReleaseNoteBanner": {
     "dismiss": "Hylkää"
+  },
+  "PriceTagPreviewPage": {
+    "title": "Hintalappujen esikatselu",
+    "itemCount": "{count} tuote(tta)",
+    "downloadButton": "Lataa"
   }
 }
