@@ -2,8 +2,8 @@
   {
     "date": "2026-09-18",
     "minRole": "STAFF",
-    "en": "Staff can now view and print price tags for any seller's items, not just their own — open an event's My items page and use \"Price tag\" next to an item, or \"Print all price tags\" at the top.",
-    "fi": "Työvoima voi nyt tarkastella ja tulostaa kaikkien myyjien hintalappuja, ei vain omiaan — avaa tapahtuman Omat tuotteet -sivu ja käytä tuotteen kohdalla olevaa \"Hintalappu\"-linkkiä tai sivun ylälaidan \"Tulosta kaikki hintalaput\" -painiketta."
+    "en": "Staff can now view and print price tags for any seller's items, not just their own — open an event's item list and use \"Price tag\" next to an item, or \"Print all price tags\" at the top.",
+    "fi": "Työvoima voi nyt tarkastella ja tulostaa kaikkien myyjien hintalappuja, ei vain omiaan — avaa tapahtuman tuotelista ja käytä tuotteen kohdalla olevaa \"Hintalappu\"-linkkiä tai sivun ylälaidan \"Tulosta kaikki hintalaput\" -painiketta."
   },
   {
     "date": "2026-09-11",
