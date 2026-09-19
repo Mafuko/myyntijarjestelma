@@ -199,5 +199,8 @@
     "back": "Takaisin",
     "showPassword": "Näytä salasana",
     "hidePassword": "Piilota salasana"
+  },
+  "ReleaseNoteBanner": {
+    "dismiss": "Hylkää"
   }
 }

@@ -1,15 +1,19 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { auth } from '@/lib/auth'
 import { logout } from '@/actions/auth'
+import { getLatestVisibleReleaseNote } from '@/lib/services/release-notes'
 import { Button } from '@/components/ui/button'
 import { BackButton } from '@/components/BackButton'
 import { LocaleToggle } from '@/components/LocaleToggle'
+import { ReleaseNoteBanner } from '@/components/ReleaseNoteBanner'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await auth()
   const t = await getTranslations('DashboardLayout')
+  const locale = await getLocale()
+  const note = session?.user?.id ? await getLatestVisibleReleaseNote(session.user.id) : null
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -36,7 +40,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">
+        {note && <ReleaseNoteBanner date={note.date} text={locale === 'fi' ? note.fi : note.en} />}
+        {children}
+      </main>
     </div>
   )
 }
