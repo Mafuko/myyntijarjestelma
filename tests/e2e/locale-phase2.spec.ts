@@ -82,3 +82,43 @@ test('a Finnish-locale login failure shows the translated error message', async 
 
   await expect(page.getByText('Väärä sähköposti tai salasana')).toBeVisible()
 })
+
+test('a Finnish-locale staff member sees the translated already-sold error at checkout', async ({ page }) => {
+  const owner = await testPrisma.user.create({
+    data: { name: 'Owner', email: 'owner-checkout-err@example.com', isOwner: true, passwordHash: await hashPassword('owner-checkout-err-pw1') },
+  })
+  const event = await testPrisma.event.create({
+    data: {
+      name: 'Event', eventDate: new Date(Date.now() + 7 * 86400000), registrationDeadline: new Date(Date.now() + 86400000),
+      itemEditCutoffDate: new Date(Date.now() + 6 * 86400000), createdByUserId: owner.id,
+    },
+  })
+  const category = await testPrisma.category.create({ data: { eventId: event.id, name: 'Vaatteet' } })
+  const seller = await testPrisma.user.create({ data: { name: 'Seller', email: 'seller-checkout-err@example.com', passwordHash: 'x' } })
+  await testPrisma.eventMembership.create({ data: { userId: seller.id, eventId: event.id, role: 'SELLER', status: 'ACTIVE' } })
+  await testPrisma.item.create({
+    data: { eventId: event.id, sellerId: seller.id, name: 'Already Sold', price: 5, categoryId: category.id, barcodeValue: 'SOLDCODEFI1', status: 'SOLD' },
+  })
+  const staff = await testPrisma.user.create({
+    data: {
+      name: 'Staff', email: 'staff-checkout-err@example.com',
+      passwordHash: await hashPassword('staff-checkout-err-pw1'), locale: 'fi',
+    },
+  })
+  await testPrisma.eventMembership.create({ data: { userId: staff.id, eventId: event.id, role: 'STAFF', status: 'ACTIVE' } })
+
+  await page.goto('/login')
+  await page.waitForLoadState('networkidle')
+  await page.getByLabel('Email').fill('staff-checkout-err@example.com')
+  await page.getByLabel('Password', { exact: true }).fill('staff-checkout-err-pw1')
+  await page.getByRole('button', { name: /log in/i }).click()
+  await expect(page).toHaveURL(/\/events/)
+
+  await page.goto(`/events/${event.id}/checkout`)
+  await page.waitForLoadState('networkidle')
+  const input = page.getByPlaceholder('Skannaa tai kirjoita koodi ja paina Enter')
+  await input.fill('SOLDCODEFI1')
+  await input.press('Enter')
+
+  await expect(page.getByText('Jo myyty: Already Sold')).toBeVisible()
+})
