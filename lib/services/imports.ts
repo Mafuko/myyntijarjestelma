@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { requireEventAccess } from '@/lib/services/authz'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024
@@ -93,7 +93,7 @@ function parseBoolean(value: string | undefined): boolean {
   return ['true', '1', 'x', 'kyllä', 'yes'].includes(value.trim().toLowerCase())
 }
 
-export type RowError = { row: number; field: string; message: string }
+export type RowError = { row: number; field: string; message?: string; code?: string; params?: Record<string, string | number> }
 export type ValidatedRow = { name: string; price: number; categoryId: string; isAgeRestricted: boolean }
 
 export async function validateImportRows(

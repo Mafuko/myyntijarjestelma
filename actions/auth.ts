@@ -6,7 +6,7 @@ import { loginRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import { activateInvite, bootstrapOwner, getUserLocale } from '@/lib/services/users'
 import { loginSchema } from '@/lib/validation/user'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 
 export async function login(formData: FormData): Promise<Result<{ redirectTo: string }>> {
   const parsed = loginSchema.safeParse({

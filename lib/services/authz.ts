@@ -4,7 +4,7 @@ export type Role = 'SELLER' | 'STAFF' | 'ADMIN'
 
 export type AuthzResult =
   | { ok: true; userId: string; role: Role | 'OWNER' }
-  | { ok: false; error: { code: 'UNAUTHENTICATED' | 'FORBIDDEN'; message: string } }
+  | { ok: false; error: { code: 'UNAUTHENTICATED' | 'FORBIDDEN_EVENT_ACCESS' | 'FORBIDDEN_OWNER_ONLY'; message: string } }
 
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
@@ -31,7 +31,7 @@ export async function requireEventAccess(
     where: { userId_eventId: { userId, eventId } },
   })
   if (!membership || membership.status !== 'ACTIVE' || !allowedRoles.includes(membership.role)) {
-    return { ok: false, error: { code: 'FORBIDDEN', message: 'You do not have access to this event' } }
+    return { ok: false, error: { code: 'FORBIDDEN_EVENT_ACCESS', message: 'You do not have access to this event' } }
   }
 
   return { ok: true, userId, role: membership.role }
@@ -44,7 +44,7 @@ export async function requireOwner(session: MinimalSession): Promise<AuthzResult
   }
   const user = await getUser(userId)
   if (!user?.isOwner) {
-    return { ok: false, error: { code: 'FORBIDDEN', message: 'Only the site owner can perform this action' } }
+    return { ok: false, error: { code: 'FORBIDDEN_OWNER_ONLY', message: 'Only the site owner can perform this action' } }
   }
   return { ok: true, userId, role: 'OWNER' }
 }

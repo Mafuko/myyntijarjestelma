@@ -6,7 +6,7 @@ import { inviteUserSchema, acceptInviteSchema, signupSchema } from '@/lib/valida
 import { requireOwner } from '@/lib/services/authz'
 import { writeAuditLog } from '@/lib/services/audit'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 export async function inviteUser(input: unknown): Promise<Result<{ inviteUrl: string | null }>> {

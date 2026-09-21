@@ -6,7 +6,7 @@ import { parseImportFile, validateImportRows, commitImport, type RowError } from
 
 export type ImportFormState =
   | { status: 'idle' }
-  | { status: 'error'; message: string }
+  | { status: 'error'; message?: string; code?: string; params?: Record<string, string | number> }
   | { status: 'preview'; validCount: number; rowErrors: RowError[] }
   | { status: 'committed'; createdCount: number }
 

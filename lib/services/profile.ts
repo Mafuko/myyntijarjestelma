@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import { encryptIban, decryptIban } from '@/lib/crypto'
 import { payoutInfoSchema } from '@/lib/validation/user'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 export async function updatePayoutInfo(session: MinimalSession, input: unknown): Promise<Result<{}>> {

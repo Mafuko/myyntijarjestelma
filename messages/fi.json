@@ -207,5 +207,10 @@
     "title": "Hintalappujen esikatselu",
     "itemCount": "{count} tuote(tta)",
     "downloadButton": "Lataa"
+  },
+  "ServiceErrors": {
+    "UNAUTHENTICATED": "Ei kirjautunut sisään",
+    "FORBIDDEN_EVENT_ACCESS": "Sinulla ei ole pääsyä tähän tapahtumaan",
+    "FORBIDDEN_OWNER_ONLY": "Vain sivuston omistaja voi tehdä tämän"
   }
 }

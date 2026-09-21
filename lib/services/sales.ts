@@ -3,7 +3,7 @@ import { barcodeLookupRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import { requireEventAccess } from '@/lib/services/authz'
 import { writeAuditLog } from '@/lib/services/audit'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 type SaleMethod = 'BARCODE_SCAN' | 'MANUAL_CODE_ENTRY' | 'MANUAL_OVERRIDE'
 

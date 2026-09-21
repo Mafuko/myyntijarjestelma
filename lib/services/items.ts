@@ -3,7 +3,7 @@ import { requireEventAccess } from '@/lib/services/authz'
 import { writeAuditLog } from '@/lib/services/audit'
 import { createItemSchema, updateItemSchema, createItemBatchSchema } from '@/lib/validation/item'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 export async function createItem(

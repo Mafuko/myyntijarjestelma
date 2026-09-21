@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { updatePayoutInfo as updatePayoutInfoService } from '@/lib/services/profile'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 
 export async function updatePayoutInfo(formData: FormData): Promise<Result<{}>> {
   const session = await auth()

@@ -207,5 +207,10 @@
     "title": "Price tag preview",
     "itemCount": "{count} item(s)",
     "downloadButton": "Download"
+  },
+  "ServiceErrors": {
+    "UNAUTHENTICATED": "Not signed in",
+    "FORBIDDEN_EVENT_ACCESS": "You do not have access to this event",
+    "FORBIDDEN_OWNER_ONLY": "Only the site owner can perform this action"
   }
 }

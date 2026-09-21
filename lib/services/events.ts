@@ -4,7 +4,7 @@ import { writeAuditLog } from '@/lib/services/audit'
 import { inviteUser } from '@/lib/services/users'
 import { createEventSchema, updateEventSchema } from '@/lib/validation/event'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 const DEFAULT_CATEGORIES = [

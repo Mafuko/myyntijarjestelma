@@ -9,7 +9,7 @@ import {
   createItemBatch as createItemBatchService,
 } from '@/lib/services/items'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 
 function itemInputFromFormData(formData: FormData) {
   return {
