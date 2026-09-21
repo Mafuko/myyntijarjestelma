@@ -152,9 +152,9 @@ export type RowError = { row: number; field: string; message: string }
 ```
 to:
 ```ts
-export type RowError = { row: number; field: string; code: string; params?: Record<string, string | number> }
+export type RowError = { row: number; field: string; message?: string; code?: string; params?: Record<string, string | number> }
 ```
-(The two push sites that construct a `RowError` still use `message: ...` today — Task 3 converts those to `code`/`params`. This step only widens the type.)
+(**Additive, not a replacement** — `message` becomes optional rather than being removed, exactly matching `Result<T>`'s own already-additive pattern from Step 1. This is deliberate: `RowError`'s two push sites in this same file still construct `{ ..., message: ... }` today, and `app/(dashboard)/events/[eventId]/items/import/ImportForm.tsx` still reads `e.message` today — neither is in this task's file list, and a required-field replacement here would break both until Tasks 3 and 6 land, leaving `tsc --noEmit` red for the tasks in between. Making all three fields optional keeps every existing reader and writer compiling unchanged through Task 1 alone; Task 3 later sets `code`/`params` and simply stops setting `message` — no type error, since `message` is optional. Task 6's own step below has been written with the corresponding `!` non-null assertions for this reason — do not remove them.)
 
 - [ ] **Step 4: Widen `ImportFormState`'s error variant in `actions/imports.ts`**
 
@@ -170,11 +170,11 @@ to:
 ```ts
 export type ImportFormState =
   | { status: 'idle' }
-  | { status: 'error'; code: string; params?: Record<string, string | number> }
+  | { status: 'error'; message?: string; code?: string; params?: Record<string, string | number> }
   | { status: 'preview'; validCount: number; rowErrors: RowError[] }
   | { status: 'committed'; createdCount: number }
 ```
-(Task 4 updates this file's 4 call sites that currently construct `{ status: 'error', message: ... }`.)
+(Same additive reasoning as `RowError` above. Task 4 updates this file's 5 call sites — not 4 as originally miscounted; they are: the missing/empty file check, the invalid `intent` check, `parseImportFile`'s failure branch, `validateImportRows`'s failure branch, and `commitImport`'s failure branch — that currently construct `{ status: 'error', message: ... }`, switching each to `{ status: 'error', code: ..., params: ... }` and simply omitting `message`, which is valid once this field is optional.)
 
 - [ ] **Step 5: Seed the `ServiceErrors` namespace**
 
@@ -1380,7 +1380,7 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
 
 - [ ] **Step 4: `app/(dashboard)/events/[eventId]/items/import/ImportForm.tsx`**
 
-Two independent widenings in this file: the top-level form error (`state.status === 'error'`) and the row-error table (`state.rowErrors[].message`). Change:
+Two independent widenings in this file: the top-level form error (`state.status === 'error'`) and the row-error table (`state.rowErrors[].message`). Note: `RowError.code` and `ImportFormState`'s `'error'` variant's `code` are typed optional (`code?: string`) — a leftover of Task 1's additive widening, kept optional at the type level only so Tasks 1 through 5 kept compiling before Tasks 3/4 converted every construction site to always set `code`. By the time this task runs, Tasks 3 and 4 have already landed and every real construction site sets `code` unconditionally, so `state.code!`/`e.code!` below (non-null assertion) is safe — there is no runtime path left that constructs one of these without `code`. Change:
 ```tsx
 export function ImportForm({ eventId }: { eventId: string }) {
   const t = useTranslations('ImportForm')
@@ -1405,7 +1405,7 @@ to:
 ```tsx
       {state.status === 'error' && (
         <Alert variant="destructive">
-          <AlertDescription>{tErrors(state.code, state.params)}</AlertDescription>
+          <AlertDescription>{tErrors(state.code!, state.params)}</AlertDescription>
         </Alert>
       )}
 ```
@@ -1425,7 +1425,7 @@ to:
                   <TableRow key={i}>
                     <TableCell>{e.row}</TableCell>
                     <TableCell>{e.field}</TableCell>
-                    <TableCell>{tErrors(e.code, e.params)}</TableCell>
+                    <TableCell>{tErrors(e.code!, e.params)}</TableCell>
                   </TableRow>
                 ))}
 ```
