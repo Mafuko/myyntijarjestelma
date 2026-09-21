@@ -1,32 +1,32 @@
 import { z } from 'zod'
 
 export const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(1),
+  email: z.string().trim().toLowerCase().email('INVALID_EMAIL'),
+  password: z.string().min(1, 'PASSWORD_REQUIRED'),
 })
 
 export const inviteUserSchema = z
   .object({
-    name: z.string().min(1).max(100),
-    email: z.string().trim().toLowerCase().email(),
-    role: z.enum(['SELLER', 'STAFF', 'ADMIN']),
-    eventId: z.string().min(1),
-    sellerAlias: z.string().min(1).max(50).optional(),
+    name: z.string().min(1, 'NAME_REQUIRED').max(100, 'NAME_TOO_LONG'),
+    email: z.string().trim().toLowerCase().email('INVALID_EMAIL'),
+    role: z.enum(['SELLER', 'STAFF', 'ADMIN'], 'INVALID_ROLE'),
+    eventId: z.string().min(1, 'EVENT_ID_REQUIRED'),
+    sellerAlias: z.string().min(1, 'SELLER_ALIAS_REQUIRED').max(50, 'SELLER_ALIAS_TOO_LONG').optional(),
   })
   .refine((data) => data.role !== 'SELLER' || !!data.sellerAlias, {
-    message: 'sellerAlias is required for the SELLER role',
+    message: 'SELLER_ALIAS_REQUIRED_FOR_ROLE',
     path: ['sellerAlias'],
   })
 
 export const acceptInviteSchema = z.object({
-  token: z.string().min(1),
-  password: z.string().min(10, 'Password must be at least 10 characters'),
+  token: z.string().min(1, 'TOKEN_REQUIRED'),
+  password: z.string().min(10, 'PASSWORD_TOO_SHORT'),
 })
 
 export const signupSchema = z.object({
-  name: z.string().min(1).max(100),
-  email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(10, 'Password must be at least 10 characters'),
+  name: z.string().min(1, 'NAME_REQUIRED').max(100, 'NAME_TOO_LONG'),
+  email: z.string().trim().toLowerCase().email('INVALID_EMAIL'),
+  password: z.string().min(10, 'PASSWORD_TOO_SHORT'),
 })
 
 export function isValidIban(iban: string): boolean {
@@ -45,10 +45,10 @@ export function isValidIban(iban: string): boolean {
 
 export const payoutInfoSchema = z
   .object({
-    payoutMethod: z.enum(['CASH', 'BANK_TRANSFER']),
+    payoutMethod: z.enum(['CASH', 'BANK_TRANSFER'], 'INVALID_PAYOUT_METHOD'),
     iban: z.string().optional(),
   })
   .refine((data) => data.payoutMethod !== 'BANK_TRANSFER' || (!!data.iban && isValidIban(data.iban)), {
-    message: 'A valid IBAN is required for bank transfer payout',
+    message: 'IBAN_REQUIRED',
     path: ['iban'],
   })
