@@ -13,7 +13,8 @@ type Category = { id: string; name: string }
 
 export function AddSeriesForm({ eventId, categories }: { eventId: string; categories: Category[] }) {
   const t = useTranslations('AddSeriesForm')
-  const [error, setError] = useState<string | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
   // Category, K-18, and mode stay controlled/sticky across submissions,
   // matching AddItemForm's quick-repeat behavior — a seller adding several
   // series/bundles in a row (e.g. "Naruto Vol. 1-4" then "Bleach Vol. 1-10")
@@ -34,7 +35,7 @@ export function AddSeriesForm({ eventId, categories }: { eventId: string; catego
     const formData = new FormData(e.currentTarget)
     const result = await createItemBatch(eventId, formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       return
     }
     setError(null)
@@ -109,7 +110,7 @@ export function AddSeriesForm({ eventId, categories }: { eventId: string; catego
           </label>
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
             </Alert>
           )}
           <Button type="submit">{mode === 'series' ? t('submitButtonSeries') : t('submitButtonBundle')}</Button>

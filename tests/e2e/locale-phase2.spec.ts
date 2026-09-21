@@ -59,3 +59,26 @@ test('Finnish locale renders across events list, items page, and members page', 
   await page.selectOption('select[name="role"]', 'SELLER')
   await expect(page.locator('select[name="role"]')).toHaveValue('SELLER')
 })
+
+test('a Finnish-locale login failure shows the translated error message', async ({ page }) => {
+  await testPrisma.user.create({
+    data: {
+      name: 'Owner', email: 'owner-errmsg@example.com', isOwner: true,
+      passwordHash: await hashPassword('owner-errmsg-pw-123'), locale: 'fi',
+    },
+  })
+
+  // Login page itself always renders in the default locale (no NEXT_LOCALE
+  // cookie exists yet pre-login), matching the established pattern in
+  // tests/e2e/locale.spec.ts -- toggle to Finnish explicitly before
+  // submitting bad credentials, since this test needs the ERROR to render
+  // in Finnish, not just post-login pages.
+  await page.goto('/login')
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('button', { name: /switch to finnish/i }).click()
+  await page.getByLabel('Sähköposti').fill('owner-errmsg@example.com')
+  await page.getByLabel('Salasana', { exact: true }).fill('wrong-password')
+  await page.getByRole('button', { name: /kirjaudu sisään/i }).click()
+
+  await expect(page.getByText('Väärä sähköposti tai salasana')).toBeVisible()
+})

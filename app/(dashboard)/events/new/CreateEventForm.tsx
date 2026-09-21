@@ -15,7 +15,8 @@ function dayAfter(dateStr: string): string {
 
 export function CreateEventForm() {
   const t = useTranslations('CreateEventForm')
-  const [error, setError] = useState<string | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
   const [pending, setPending] = useState(false)
   const [eventDate, setEventDate] = useState('')
   const [multiDay, setMultiDay] = useState(false)
@@ -32,7 +33,7 @@ export function CreateEventForm() {
     setPending(true)
     const result = await createEvent(formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       setPending(false)
       return
     }
@@ -84,7 +85,7 @@ export function CreateEventForm() {
       </div>
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
         </Alert>
       )}
       <Button type="submit" disabled={pending}>{t('submitButton')}</Button>

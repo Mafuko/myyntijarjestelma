@@ -10,12 +10,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function UpdateCommissionForm({ eventId, commissionRate }: { eventId: string; commissionRate: string }) {
   const t = useTranslations('UpdateCommissionForm')
-  const [error, setError] = useState<string | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
 
   async function handleSubmit(formData: FormData) {
     const result = await updateEvent(eventId, formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       return
     }
     setError(null)
@@ -34,7 +35,7 @@ export function UpdateCommissionForm({ eventId, commissionRate }: { eventId: str
       </div>
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
         </Alert>
       )}
     </form>
