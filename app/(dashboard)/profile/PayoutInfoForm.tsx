@@ -17,12 +17,13 @@ export function PayoutInfoForm({
   currentIban: string | null
 }) {
   const t = useTranslations('PayoutInfoForm')
-  const [error, setError] = useState<string | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
 
   async function handleSubmit(formData: FormData) {
     const result = await updatePayoutInfo(formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       return
     }
     setError(null)
@@ -51,7 +52,7 @@ export function PayoutInfoForm({
       </div>
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
         </Alert>
       )}
       <Button type="submit">{t('saveButton')}</Button>

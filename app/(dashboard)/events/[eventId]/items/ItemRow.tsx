@@ -35,8 +35,9 @@ export function ItemRow({
 }) {
   const t = useTranslations('ItemRow')
   const tStatus = useTranslations('ItemStatus')
+  const tErrors = useTranslations('ServiceErrors')
   const [isEditing, setIsEditing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
   const [pending, startTransition] = useTransition()
   const [name, setName] = useState(item.name)
   const [price, setPrice] = useState(item.price)
@@ -53,7 +54,7 @@ export function ItemRow({
     startTransition(async () => {
       const result = await updateItem(item.id, eventId, formData)
       if (!result.ok) {
-        setError(result.error.message)
+        setError(result.error)
         return
       }
       setError(null)
@@ -110,7 +111,7 @@ export function ItemRow({
         </label>
         {error && (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
           </Alert>
         )}
         <div className="flex gap-2">

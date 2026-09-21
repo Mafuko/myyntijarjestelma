@@ -13,6 +13,7 @@ type LookupResult = { itemId: string; name: string; price: string; sellerAlias: 
 export function CheckoutScanner({ eventId }: { eventId: string }) {
   const t = useTranslations('CheckoutScanner')
   const tCommon = useTranslations('Common')
+  const tErrors = useTranslations('ServiceErrors')
   const [code, setCode] = useState('')
   const [lookup, setLookup] = useState<LookupResult | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -29,7 +30,7 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
     const result = await lookupCode(eventId, code.trim())
     setCode('')
     if (!result.ok) {
-      setMessage(result.error.message)
+      setMessage(tErrors(result.error.code, result.error.params))
       setLookup(null)
       return
     }
@@ -46,7 +47,7 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
     setPending(true)
     const result = await confirmSale(eventId, lookup.itemId, 'BARCODE_SCAN')
     setPending(false)
-    setMessage(result.ok ? t('sold', { name: lookup.name }) : result.error.message)
+    setMessage(result.ok ? t('sold', { name: lookup.name }) : tErrors(result.error.code, result.error.params))
     setLookup(null)
   }
 

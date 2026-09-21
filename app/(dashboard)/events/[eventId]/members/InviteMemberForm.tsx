@@ -13,7 +13,8 @@ import { CopyInviteLink } from './CopyInviteLink'
 export function InviteMemberForm({ eventId }: { eventId: string }) {
   const t = useTranslations('InviteMemberForm')
   const tRoles = useTranslations('Roles')
-  const [error, setError] = useState<string | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
   // undefined: no invite sent yet. null: sent, but the invitee already had an
   // account with a password (inviteUser only issues a token for brand-new or
   // not-yet-activated users), so there's no link to share — they just log in.
@@ -22,7 +23,7 @@ export function InviteMemberForm({ eventId }: { eventId: string }) {
   async function handleSubmit(formData: FormData) {
     const result = await inviteMember(eventId, formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       setInvited(undefined)
       return
     }
@@ -56,7 +57,7 @@ export function InviteMemberForm({ eventId }: { eventId: string }) {
           <Input name="sellerAlias" placeholder={t('sellerAliasPlaceholder')} />
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
             </Alert>
           )}
           <Button type="submit">{t('submitButton')}</Button>
