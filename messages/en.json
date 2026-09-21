@@ -267,6 +267,13 @@
     "UNKNOWN_CATEGORY": "Unknown category \"{category}\"",
     "ALREADY_MEMBER": "User already has a role in this event",
     "INVALID_TOKEN": "Invite link is invalid or already used",
-    "ALREADY_INITIALIZED": "Setup has already been completed"
+    "ALREADY_INITIALIZED": "Setup has already been completed",
+    "RATE_LIMITED_LOGIN": "Too many login attempts. Please try again in a minute.",
+    "INVALID_CREDENTIALS": "Incorrect email or password",
+    "LOOKUP_UNEXPECTED_ERROR": "Something went wrong looking up that code. Please try again.",
+    "RECORD_SALE_UNEXPECTED_ERROR": "Something went wrong recording the sale. Please try again.",
+    "UNDO_SALE_UNEXPECTED_ERROR": "Something went wrong undoing that sale. Please try again.",
+    "IMPORT_NO_FILE": "Please choose a file to import",
+    "IMPORT_INVALID_ACTION": "Invalid import action"
   }
 }

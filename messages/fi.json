@@ -267,6 +267,13 @@
     "UNKNOWN_CATEGORY": "Tuntematon kategoria \"{category}\"",
     "ALREADY_MEMBER": "Käyttäjällä on jo rooli tässä tapahtumassa",
     "INVALID_TOKEN": "Kutsulinkki on virheellinen tai jo käytetty",
-    "ALREADY_INITIALIZED": "Käyttöönotto on jo suoritettu"
+    "ALREADY_INITIALIZED": "Käyttöönotto on jo suoritettu",
+    "RATE_LIMITED_LOGIN": "Liikaa kirjautumisyrityksiä. Yritä uudelleen minuutin kuluttua.",
+    "INVALID_CREDENTIALS": "Väärä sähköposti tai salasana",
+    "LOOKUP_UNEXPECTED_ERROR": "Jotain meni pieleen koodia haettaessa. Yritä uudelleen.",
+    "RECORD_SALE_UNEXPECTED_ERROR": "Jotain meni pieleen myyntiä kirjattaessa. Yritä uudelleen.",
+    "UNDO_SALE_UNEXPECTED_ERROR": "Jotain meni pieleen myyntiä peruttaessa. Yritä uudelleen.",
+    "IMPORT_NO_FILE": "Valitse tuotava tiedosto",
+    "IMPORT_INVALID_ACTION": "Virheellinen tuontitoiminto"
   }
 }

@@ -14,12 +14,12 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
     password: formData.get('password'),
   })
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   const { allowed } = await checkRateLimit(loginRateLimiter, parsed.data.email)
   if (!allowed) {
-    return { ok: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts. Please try again in a minute.' } }
+    return { ok: false, error: { code: 'RATE_LIMITED_LOGIN', message: 'Too many login attempts. Please try again in a minute.' } }
   }
 
   try {

@@ -29,7 +29,7 @@ describe('login action', () => {
     const result = await login(formData)
 
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('VALIDATION_ERROR')
+    if (!result.ok) expect(result.error.code).toBe('INVALID_EMAIL')
     expect(signIn).not.toHaveBeenCalled()
   })
 
@@ -120,7 +120,7 @@ describe('login action', () => {
     const result = await login(formData)
 
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('RATE_LIMITED')
+    if (!result.ok) expect(result.error.code).toBe('RATE_LIMITED_LOGIN')
     expect(signIn).not.toHaveBeenCalled()
   })
 })

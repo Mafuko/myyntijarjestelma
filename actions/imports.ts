@@ -20,22 +20,22 @@ export async function handleImportForm(
   const intent = formData.get('intent')
 
   if (!(file instanceof File) || file.size === 0) {
-    return { status: 'error', message: 'Please choose a file to import' }
+    return { status: 'error', code: 'IMPORT_NO_FILE' }
   }
 
   if (intent !== 'preview' && intent !== 'commit') {
-    return { status: 'error', message: 'Invalid import action' }
+    return { status: 'error', code: 'IMPORT_INVALID_ACTION' }
   }
 
   const buffer = Buffer.from(await file.arrayBuffer())
   const parsed = await parseImportFile(file.name, buffer)
   if (!parsed.ok) {
-    return { status: 'error', message: parsed.error.message }
+    return { status: 'error', code: parsed.error.code, params: parsed.error.params }
   }
 
   const validated = await validateImportRows(session, eventId, parsed.data.rows)
   if (!validated.ok) {
-    return { status: 'error', message: validated.error.message }
+    return { status: 'error', code: validated.error.code, params: validated.error.params }
   }
   const { validRows, rowErrors } = validated.data
 
@@ -45,7 +45,7 @@ export async function handleImportForm(
 
   const result = await commitImport(session, eventId, validRows)
   if (!result.ok) {
-    return { status: 'error', message: result.error.message }
+    return { status: 'error', code: result.error.code, params: result.error.params }
   }
 
   revalidatePath(`/events/${eventId}/items`)
