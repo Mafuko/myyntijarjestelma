@@ -60,9 +60,9 @@ export async function parseImportFile(fileName: string, fileBuffer: Buffer): Pro
 }
 
 const importRowSchema = z.object({
-  name: z.string().min(1, 'ITEM_NAME_REQUIRED').max(200, 'ITEM_NAME_TOO_LONG'),
+  name: z.string('ITEM_NAME_REQUIRED').min(1, 'ITEM_NAME_REQUIRED').max(200, 'ITEM_NAME_TOO_LONG'),
   price: z.coerce.number('PRICE_INVALID').positive('PRICE_MUST_BE_POSITIVE').max(100000, 'PRICE_TOO_HIGH'),
-  categoryName: z.string().min(1, 'CATEGORY_REQUIRED'),
+  categoryName: z.string('CATEGORY_REQUIRED').min(1, 'CATEGORY_REQUIRED'),
   isAgeRestricted: z.boolean(),
 })
 
