@@ -26,7 +26,7 @@ export async function createEvent(session: MinimalSession, input: unknown): Prom
 
   const parsed = createEventSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   const event = await prisma.$transaction(async (tx) => {
@@ -60,7 +60,7 @@ export async function updateEvent(
 
   const parsed = updateEventSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   const before = await prisma.event.findUniqueOrThrow({ where: { id: eventId } })

@@ -249,6 +249,24 @@
     "COMMISSION_RATE_INVALID": "Enter a valid commission rate",
     "COMMISSION_RATE_TOO_LOW": "Commission rate must be at least 0",
     "COMMISSION_RATE_TOO_HIGH": "Commission rate must be at most 1",
-    "EVENT_END_DATE_BEFORE_START": "Event end date must be on or after the event date"
+    "EVENT_END_DATE_BEFORE_START": "Event end date must be on or after the event date",
+    "FORBIDDEN_NOT_ITEM_OWNER": "You cannot modify this item",
+    "FORBIDDEN_NOT_PRICE_TAG_OWNER": "You can only generate tags for your own items",
+    "RATE_LIMITED_LOOKUP": "Too many lookups — please slow down",
+    "CODE_NOT_FOUND": "Code not recognized",
+    "ITEM_NOT_FOUND": "Item not found",
+    "ALREADY_SOLD": "This item has already been sold",
+    "NOT_SOLD": "This item is not currently sold",
+    "CUTOFF_PASSED": "The item edit cutoff date has passed",
+    "NO_ITEMS": "No items found for the given ids",
+    "FILE_TOO_LARGE": "File exceeds the 2 MB limit",
+    "EMPTY_FILE": "No worksheet found",
+    "PARSE_ERROR": "The file could not be parsed. Please check the format and try again.",
+    "TOO_MANY_ROWS": "File has more than {max} rows",
+    "NO_ROWS": "No valid rows to import",
+    "UNKNOWN_CATEGORY": "Unknown category \"{category}\"",
+    "ALREADY_MEMBER": "User already has a role in this event",
+    "INVALID_TOKEN": "Invite link is invalid or already used",
+    "ALREADY_INITIALIZED": "Setup has already been completed"
   }
 }

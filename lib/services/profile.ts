@@ -13,7 +13,7 @@ export async function updatePayoutInfo(session: MinimalSession, input: unknown):
 
   const parsed = payoutInfoSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   await prisma.user.update({

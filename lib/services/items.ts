@@ -21,7 +21,7 @@ export async function createItem(
 
   const parsed = createItemSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   const item = await prisma.item.create({
@@ -46,7 +46,7 @@ export async function createItemBatch(
 
   const parsed = createItemBatchSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
   const { baseName, startVolume, endVolume, price, categoryId, isAgeRestricted, mode } = parsed.data
 
@@ -73,7 +73,7 @@ async function assertOwnsItemOrIsManager(
 ): Promise<Result<{ userId: string; role: string; item: { id: string; eventId: string; sellerId: string } }>> {
   const item = await prisma.item.findUnique({ where: { id: itemId } })
   if (!item) {
-    return { ok: false, error: { code: 'NOT_FOUND', message: 'Item not found' } }
+    return { ok: false, error: { code: 'ITEM_NOT_FOUND', message: 'Item not found' } }
   }
 
   const authz = await requireEventAccess(session, item.eventId, ['SELLER', 'STAFF', 'ADMIN'])
@@ -82,7 +82,7 @@ async function assertOwnsItemOrIsManager(
   const isOwnItem = item.sellerId === authz.userId
   const isManager = authz.role === 'ADMIN' || authz.role === 'OWNER'
   if (!isOwnItem && !isManager) {
-    return { ok: false, error: { code: 'FORBIDDEN', message: 'You cannot modify this item' } }
+    return { ok: false, error: { code: 'FORBIDDEN_NOT_ITEM_OWNER', message: 'You cannot modify this item' } }
   }
 
   return { ok: true, data: { userId: authz.userId, role: authz.role, item } }
@@ -100,7 +100,7 @@ export async function updateItem(session: MinimalSession, itemId: string, input:
 
   const parsed = updateItemSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   await prisma.item.update({ where: { id: itemId }, data: parsed.data })

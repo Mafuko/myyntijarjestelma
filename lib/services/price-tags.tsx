@@ -56,7 +56,7 @@ export async function generatePriceTagData(
   const isManager = authz.role === 'STAFF' || authz.role === 'ADMIN' || authz.role === 'OWNER'
   for (const item of items) {
     if (!isManager && item.sellerId !== authz.userId) {
-      return { ok: false, error: { code: 'FORBIDDEN', message: 'You can only generate tags for your own items' } }
+      return { ok: false, error: { code: 'FORBIDDEN_NOT_PRICE_TAG_OWNER', message: 'You can only generate tags for your own items' } }
     }
   }
 

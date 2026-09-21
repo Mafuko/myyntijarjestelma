@@ -249,6 +249,24 @@
     "COMMISSION_RATE_INVALID": "Anna kelvollinen välityspalkkio",
     "COMMISSION_RATE_TOO_LOW": "Välityspalkkion on oltava vähintään 0",
     "COMMISSION_RATE_TOO_HIGH": "Välityspalkkion on oltava enintään 1",
-    "EVENT_END_DATE_BEFORE_START": "Tapahtuman päättymispäivän on oltava sama tai myöhempi kuin tapahtumapäivä"
+    "EVENT_END_DATE_BEFORE_START": "Tapahtuman päättymispäivän on oltava sama tai myöhempi kuin tapahtumapäivä",
+    "FORBIDDEN_NOT_ITEM_OWNER": "Et voi muokata tätä tuotetta",
+    "FORBIDDEN_NOT_PRICE_TAG_OWNER": "Voit luoda hintalappuja vain omille tuotteillesi",
+    "RATE_LIMITED_LOOKUP": "Liikaa hakuja — hidasta hieman",
+    "CODE_NOT_FOUND": "Koodia ei tunnistettu",
+    "ITEM_NOT_FOUND": "Tuotetta ei löytynyt",
+    "ALREADY_SOLD": "Tämä tuote on jo myyty",
+    "NOT_SOLD": "Tämä tuote ei ole tällä hetkellä myyty",
+    "CUTOFF_PASSED": "Tuotteiden muokkauksen takaraja on ohitettu",
+    "NO_ITEMS": "Annetuilla tunnisteilla ei löytynyt tuotteita",
+    "FILE_TOO_LARGE": "Tiedosto ylittää 2 Mt:n rajan",
+    "EMPTY_FILE": "Työkirjaa ei löytynyt",
+    "PARSE_ERROR": "Tiedostoa ei voitu jäsentää. Tarkista muoto ja yritä uudelleen.",
+    "TOO_MANY_ROWS": "Tiedostossa on enemmän kuin {max} riviä",
+    "NO_ROWS": "Ei kelvollisia rivejä tuotavaksi",
+    "UNKNOWN_CATEGORY": "Tuntematon kategoria \"{category}\"",
+    "ALREADY_MEMBER": "Käyttäjällä on jo rooli tässä tapahtumassa",
+    "INVALID_TOKEN": "Kutsulinkki on virheellinen tai jo käytetty",
+    "ALREADY_INITIALIZED": "Käyttöönotto on jo suoritettu"
   }
 }

@@ -12,7 +12,7 @@ type MinimalSession = { user?: { id?: string | null } | null } | null
 export async function inviteUser(input: unknown): Promise<Result<{ inviteUrl: string | null }>> {
   const parsed = inviteUserSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
   const { name, email, role, eventId, sellerAlias } = parsed.data
 
@@ -54,7 +54,7 @@ export async function inviteUser(input: unknown): Promise<Result<{ inviteUrl: st
 export async function activateInvite(input: unknown): Promise<Result<{ userId: string }>> {
   const parsed = acceptInviteSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
   const { token, password } = parsed.data
 
@@ -109,7 +109,7 @@ const ALREADY_INITIALIZED_ERROR = { code: 'ALREADY_INITIALIZED', message: 'Setup
 export async function bootstrapOwner(input: unknown): Promise<Result<{ userId: string }>> {
   const parsed = signupSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
   const { name, email, password } = parsed.data
 
