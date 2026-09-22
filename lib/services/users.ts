@@ -155,3 +155,12 @@ export async function getUserLocale(email: string): Promise<'en' | 'fi'> {
   const user = await prisma.user.findUnique({ where: { email }, select: { locale: true } })
   return (user?.locale as 'en' | 'fi') ?? 'en'
 }
+
+export async function updateUserTheme(userId: string, theme: 'dark' | 'light'): Promise<void> {
+  await prisma.user.update({ where: { id: userId }, data: { theme } })
+}
+
+export async function getUserTheme(email: string): Promise<'dark' | 'light'> {
+  const user = await prisma.user.findUnique({ where: { email }, select: { theme: true } })
+  return (user?.theme as 'dark' | 'light') ?? 'dark'
+}

@@ -47,6 +47,7 @@ model User {
   inviteToken    String?  @unique
   tokenVersion   Int      @default(0)
   locale         String   @default("en")
+  theme          String   @default("dark")
   lastSeenReleaseNoteDate String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

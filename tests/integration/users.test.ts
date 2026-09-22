@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { testPrisma, resetDb } from './setup'
-import { inviteUser, activateInvite, deleteUserPii, bootstrapOwner, updateUserLocale, getUserLocale } from '@/lib/services/users'
+import { inviteUser, activateInvite, deleteUserPii, bootstrapOwner, updateUserLocale, getUserLocale, updateUserTheme, getUserTheme } from '@/lib/services/users'
 
 function sessionFor(userId: string) {
   return { user: { id: userId } }
@@ -260,5 +260,29 @@ describe('updateUserLocale / getUserLocale', () => {
   it('returns en for an email with no matching user', async () => {
     const locale = await getUserLocale('does-not-exist@example.com')
     expect(locale).toBe('en')
+  })
+})
+
+describe('updateUserTheme / getUserTheme', () => {
+  beforeEach(async () => {
+    await resetDb()
+  })
+
+  it('defaults a new user to dark', async () => {
+    const user = await testPrisma.user.create({ data: { name: 'Fresh User', email: 'fresh-theme1@example.com', passwordHash: 'x' } })
+    const theme = await getUserTheme(user.email)
+    expect(theme).toBe('dark')
+  })
+
+  it('persists an updated theme and reflects it via getUserTheme', async () => {
+    const user = await testPrisma.user.create({ data: { name: 'Fresh User', email: 'fresh-theme2@example.com', passwordHash: 'x' } })
+    await updateUserTheme(user.id, 'light')
+    const theme = await getUserTheme(user.email)
+    expect(theme).toBe('light')
+  })
+
+  it('returns dark for an email with no matching user', async () => {
+    const theme = await getUserTheme('does-not-exist-theme@example.com')
+    expect(theme).toBe('dark')
   })
 })
