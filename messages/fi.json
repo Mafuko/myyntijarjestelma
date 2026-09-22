@@ -20,6 +20,10 @@
   "LocaleToggle": {
     "switchToOther": "Vaihda englanniksi"
   },
+  "ThemeToggle": {
+    "switchToLight": "Vaihda vaaleaan tilaan",
+    "switchToDark": "Vaihda tummaan tilaan"
+  },
   "EventsPage": {
     "title": "Tapahtumat",
     "newEvent": "Uusi tapahtuma"

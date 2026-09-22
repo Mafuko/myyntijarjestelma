@@ -20,6 +20,10 @@
   "LocaleToggle": {
     "switchToOther": "Switch to Finnish"
   },
+  "ThemeToggle": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
+  },
   "EventsPage": {
     "title": "Events",
     "newEvent": "New event"
