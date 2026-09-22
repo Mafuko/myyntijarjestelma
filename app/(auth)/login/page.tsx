@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LocaleToggle } from '@/components/LocaleToggle'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function LoginPage() {
   const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
@@ -30,7 +31,10 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle>{t('title')}</CardTitle>
-          <LocaleToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LocaleToggle />
+          </div>
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="flex flex-col gap-4">

@@ -7,6 +7,7 @@ import { getLatestVisibleReleaseNote } from '@/lib/services/release-notes'
 import { Button } from '@/components/ui/button'
 import { BackButton } from '@/components/BackButton'
 import { LocaleToggle } from '@/components/LocaleToggle'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { ReleaseNoteBanner } from '@/components/ReleaseNoteBanner'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -26,6 +27,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             </Link>
           </div>
           <div className="flex min-w-0 items-center gap-4 text-sm">
+            <ThemeToggle />
             <LocaleToggle />
             {session?.user && (
               <>

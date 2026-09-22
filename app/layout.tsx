@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Sora, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
+import { cookies } from 'next/headers';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import "./globals.css";
 
 const sora = Sora({
@@ -21,14 +23,19 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
+  const cookieStore = await cookies();
+  const theme = cookieStore.get('THEME')?.value === 'light' ? 'light' : 'dark';
 
   return (
     <html
       lang={locale}
+      data-theme={theme === 'light' ? 'light' : undefined}
       className={`${sora.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
