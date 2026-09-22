@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { signIn, signOut } from '@/lib/auth'
 import { loginRateLimiter, checkRateLimit } from '@/lib/rate-limit'
-import { activateInvite, bootstrapOwner, getUserLocale } from '@/lib/services/users'
+import { activateInvite, bootstrapOwner, getUserLocale, getUserTheme } from '@/lib/services/users'
 import { loginSchema } from '@/lib/validation/user'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
@@ -29,6 +29,10 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
       const locale = await getUserLocale(parsed.data.email)
       cookieStore.set('NEXT_LOCALE', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 })
     }
+    if (!cookieStore.get('THEME')) {
+      const theme = await getUserTheme(parsed.data.email)
+      cookieStore.set('THEME', theme, { path: '/', maxAge: 60 * 60 * 24 * 365 })
+    }
     return { ok: true, data: { redirectTo: '/events' } }
   } catch {
     return { ok: false, error: { code: 'INVALID_CREDENTIALS', message: 'Incorrect email or password' } }
@@ -38,6 +42,7 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
 export async function logout(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.delete('NEXT_LOCALE')
+  cookieStore.delete('THEME')
   await signOut({ redirectTo: '/login' })
 }
 

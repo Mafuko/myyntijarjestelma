@@ -8,6 +8,7 @@ vi.mock('@/lib/services/users', () => ({
   activateInvite: vi.fn(),
   bootstrapOwner: vi.fn(),
   getUserLocale: vi.fn().mockResolvedValue('en'),
+  getUserTheme: vi.fn().mockResolvedValue('dark'),
 }))
 vi.mock('@/lib/rate-limit', () => ({
   loginRateLimiter: {},
@@ -103,6 +104,49 @@ describe('login action', () => {
 
     expect(result.ok).toBe(true)
     expect(getUserLocale).not.toHaveBeenCalled()
+    expect(setCookie).not.toHaveBeenCalled()
+  })
+
+  it('hydrates the THEME cookie from the signed-in user\'s stored theme', async () => {
+    const { login } = await import('@/actions/auth')
+    const { signIn } = await import('@/lib/auth')
+    const { getUserTheme } = await import('@/lib/services/users')
+    const { cookies } = await import('next/headers')
+    vi.mocked(signIn).mockResolvedValueOnce(undefined as never)
+    vi.mocked(getUserTheme).mockResolvedValueOnce('light')
+    const setCookie = vi.fn()
+    vi.mocked(cookies).mockResolvedValueOnce({ set: setCookie, get: vi.fn() } as any)
+
+    const formData = new FormData()
+    formData.set('email', 'light-user@example.com')
+    formData.set('password', 'correct-horse-battery-staple')
+
+    const result = await login(formData)
+
+    expect(result.ok).toBe(true)
+    expect(getUserTheme).toHaveBeenCalledWith('light-user@example.com')
+    expect(setCookie).toHaveBeenCalledWith('THEME', 'light', expect.objectContaining({ path: '/' }))
+  })
+
+  it('leaves an already-set THEME cookie alone, even if it differs from the user\'s stored theme', async () => {
+    const { login } = await import('@/actions/auth')
+    const { signIn } = await import('@/lib/auth')
+    const { getUserTheme } = await import('@/lib/services/users')
+    const { cookies } = await import('next/headers')
+    vi.mocked(signIn).mockResolvedValueOnce(undefined as never)
+    vi.mocked(getUserTheme).mockClear()
+    const setCookie = vi.fn()
+    const getCookie = vi.fn().mockReturnValue({ name: 'THEME', value: 'light' })
+    vi.mocked(cookies).mockResolvedValueOnce({ set: setCookie, get: getCookie } as any)
+
+    const formData = new FormData()
+    formData.set('email', 'already-toggled-theme@example.com')
+    formData.set('password', 'correct-horse-battery-staple')
+
+    const result = await login(formData)
+
+    expect(result.ok).toBe(true)
+    expect(getUserTheme).not.toHaveBeenCalled()
     expect(setCookie).not.toHaveBeenCalled()
   })
 
