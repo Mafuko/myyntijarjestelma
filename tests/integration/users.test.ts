@@ -209,7 +209,7 @@ describe('bootstrapOwner', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('VALIDATION_ERROR')
+    expect(result.error.code).toBe('PASSWORD_TOO_SHORT')
 
     const count = await testPrisma.user.count()
     expect(count).toBe(0)

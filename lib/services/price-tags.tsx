@@ -4,7 +4,7 @@ import { requireEventAccess } from '@/lib/services/authz'
 import bwipjs from 'bwip-js/node'
 import { Document, Page, View, Text, Image, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 export type PriceTagData = {
@@ -56,7 +56,7 @@ export async function generatePriceTagData(
   const isManager = authz.role === 'STAFF' || authz.role === 'ADMIN' || authz.role === 'OWNER'
   for (const item of items) {
     if (!isManager && item.sellerId !== authz.userId) {
-      return { ok: false, error: { code: 'FORBIDDEN', message: 'You can only generate tags for your own items' } }
+      return { ok: false, error: { code: 'FORBIDDEN_NOT_PRICE_TAG_OWNER', message: 'You can only generate tags for your own items' } }
     }
   }
 

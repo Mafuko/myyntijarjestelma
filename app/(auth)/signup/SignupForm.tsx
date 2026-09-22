@@ -12,14 +12,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function SignupForm() {
   const t = useTranslations('SignupForm')
-  const [error, setError] = useState<string | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
   const [pending, setPending] = useState(false)
 
   async function handleSubmit(formData: FormData) {
     setPending(true)
     const result = await signupOwner(formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       setPending(false)
       return
     }
@@ -48,7 +49,7 @@ export function SignupForm() {
             </div>
             {error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
               </Alert>
             )}
             <Button type="submit" disabled={pending}>{t('submitButton')}</Button>

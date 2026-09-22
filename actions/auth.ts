@@ -6,7 +6,7 @@ import { loginRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import { activateInvite, bootstrapOwner, getUserLocale } from '@/lib/services/users'
 import { loginSchema } from '@/lib/validation/user'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 
 export async function login(formData: FormData): Promise<Result<{ redirectTo: string }>> {
   const parsed = loginSchema.safeParse({
@@ -14,12 +14,12 @@ export async function login(formData: FormData): Promise<Result<{ redirectTo: st
     password: formData.get('password'),
   })
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   const { allowed } = await checkRateLimit(loginRateLimiter, parsed.data.email)
   if (!allowed) {
-    return { ok: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts. Please try again in a minute.' } }
+    return { ok: false, error: { code: 'RATE_LIMITED_LOGIN', message: 'Too many login attempts. Please try again in a minute.' } }
   }
 
   try {

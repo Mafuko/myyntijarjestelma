@@ -13,7 +13,8 @@ type Category = { id: string; name: string }
 
 export function AddItemForm({ eventId, categories }: { eventId: string; categories: Category[] }) {
   const t = useTranslations('AddItemForm')
-  const [error, setError] = useState<string | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
   // Category and K-18 are kept as controlled state so they persist across
   // submissions (quick-repeat entry) regardless of any browser/React form
   // auto-reset behavior. Name and price are uncontrolled and cleared
@@ -36,7 +37,7 @@ export function AddItemForm({ eventId, categories }: { eventId: string; categori
     const formData = new FormData(e.currentTarget)
     const result = await createItem(eventId, formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       return
     }
     setError(null)
@@ -85,7 +86,7 @@ export function AddItemForm({ eventId, categories }: { eventId: string; categori
           </label>
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
             </Alert>
           )}
           <Button type="submit">{t('submitButton')}</Button>

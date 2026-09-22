@@ -16,7 +16,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const result = await generatePriceTagData(session, eventId, itemIds)
   if (!result.ok) {
-    const status = result.error.code === 'UNAUTHENTICATED' ? 401 : result.error.code === 'FORBIDDEN' ? 403 : 400
+    const status =
+      result.error.code === 'UNAUTHENTICATED'
+        ? 401
+        : result.error.code === 'FORBIDDEN_EVENT_ACCESS' || result.error.code === 'FORBIDDEN_NOT_PRICE_TAG_OWNER'
+          ? 403
+          : 400
     return NextResponse.json({ error: result.error.message }, { status })
   }
 

@@ -8,7 +8,7 @@ import {
   inviteMemberToEvent,
 } from '@/lib/services/events'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 
 export async function createEvent(formData: FormData): Promise<Result<{ eventId: string }>> {
   const session = await auth()

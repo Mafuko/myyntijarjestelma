@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { deleteUserPii as deleteUserPiiService } from '@/lib/services/users'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 
 export async function deleteUserPii(targetUserId: string): Promise<Result<{}>> {
   const session = await auth()

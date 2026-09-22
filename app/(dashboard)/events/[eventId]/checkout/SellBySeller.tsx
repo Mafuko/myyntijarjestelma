@@ -14,19 +14,20 @@ function SellableItemRow({ eventId, item }: { eventId: string; item: Item }) {
   const t = useTranslations('SellBySeller')
   const tStatus = useTranslations('ItemStatus')
   const [pending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
+  const tErrors = useTranslations('ServiceErrors')
 
   function handleSell() {
     startTransition(async () => {
       const result = await confirmSale(eventId, item.id, 'MANUAL_OVERRIDE')
-      setError(result.ok ? null : result.error.message)
+      setError(result.ok ? null : result.error)
     })
   }
 
   function handleUndo() {
     startTransition(async () => {
       const result = await undoSale(eventId, item.id)
-      setError(result.ok ? null : result.error.message)
+      setError(result.ok ? null : result.error)
     })
   }
 
@@ -53,7 +54,7 @@ function SellableItemRow({ eventId, item }: { eventId: string; item: Item }) {
       </div>
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
         </Alert>
       )}
     </div>

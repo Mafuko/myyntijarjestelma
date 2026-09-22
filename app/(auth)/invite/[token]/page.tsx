@@ -12,14 +12,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function InvitePage() {
   const t = useTranslations('InvitePage')
+  const tErrors = useTranslations('ServiceErrors')
   const params = useParams<{ token: string }>()
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
 
   async function handleSubmit(formData: FormData) {
     formData.set('token', params.token)
     const result = await acceptInvite(formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       return
     }
     window.location.href = result.data.redirectTo
@@ -39,7 +40,7 @@ export default function InvitePage() {
             </div>
             {error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
               </Alert>
             )}
             <Button type="submit">{t('submitButton')}</Button>

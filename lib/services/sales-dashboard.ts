@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { requireEventAccess } from '@/lib/services/authz'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 export type SalesSnapshotItem = { id: string; name: string; price: string; status: string; sellerAlias: string | null }

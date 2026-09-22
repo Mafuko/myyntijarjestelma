@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { requireEventAccess } from '@/lib/services/authz'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024
@@ -43,7 +43,7 @@ export async function parseImportFile(fileName: string, fileBuffer: Buffer): Pro
   } else {
     const parsed = Papa.parse<RawImportRow>(fileBuffer.toString('utf-8'), { header: true, skipEmptyLines: true })
     if (parsed.errors.length > 0) {
-      return { ok: false, error: { code: 'PARSE_ERROR', message: parsed.errors[0].message } }
+      return { ok: false, error: { code: 'PARSE_ERROR', message: 'The file could not be parsed. Please check the format and try again.' } }
     }
     rows = parsed.data.map((row) => {
       const trimmed: RawImportRow = {}
@@ -53,16 +53,16 @@ export async function parseImportFile(fileName: string, fileBuffer: Buffer): Pro
   }
 
   if (rows.length > MAX_ROWS) {
-    return { ok: false, error: { code: 'TOO_MANY_ROWS', message: `File has more than ${MAX_ROWS} rows` } }
+    return { ok: false, error: { code: 'TOO_MANY_ROWS', message: `File has more than ${MAX_ROWS} rows`, params: { max: MAX_ROWS } } }
   }
 
   return { ok: true, data: { rows } }
 }
 
 const importRowSchema = z.object({
-  name: z.string().min(1).max(200),
-  price: z.coerce.number().positive().max(100000),
-  categoryName: z.string().min(1),
+  name: z.string('ITEM_NAME_REQUIRED').min(1, 'ITEM_NAME_REQUIRED').max(200, 'ITEM_NAME_TOO_LONG'),
+  price: z.coerce.number('PRICE_INVALID').positive('PRICE_MUST_BE_POSITIVE').max(100000, 'PRICE_TOO_HIGH'),
+  categoryName: z.string('CATEGORY_REQUIRED').min(1, 'CATEGORY_REQUIRED'),
   isAgeRestricted: z.boolean(),
 })
 
@@ -93,7 +93,7 @@ function parseBoolean(value: string | undefined): boolean {
   return ['true', '1', 'x', 'kyllä', 'yes'].includes(value.trim().toLowerCase())
 }
 
-export type RowError = { row: number; field: string; message: string }
+export type RowError = { row: number; field: string; message?: string; code?: string; params?: Record<string, string | number> }
 export type ValidatedRow = { name: string; price: number; categoryId: string; isAgeRestricted: boolean }
 
 export async function validateImportRows(
@@ -122,14 +122,14 @@ export async function validateImportRows(
 
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
-        rowErrors.push({ row: rowNumber, field: String(issue.path[0] ?? 'unknown'), message: issue.message })
+        rowErrors.push({ row: rowNumber, field: String(issue.path[0] ?? 'unknown'), code: issue.message })
       }
       return
     }
 
     const categoryId = categoryByName.get(parsed.data.categoryName.toLowerCase())
     if (!categoryId) {
-      rowErrors.push({ row: rowNumber, field: 'categoryName', message: `Unknown category "${parsed.data.categoryName}"` })
+      rowErrors.push({ row: rowNumber, field: 'categoryName', code: 'UNKNOWN_CATEGORY', params: { category: parsed.data.categoryName } })
       return
     }
 

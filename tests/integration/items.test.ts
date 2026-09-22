@@ -272,7 +272,7 @@ describe('createItemBatch', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('VALIDATION_ERROR')
+    expect(result.error.code).toBe('BATCH_END_BEFORE_START')
 
     const count = await testPrisma.item.count()
     expect(count).toBe(0)
@@ -285,7 +285,7 @@ describe('createItemBatch', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('VALIDATION_ERROR')
+    expect(result.error.code).toBe('BATCH_TOO_MANY_VOLUMES')
   })
 
   it('lets staff create a batch for themselves too (any event member can sell)', async () => {

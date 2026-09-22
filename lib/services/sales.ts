@@ -3,7 +3,7 @@ import { barcodeLookupRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 import { requireEventAccess } from '@/lib/services/authz'
 import { writeAuditLog } from '@/lib/services/audit'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 type SaleMethod = 'BARCODE_SCAN' | 'MANUAL_CODE_ENTRY' | 'MANUAL_OVERRIDE'
 
@@ -17,12 +17,12 @@ export async function lookupItemByCode(
 
   const { allowed } = await checkRateLimit(barcodeLookupRateLimiter, authz.userId)
   if (!allowed) {
-    return { ok: false, error: { code: 'RATE_LIMITED', message: 'Too many lookups — please slow down' } }
+    return { ok: false, error: { code: 'RATE_LIMITED_LOOKUP', message: 'Too many lookups — please slow down' } }
   }
 
   const item = await prisma.item.findFirst({ where: { eventId, barcodeValue: code } })
   if (!item) {
-    return { ok: false, error: { code: 'NOT_FOUND', message: 'Code not recognized' } }
+    return { ok: false, error: { code: 'CODE_NOT_FOUND', message: 'Code not recognized' } }
   }
 
   const membership = await prisma.eventMembership.findUnique({
@@ -48,7 +48,7 @@ export async function recordSale(
 ): Promise<Result<{ saleId: string }>> {
   const item = await prisma.item.findUnique({ where: { id: itemId } })
   if (!item) {
-    return { ok: false, error: { code: 'NOT_FOUND', message: 'Item not found' } }
+    return { ok: false, error: { code: 'ITEM_NOT_FOUND', message: 'Item not found' } }
   }
 
   const authz = await requireEventAccess(session, item.eventId, ['STAFF', 'ADMIN'])
@@ -75,7 +75,7 @@ export async function recordSale(
 export async function undoSale(session: MinimalSession, itemId: string): Promise<Result<{ itemId: string }>> {
   const item = await prisma.item.findUnique({ where: { id: itemId } })
   if (!item) {
-    return { ok: false, error: { code: 'NOT_FOUND', message: 'Item not found' } }
+    return { ok: false, error: { code: 'ITEM_NOT_FOUND', message: 'Item not found' } }
   }
 
   const authz = await requireEventAccess(session, item.eventId, ['STAFF', 'ADMIN'])

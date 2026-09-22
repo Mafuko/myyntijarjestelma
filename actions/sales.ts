@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { lookupItemByCode, recordSale as recordSaleService, undoSale as undoSaleService } from '@/lib/services/sales'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 
 export async function lookupCode(
   eventId: string,
@@ -21,7 +21,7 @@ export async function lookupCode(
     // server/client boundary, matching confirmSale's pattern below.
     return {
       ok: false,
-      error: { code: 'UNEXPECTED_ERROR', message: 'Something went wrong looking up that code. Please try again.' },
+      error: { code: 'LOOKUP_UNEXPECTED_ERROR', message: 'Something went wrong looking up that code. Please try again.' },
     }
   }
 }
@@ -48,7 +48,7 @@ export async function confirmSale(
     // Action's contract of never throwing across the server/client boundary.
     return {
       ok: false,
-      error: { code: 'UNEXPECTED_ERROR', message: 'Something went wrong recording the sale. Please try again.' },
+      error: { code: 'RECORD_SALE_UNEXPECTED_ERROR', message: 'Something went wrong recording the sale. Please try again.' },
     }
   }
 }
@@ -68,7 +68,7 @@ export async function undoSale(eventId: string, itemId: string): Promise<Result<
     // contract of never throwing across the server/client boundary.
     return {
       ok: false,
-      error: { code: 'UNEXPECTED_ERROR', message: 'Something went wrong undoing that sale. Please try again.' },
+      error: { code: 'UNDO_SALE_UNEXPECTED_ERROR', message: 'Something went wrong undoing that sale. Please try again.' },
     }
   }
 }

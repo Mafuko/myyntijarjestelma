@@ -54,7 +54,7 @@ describe('lookupItemByCode', () => {
     const { staff, event } = await setup()
     const result = await lookupItemByCode(sessionFor(staff.id), event.id, 'DOES-NOT-EXIST')
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('NOT_FOUND')
+    if (!result.ok) expect(result.error.code).toBe('CODE_NOT_FOUND')
   })
 
   it('rejects a seller trying to use the lookup (staff/admin only)', async () => {
@@ -166,7 +166,7 @@ describe('undoSale', () => {
     const { staff } = await setup()
     const result = await undoSale(sessionFor(staff.id), 'does-not-exist')
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('NOT_FOUND')
+    if (!result.ok) expect(result.error.code).toBe('ITEM_NOT_FOUND')
   })
 
   it('still returns ok:true if writing the audit log fails after the undo already committed', async () => {

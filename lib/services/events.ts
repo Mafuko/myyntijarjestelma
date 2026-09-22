@@ -4,7 +4,7 @@ import { writeAuditLog } from '@/lib/services/audit'
 import { inviteUser } from '@/lib/services/users'
 import { createEventSchema, updateEventSchema } from '@/lib/validation/event'
 
-type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string } }
+type Result<T> = { ok: true; data: T } | { ok: false; error: { code: string; message: string; params?: Record<string, string | number> } }
 type MinimalSession = { user?: { id?: string | null } | null } | null
 
 const DEFAULT_CATEGORIES = [
@@ -26,7 +26,7 @@ export async function createEvent(session: MinimalSession, input: unknown): Prom
 
   const parsed = createEventSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   const event = await prisma.$transaction(async (tx) => {
@@ -60,7 +60,7 @@ export async function updateEvent(
 
   const parsed = updateEventSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
   }
 
   const before = await prisma.event.findUniqueOrThrow({ where: { id: eventId } })

@@ -44,7 +44,7 @@ describe('confirmSale action', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('UNEXPECTED_ERROR')
+      expect(result.error.code).toBe('RECORD_SALE_UNEXPECTED_ERROR')
       expect(result.error.message).toBe('Something went wrong recording the sale. Please try again.')
     }
   })
@@ -74,7 +74,7 @@ describe('undoSale action', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('UNEXPECTED_ERROR')
+      expect(result.error.code).toBe('UNDO_SALE_UNEXPECTED_ERROR')
       expect(result.error.message).toBe('Something went wrong undoing that sale. Please try again.')
     }
   })

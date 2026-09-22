@@ -77,7 +77,7 @@ describe('requireEventAccess authorization matrix', () => {
     const { seller, event } = await setupEventWithMembers()
     const result = await requireEventAccess(sessionFor(seller.id), event.id, ['ADMIN'])
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('FORBIDDEN')
+    if (!result.ok) expect(result.error.code).toBe('FORBIDDEN_EVENT_ACCESS')
   })
 
   it('denies a user with no membership in the event', async () => {

@@ -12,13 +12,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LocaleToggle } from '@/components/LocaleToggle'
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{ code: string; message: string; params?: Record<string, string | number> } | null>(null)
   const t = useTranslations('Login')
+  const tErrors = useTranslations('ServiceErrors')
 
   async function handleSubmit(formData: FormData) {
     const result = await login(formData)
     if (!result.ok) {
-      setError(result.error.message)
+      setError(result.error)
       return
     }
     window.location.href = result.data.redirectTo
@@ -43,7 +44,7 @@ export default function LoginPage() {
             </div>
             {error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{tErrors(error.code, error.params)}</AlertDescription>
               </Alert>
             )}
             <Button type="submit">{t('submitButton')}</Button>

@@ -12,6 +12,7 @@ const initialState: ImportFormState = { status: 'idle' }
 
 export function ImportForm({ eventId }: { eventId: string }) {
   const t = useTranslations('ImportForm')
+  const tErrors = useTranslations('ServiceErrors')
   const [state, formAction, isPending] = useActionState(handleImportForm.bind(null, eventId), initialState)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const selectedFileRef = useRef<File | null>(null)
@@ -54,7 +55,7 @@ export function ImportForm({ eventId }: { eventId: string }) {
 
       {state.status === 'error' && (
         <Alert variant="destructive">
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertDescription>{tErrors(state.code!, state.params)}</AlertDescription>
         </Alert>
       )}
 
@@ -75,7 +76,7 @@ export function ImportForm({ eventId }: { eventId: string }) {
                   <TableRow key={i}>
                     <TableCell>{e.row}</TableCell>
                     <TableCell>{e.field}</TableCell>
-                    <TableCell>{e.message}</TableCell>
+                    <TableCell>{tErrors(e.code!, e.params)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

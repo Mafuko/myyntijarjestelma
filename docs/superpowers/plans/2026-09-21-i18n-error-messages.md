@@ -35,18 +35,20 @@ Several existing codes are reused today for **different** messages within the sa
 | `RATE_LIMITED` | "Too many lookups — please slow down" | `RATE_LIMITED_LOOKUP` | `lib/services/sales.ts` |
 | `RATE_LIMITED` | "Too many login attempts. Please try again in a minute." | `RATE_LIMITED_LOGIN` | `actions/auth.ts` |
 | `UNEXPECTED_ERROR` (×3, all different messages) | 3 distinct "Something went wrong..." strings | `LOOKUP_UNEXPECTED_ERROR`, `RECORD_SALE_UNEXPECTED_ERROR`, `UNDO_SALE_UNEXPECTED_ERROR` | `actions/sales.ts` |
-| `VALIDATION_ERROR` (blanket, all Zod passthrough sites) | varies | replaced entirely by per-field Zod codes — see Task 2 | 7 call sites across `lib/services/*.ts` + `actions/auth.ts` |
+| `VALIDATION_ERROR` (blanket, all Zod passthrough sites) | varies | per-field Zod codes from Task 2, forwarded by each passthrough site's own task — see note below | 10 call sites across `lib/services/{events,items,profile,users}.ts` + `actions/auth.ts` |
+
+**Correction (found during Task 1/2 execution, not caught during plan-writing):** the original text above read "replaced entirely by per-field Zod codes — see Task 2" and claimed 7 call sites. Both are wrong. **10** call sites exist (`lib/services/events.ts` ×2, `lib/services/items.ts` ×3, `lib/services/profile.ts` ×1, `lib/services/users.ts` ×3, `actions/auth.ts` ×1 — `lib/services/events.ts` was missing from the original scope survey entirely), and giving Zod schema fields their own codes (Task 2) does **not**, by itself, make any passthrough site forward that code: every one of these 10 sites hardcodes `code: 'VALIDATION_ERROR'` as a string literal and only forwards `parsed.error.issues[0].message` into the `message` field, never into `code`. Task 2 discovered this the hard way (see this plan's SDD ledger, Task 2 round 1) when its implementer found 4 test assertions it was told to update couldn't actually pass — the codes they expect are never produced until the owning service/action file's passthrough line is fixed too. Each of the 10 sites is fixed in whichever task already owns that file (Task 3 for the `lib/services/*.ts` sites including the newly-added `events.ts`, Task 4 for `actions/auth.ts`), paired with its corresponding test-assertion update in the same task/commit — not in Task 2, which touches only the validation layer and leaves the passthrough sites (and their tests) exactly as they are today.
 
 **Existing test impact of this table** (found by searching `tests/` for every affected code before writing this plan, not guessed):
-- `tests/integration/authz.test.ts:80` — asserts `'FORBIDDEN'` on `requireEventAccess`'s denial path → update to `'FORBIDDEN_EVENT_ACCESS'`.
-- `tests/integration/sales.test.ts:57` — asserts `'NOT_FOUND'` on `lookupItemByCode` → update to `'CODE_NOT_FOUND'`.
-- `tests/integration/sales.test.ts:169` — asserts `'NOT_FOUND'` on `undoSale` → update to `'ITEM_NOT_FOUND'`.
-- `tests/unit/actions/auth.test.ts:32` — asserts `'VALIDATION_ERROR'` on an invalid-email login attempt → update to `'INVALID_EMAIL'`.
-- `tests/unit/actions/auth.test.ts:123` — asserts `'RATE_LIMITED'` → update to `'RATE_LIMITED_LOGIN'`.
-- `tests/integration/users.test.ts:212` — asserts `'VALIDATION_ERROR'` on a too-short signup password → update to `'PASSWORD_TOO_SHORT'`.
-- `tests/integration/items.test.ts:275` — asserts `'VALIDATION_ERROR'` on `endVolume < startVolume` → update to `'BATCH_END_BEFORE_START'`.
-- `tests/integration/items.test.ts:288` — asserts `'VALIDATION_ERROR'` on a >50-volume batch → update to `'BATCH_TOO_MANY_VOLUMES'`.
-- Checked and confirmed **unaffected**: `tests/unit/actions/sales.test.ts:48,78` assert on the literal English *message* text for the two `UNEXPECTED_ERROR` cases — that text doesn't change (only `code` does, which these tests don't assert on), so no edit needed there. `tests/unit/imports-parse.test.ts` only asserts `FILE_TOO_LARGE`/`TOO_MANY_ROWS` codes, both unchanged. No e2e test asserts on any of the affected literal English text on-screen (checked: the only matching hit, `checkout.spec.ts:88`'s `"Already sold: Already Sold"`, comes from an unrelated existing translated string, not a service error).
+- `tests/integration/authz.test.ts:80` — asserts `'FORBIDDEN'` on `requireEventAccess`'s denial path → update to `'FORBIDDEN_EVENT_ACCESS'`. (Task 1.)
+- `tests/integration/sales.test.ts:57` — asserts `'NOT_FOUND'` on `lookupItemByCode` → update to `'CODE_NOT_FOUND'`. (Task 3.)
+- `tests/integration/sales.test.ts:169` — asserts `'NOT_FOUND'` on `undoSale` → update to `'ITEM_NOT_FOUND'`. (Task 3.)
+- `tests/unit/actions/auth.test.ts:32` — asserts `'VALIDATION_ERROR'` on an invalid-email login attempt → update to `'INVALID_EMAIL'`. (Task 4, paired with `actions/auth.ts`'s passthrough fix — **not** Task 2.)
+- `tests/unit/actions/auth.test.ts:123` — asserts `'RATE_LIMITED'` → update to `'RATE_LIMITED_LOGIN'`. (Task 4.)
+- `tests/integration/users.test.ts:212` — asserts `'VALIDATION_ERROR'` on a too-short signup password → update to `'PASSWORD_TOO_SHORT'`. (Task 3, paired with `lib/services/users.ts`'s passthrough fix — **not** Task 2.)
+- `tests/integration/items.test.ts:275` — asserts `'VALIDATION_ERROR'` on `endVolume < startVolume` → update to `'BATCH_END_BEFORE_START'`. (Task 3, paired with `lib/services/items.ts`'s passthrough fix — **not** Task 2.)
+- `tests/integration/items.test.ts:288` — asserts `'VALIDATION_ERROR'` on a >50-volume batch → update to `'BATCH_TOO_MANY_VOLUMES'`. (Task 3.)
+- Checked and confirmed **unaffected**: `tests/unit/actions/sales.test.ts:48,78` assert on the literal English *message* text for the two `UNEXPECTED_ERROR` cases — that text doesn't change (only `code` does, which these tests don't assert on), so no edit needed there. `tests/unit/imports-parse.test.ts` only asserts `FILE_TOO_LARGE`/`TOO_MANY_ROWS` codes, both unchanged. No e2e test asserts on any of the affected literal English text on-screen (checked: the only matching hit, `checkout.spec.ts:88`'s `"Already sold: Already Sold"`, comes from an unrelated existing translated string, not a service error). No existing test asserts on `lib/services/events.ts`'s `VALIDATION_ERROR` passthrough at all (checked `tests/integration/events.test.ts`, `tests/unit/actions/events.test.ts` — neither asserts `.error.code`/`.error.message`), so its passthrough fix (Task 3) needs no test-file update.
 
 ---
 
@@ -152,9 +154,9 @@ export type RowError = { row: number; field: string; message: string }
 ```
 to:
 ```ts
-export type RowError = { row: number; field: string; code: string; params?: Record<string, string | number> }
+export type RowError = { row: number; field: string; message?: string; code?: string; params?: Record<string, string | number> }
 ```
-(The two push sites that construct a `RowError` still use `message: ...` today — Task 3 converts those to `code`/`params`. This step only widens the type.)
+(**Additive, not a replacement** — `message` becomes optional rather than being removed, exactly matching `Result<T>`'s own already-additive pattern from Step 1. This is deliberate: `RowError`'s two push sites in this same file still construct `{ ..., message: ... }` today, and `app/(dashboard)/events/[eventId]/items/import/ImportForm.tsx` still reads `e.message` today — neither is in this task's file list, and a required-field replacement here would break both until Tasks 3 and 6 land, leaving `tsc --noEmit` red for the tasks in between. Making all three fields optional keeps every existing reader and writer compiling unchanged through Task 1 alone; Task 3 later sets `code`/`params` and simply stops setting `message` — no type error, since `message` is optional. Task 6's own step below has been written with the corresponding `!` non-null assertions for this reason — do not remove them.)
 
 - [ ] **Step 4: Widen `ImportFormState`'s error variant in `actions/imports.ts`**
 
@@ -170,11 +172,11 @@ to:
 ```ts
 export type ImportFormState =
   | { status: 'idle' }
-  | { status: 'error'; code: string; params?: Record<string, string | number> }
+  | { status: 'error'; message?: string; code?: string; params?: Record<string, string | number> }
   | { status: 'preview'; validCount: number; rowErrors: RowError[] }
   | { status: 'committed'; createdCount: number }
 ```
-(Task 4 updates this file's 4 call sites that currently construct `{ status: 'error', message: ... }`.)
+(Same additive reasoning as `RowError` above. Task 4 updates this file's 5 call sites — not 4 as originally miscounted; they are: the missing/empty file check, the invalid `intent` check, `parseImportFile`'s failure branch, `validateImportRows`'s failure branch, and `commitImport`'s failure branch — that currently construct `{ status: 'error', message: ... }`, switching each to `{ status: 'error', code: ..., params: ... }` and simply omitting `message`, which is valid once this field is optional.)
 
 - [ ] **Step 5: Seed the `ServiceErrors` namespace**
 
@@ -223,11 +225,11 @@ git commit -m "feat: widen Result<T>/RowError/ImportFormState with params, resol
 **Files:**
 - Modify: `lib/validation/user.ts`, `lib/validation/item.ts`, `lib/validation/event.ts`
 - Modify: `messages/en.json`, `messages/fi.json` (append every Zod-derived code)
-- Test: `tests/unit/actions/auth.test.ts`, `tests/integration/users.test.ts`, `tests/integration/items.test.ts` (assertion updates per the Collision Table)
+- Test: none — this task touches only the validation layer; the 3 test files affected by these code changes (`tests/unit/actions/auth.test.ts`, `tests/integration/users.test.ts`, `tests/integration/items.test.ts`) are updated later, in Task 3/Task 4, together with the service/action passthrough-site fix that actually starts forwarding these codes (see the Collision Table's correction note — do not update them here, they would fail: the passthrough sites that call these schemas still hardcode `code: 'VALIDATION_ERROR'` until then).
 
 **Interfaces:**
 - Produces: every Zod schema field now has an explicit `message` parameter carrying a code string (verified working syntax below, confirmed against the actual installed `zod@4.4.3` package before writing this plan — do not deviate from these exact forms).
-- Consumes: nothing from Task 1 directly (these files don't touch `Result<T>` themselves — the services that call `.safeParse()` on them already pass `parsed.error.issues[0].message` through unchanged; that message is now a code instead of prose, which is what makes the whole mechanism work).
+- Consumes: nothing from Task 1 directly (these files don't touch `Result<T>` themselves). **Note:** the services that call `.safeParse()` on these schemas do *not* yet forward this code anywhere — they hardcode `code: 'VALIDATION_ERROR'` and only forward `parsed.error.issues[0].message` into `message`. Making the new codes actually reachable at runtime requires each passthrough site's own fix, done in Task 3 (`lib/services/*.ts`, including `events.ts`) and Task 4 (`actions/auth.ts`), not in this task. This task only makes the codes exist and be resolvable in `messages/*.json` — it does not wire them up end-to-end by itself.
 
 **Verified Zod syntax** (each form below was actually run against `zod@4.4.3` in this repo before writing this plan — all confirmed working):
 - `z.string().min(N, 'CODE')` / `.max(N, 'CODE')` / `.positive('CODE')` — positional string, already used in this codebase today (e.g. `acceptInviteSchema.password`).
@@ -444,57 +446,19 @@ And the Finnish equivalents into `messages/fi.json`'s `ServiceErrors` namespace:
   "EVENT_END_DATE_BEFORE_START": "Tapahtuman päättymispäivän on oltava sama tai myöhempi kuin tapahtumapäivä"
 ```
 
-- [ ] **Step 5: Update the 4 existing test assertions affected by this task (per the Collision Table)**
-
-In `tests/unit/actions/auth.test.ts`, change (line 32):
-```ts
-    if (!result.ok) expect(result.error.code).toBe('VALIDATION_ERROR')
-```
-to:
-```ts
-    if (!result.ok) expect(result.error.code).toBe('INVALID_EMAIL')
-```
-
-In `tests/integration/users.test.ts`, change (line 212, the `'rejects a password shorter than 10 characters'` test):
-```ts
-    expect(result.error.code).toBe('VALIDATION_ERROR')
-```
-to:
-```ts
-    expect(result.error.code).toBe('PASSWORD_TOO_SHORT')
-```
-
-In `tests/integration/items.test.ts`, change (line 275, the `'rejects when endVolume is less than startVolume'` test):
-```ts
-    expect(result.error.code).toBe('VALIDATION_ERROR')
-```
-to:
-```ts
-    expect(result.error.code).toBe('BATCH_END_BEFORE_START')
-```
-
-And (line 288, the `'rejects a range larger than 50 volumes'` test):
-```ts
-    expect(result.error.code).toBe('VALIDATION_ERROR')
-```
-to:
-```ts
-    expect(result.error.code).toBe('BATCH_TOO_MANY_VOLUMES')
-```
-
-- [ ] **Step 6: Typecheck and run the full suite**
+- [ ] **Step 5: Typecheck and run the full suite**
 
 Run: `npx tsc --noEmit`
 Expected: no errors.
 
 Run: `NODE_OPTIONS='--require dotenv/config' npx vitest run`
-Expected: all tests pass, including the 4 updated assertions.
+Expected: all tests pass, **unchanged** — this task does not touch `tests/unit/actions/auth.test.ts`, `tests/integration/users.test.ts`, or `tests/integration/items.test.ts` even though the Collision Table lists codes from this task's schemas as their eventual replacement values. Those 3 files still assert `'VALIDATION_ERROR'` today and will keep passing exactly as before, because the service passthrough sites that call these schemas still hardcode `code: 'VALIDATION_ERROR'` — Task 3/Task 4 flip the passthrough site and the corresponding assertion together, later. If any of these 3 files unexpectedly fail after this task's changes alone, stop and report it — it means a passthrough site forwards the Zod code sooner than expected, which would be a discrepancy worth flagging, not silently fixing.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git checkout -- tsconfig.json
-git add lib/validation/user.ts lib/validation/item.ts lib/validation/event.ts messages/en.json messages/fi.json tests/unit/actions/auth.test.ts tests/integration/users.test.ts tests/integration/items.test.ts
+git add lib/validation/user.ts lib/validation/item.ts lib/validation/event.ts messages/en.json messages/fi.json
 git commit -m "feat: give every Zod validation field a distinct translatable code"
 ```
 
@@ -503,13 +467,15 @@ git commit -m "feat: give every Zod validation field a distinct translatable cod
 ## Task 3: `lib/services/*.ts` — literal message codes, params for interpolated messages, `RowError` conversion
 
 **Files:**
-- Modify: `lib/services/imports.ts`, `lib/services/items.ts`, `lib/services/price-tags.tsx`, `lib/services/profile.ts`, `lib/services/sales.ts`, `lib/services/users.ts`
+- Modify: `lib/services/imports.ts`, `lib/services/items.ts`, `lib/services/price-tags.tsx`, `lib/services/profile.ts`, `lib/services/sales.ts`, `lib/services/users.ts`, `lib/services/events.ts`
 - Modify: `messages/en.json`, `messages/fi.json` (append this task's codes)
-- Test: `tests/integration/sales.test.ts` (2 assertion updates per the Collision Table)
+- Test: `tests/integration/sales.test.ts` (2 assertion updates per the Collision Table), `tests/integration/items.test.ts` (2 assertion updates), `tests/integration/users.test.ts` (1 assertion update)
 
 **Interfaces:**
-- Consumes: Task 1's widened `Result<T>`/`RowError` types.
+- Consumes: Task 1's widened `Result<T>`/`RowError` types; Task 2's per-field Zod codes (`lib/validation/item.ts`, `user.ts` — this task's `items.ts`/`profile.ts`/`users.ts` passthrough-site fixes are what actually makes those codes reachable at runtime; see the Collision Table's correction note).
 - Produces: nothing new consumed by later tasks beyond the `ServiceErrors` keys (Task 5/6 UI components reference these by code).
+
+**Note on `lib/services/events.ts`:** this file was missing from the plan's original file lists entirely (a scope-survey gap found during Task 2's execution — see the Collision Table's correction note). It has 2 `VALIDATION_ERROR` passthrough sites, fixed the same way as this task's other files (Step 6c below). Its errors are rendered by `CreateEventForm.tsx`/`UpdateCommissionForm.tsx` in Task 5's UI scope, so leaving it unfixed would mean those two forms permanently show an unresolvable `VALIDATION_ERROR` lookup for every event-creation/update validation failure once Task 5 lands — not a transient mid-rollout gap, a permanent one. No existing test asserts on this file's error code/message, so no test-file update is needed for it.
 
 - [ ] **Step 1: `lib/services/imports.ts`**
 
@@ -640,7 +606,35 @@ to:
   }
 ```
 
-(This file's `VALIDATION_ERROR` passthrough lines — `return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }`, ×3 — are unaffected by this task; Task 2 already gave every field of `createItemSchema`/`updateItemSchema`/`createItemBatchSchema` its own code, and this file's passthrough code just keeps forwarding whatever code fired. Leave these 3 lines exactly as they are.)
+Change (all 3 occurrences, identical text — this file's `VALIDATION_ERROR` passthrough sites, one each in the functions validating `createItemSchema`/`updateItemSchema`/`createItemBatchSchema`):
+```ts
+    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+```
+to:
+```ts
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
+```
+(`code` was a hardcoded string literal — it never actually forwarded the Zod-derived code before this change, contrary to what an earlier draft of this task claimed. Task 2 already gave every field of these 3 schemas its own code string in `message`; this is the fix that makes those codes reachable through `code` at runtime. `message` keeps forwarding the same value, per the deliberate Global Constraints exception: for Zod-derived errors, `code` and `message` hold the same code value.)
+
+- [ ] **Step 2b: Update `tests/integration/items.test.ts`'s 2 affected assertions (per the Collision Table)**
+
+Change (line 275, the `'rejects when endVolume is less than startVolume'` test):
+```ts
+    expect(result.error.code).toBe('VALIDATION_ERROR')
+```
+to:
+```ts
+    expect(result.error.code).toBe('BATCH_END_BEFORE_START')
+```
+
+Change (line 288, the `'rejects a range larger than 50 volumes'` test):
+```ts
+    expect(result.error.code).toBe('VALIDATION_ERROR')
+```
+to:
+```ts
+    expect(result.error.code).toBe('BATCH_TOO_MANY_VOLUMES')
+```
 
 - [ ] **Step 3: `lib/services/price-tags.tsx`**
 
@@ -667,7 +661,15 @@ Both occurrences of:
 ```
 stay **unchanged** (same code, same message as `authz.ts`'s `UNAUTHENTICATED` — already shares the `ServiceErrors.UNAUTHENTICATED` key Task 1 seeded).
 
-(This file's `VALIDATION_ERROR` passthrough — `message: parsed.error.issues[0].message` — is unaffected; `payoutInfoSchema`'s fields already got codes in Task 2.)
+Change (this file's single `VALIDATION_ERROR` passthrough site, validating `payoutInfoSchema`):
+```ts
+    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+```
+to:
+```ts
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
+```
+(Same fix as `items.ts` above — `payoutInfoSchema`'s fields already got codes in Task 2, but nothing forwarded them into `code` until now. No existing test asserts on this file's error code, so no test-file update is needed here.)
 
 - [ ] **Step 5: `lib/services/sales.ts`**
 
@@ -750,7 +752,38 @@ const ALREADY_INITIALIZED_ERROR = { code: 'ALREADY_INITIALIZED', message: 'Setup
 ```
 stays **unchanged**.
 
-(This file's 3 `VALIDATION_ERROR` passthrough lines are unaffected — `inviteUserSchema`/`acceptInviteSchema`/`signupSchema` already got their codes in Task 2.)
+Change (all 3 occurrences, identical text — this file's `VALIDATION_ERROR` passthrough sites, one each for `inviteUserSchema`/`acceptInviteSchema`/`signupSchema`):
+```ts
+    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+```
+to:
+```ts
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
+```
+(Same fix as `items.ts`/`profile.ts` above — these 3 schemas already got their codes in Task 2, but nothing forwarded them into `code` until now.)
+
+- [ ] **Step 6b: Update `tests/integration/users.test.ts`'s affected assertion (per the Collision Table)**
+
+Change (line 212, the `'rejects a password shorter than 10 characters'` test):
+```ts
+    expect(result.error.code).toBe('VALIDATION_ERROR')
+```
+to:
+```ts
+    expect(result.error.code).toBe('PASSWORD_TOO_SHORT')
+```
+
+- [ ] **Step 6c: `lib/services/events.ts`**
+
+This file was missing from the plan's original scope entirely (see this task's Files section note above). Change (both occurrences, identical text — one in `createEvent`, one in `updateEvent`):
+```ts
+    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+```
+to:
+```ts
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
+```
+(Same fix as the other 3 files above. `createEventSchema`/`updateEventSchema`'s fields already got their codes in Task 2 — this is what makes them reachable through `code` at runtime. No existing test asserts on this file's error code, so no test-file update is needed here.)
 
 - [ ] **Step 7: Append this task's codes to `messages/en.json`'s `ServiceErrors` namespace**
 
@@ -803,13 +836,13 @@ Run: `npx tsc --noEmit`
 Expected: no errors.
 
 Run: `NODE_OPTIONS='--require dotenv/config' npx vitest run`
-Expected: all tests pass, including the 2 updated assertions in `tests/integration/sales.test.ts`.
+Expected: all tests pass, including the 2 updated assertions in `tests/integration/sales.test.ts`, the 2 in `tests/integration/items.test.ts`, and the 1 in `tests/integration/users.test.ts`.
 
 - [ ] **Step 9: Commit**
 
 ```bash
 git checkout -- tsconfig.json
-git add lib/services/imports.ts lib/services/items.ts lib/services/price-tags.tsx lib/services/profile.ts lib/services/sales.ts lib/services/users.ts messages/en.json messages/fi.json tests/integration/sales.test.ts
+git add lib/services/imports.ts lib/services/items.ts lib/services/price-tags.tsx lib/services/profile.ts lib/services/sales.ts lib/services/users.ts lib/services/events.ts messages/en.json messages/fi.json tests/integration/sales.test.ts tests/integration/items.test.ts tests/integration/users.test.ts
 git commit -m "feat: give lib/services error literals distinct codes, add params for interpolated messages"
 ```
 
@@ -820,10 +853,10 @@ git commit -m "feat: give lib/services error literals distinct codes, add params
 **Files:**
 - Modify: `actions/auth.ts`, `actions/sales.ts`, `actions/imports.ts`
 - Modify: `messages/en.json`, `messages/fi.json` (append this task's codes)
-- Test: `tests/unit/actions/auth.test.ts` (1 assertion update), `tests/unit/actions/sales.test.ts` (2 assertion updates) — both per the Collision Table
+- Test: `tests/unit/actions/auth.test.ts` (2 assertion updates), `tests/unit/actions/sales.test.ts` (2 assertion updates) — all per the Collision Table
 
 **Interfaces:**
-- Consumes: Task 1's widened `Result<T>`/`ImportFormState` types.
+- Consumes: Task 1's widened `Result<T>`/`ImportFormState` types; Task 2's per-field Zod codes (`lib/validation/user.ts`'s `loginSchema`) — this task's `actions/auth.ts` passthrough-site fix is what actually makes those codes reachable at runtime; see the Collision Table's correction note.
 
 - [ ] **Step 1: `actions/auth.ts`**
 
@@ -842,9 +875,26 @@ Change:
 ```
 stays **unchanged**.
 
-(This file's `VALIDATION_ERROR` passthrough for `login`'s `loginSchema.safeParse` is unaffected — `loginSchema`'s fields already got codes in Task 2.)
+Change (this file's `VALIDATION_ERROR` passthrough site for `login`'s `loginSchema.safeParse`):
+```ts
+    return { ok: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.issues[0].message } }
+```
+to:
+```ts
+    return { ok: false, error: { code: parsed.error.issues[0].message, message: parsed.error.issues[0].message } }
+```
+(`loginSchema`'s fields already got codes in Task 2, but `code` was a hardcoded string literal — it never forwarded them before this change. Same fix as the `lib/services/*.ts` sites in Task 3.)
 
-- [ ] **Step 1b: Update `tests/unit/actions/auth.test.ts`'s affected assertion (per the Collision Table)**
+- [ ] **Step 1b: Update `tests/unit/actions/auth.test.ts`'s 2 affected assertions (per the Collision Table)**
+
+Change (line 32, an invalid-email login attempt):
+```ts
+    if (!result.ok) expect(result.error.code).toBe('VALIDATION_ERROR')
+```
+to:
+```ts
+    if (!result.ok) expect(result.error.code).toBe('INVALID_EMAIL')
+```
 
 Change (line 123):
 ```ts
@@ -1016,7 +1066,7 @@ Run: `npx tsc --noEmit`
 Expected: no errors.
 
 Run: `NODE_OPTIONS='--require dotenv/config' npx vitest run`
-Expected: all tests pass, including the 3 updated assertions across `tests/unit/actions/auth.test.ts` and `tests/unit/actions/sales.test.ts`.
+Expected: all tests pass, including the 4 updated assertions across `tests/unit/actions/auth.test.ts` (2) and `tests/unit/actions/sales.test.ts` (2).
 
 - [ ] **Step 6: Commit**
 
@@ -1380,7 +1430,7 @@ export function CheckoutScanner({ eventId }: { eventId: string }) {
 
 - [ ] **Step 4: `app/(dashboard)/events/[eventId]/items/import/ImportForm.tsx`**
 
-Two independent widenings in this file: the top-level form error (`state.status === 'error'`) and the row-error table (`state.rowErrors[].message`). Change:
+Two independent widenings in this file: the top-level form error (`state.status === 'error'`) and the row-error table (`state.rowErrors[].message`). Note: `RowError.code` and `ImportFormState`'s `'error'` variant's `code` are typed optional (`code?: string`) — a leftover of Task 1's additive widening, kept optional at the type level only so Tasks 1 through 5 kept compiling before Tasks 3/4 converted every construction site to always set `code`. By the time this task runs, Tasks 3 and 4 have already landed and every real construction site sets `code` unconditionally, so `state.code!`/`e.code!` below (non-null assertion) is safe — there is no runtime path left that constructs one of these without `code`. Change:
 ```tsx
 export function ImportForm({ eventId }: { eventId: string }) {
   const t = useTranslations('ImportForm')
@@ -1405,7 +1455,7 @@ to:
 ```tsx
       {state.status === 'error' && (
         <Alert variant="destructive">
-          <AlertDescription>{tErrors(state.code, state.params)}</AlertDescription>
+          <AlertDescription>{tErrors(state.code!, state.params)}</AlertDescription>
         </Alert>
       )}
 ```
@@ -1425,7 +1475,7 @@ to:
                   <TableRow key={i}>
                     <TableCell>{e.row}</TableCell>
                     <TableCell>{e.field}</TableCell>
-                    <TableCell>{tErrors(e.code, e.params)}</TableCell>
+                    <TableCell>{tErrors(e.code!, e.params)}</TableCell>
                   </TableRow>
                 ))}
 ```
