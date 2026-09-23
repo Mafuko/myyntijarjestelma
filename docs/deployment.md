@@ -53,6 +53,8 @@ Walk through the app once as the new owner to confirm the real deployment works 
 - [ ] Run one checkout by scanning (or typing) that item's barcode.
 - [ ] Confirm the sales dashboard updates live.
 
+**Barcode scanner hardware note:** the checkout page (`CheckoutScanner.tsx`) expects any USB barcode scanner acting as a plain HID keyboard-wedge device (types the decoded code, then Enter) — there's no scanner-specific integration, so any such scanner works in principle. In practice, **laser** scanners (a single sweeping laser line, decoding by reflected intensity) are unreliable reading a barcode off an LCD/phone screen, because a glossy screen reflects the laser specularly (like a mirror) instead of diffusing it the way matte paper does — this can look like the scanner "doesn't work" when tested against a screen. **2D/imager** scanners (camera-based decoding) don't have this problem and read screens fine. Confirmed in testing: a Fujitech 2D USB scanner read a screen-displayed barcode with no issue; a Wave wired USB laser scanner did not. Since real usage scans **printed** price tags, not screens, a laser scanner that fails on-screen may still work fine on a printed tag — test against an actual printed price tag before ruling one out. If provisioning scanners for an event, prefer 2D/imager models to avoid this class of surprise during setup/testing.
+
 ## Known follow-ups
 
 This runbook covers what's needed to deploy today. Two related items are tracked separately in `docs/next-steps.md` and aren't part of this process yet:
