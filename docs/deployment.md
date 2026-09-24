@@ -26,8 +26,8 @@ Set these in the Vercel project's Settings → Environment Variables (Production
 | `PII_ENCRYPTION_KEY` | Generate with `openssl rand -base64 32`. See the dedicated section below before setting this — it's not a normal env var to lose. |
 | `UPSTASH_REDIS_REST_URL` | Reuse the existing Upstash Redis database used by CI — get the value from the [Upstash console](https://console.upstash.com) (the database's Details page has a "REST API" section showing both values). **Not** from the GitHub Actions secret of the same name: GitHub secrets are write-only and can't be viewed again once saved, only overwritten — Upstash's own dashboard is the actual source of truth. No new Upstash database needed. |
 | `UPSTASH_REDIS_REST_TOKEN` | Same as above. |
-| `NEXT_PUBLIC_SENTRY_DSN` | From the Sentry project's Settings → Client Keys (DSN) page. |
-| `SENTRY_AUTH_TOKEN` | Generate at Sentry → Settings → Auth Tokens (needs `project:releases` scope) — used only at build time for source-map upload. |
+| `NEXT_PUBLIC_SENTRY_DSN` | From the Sentry project's Settings → Client Keys (DSN) page. Next.js inlines `NEXT_PUBLIC_*` vars into the client bundle at build time, so changing this value requires a redeploy (not just a re-save in Vercel) — otherwise client-side reporting keeps using the old (or no) DSN. |
+| `SENTRY_AUTH_TOKEN` | Generate at Sentry → Settings → Auth Tokens (needs `project:releases` scope, and typically `org:read` too — source-map upload fails without it) — used only at build time for source-map upload. |
 | `SENTRY_ORG` | The Sentry organization slug, visible in the Sentry dashboard URL. |
 | `SENTRY_PROJECT` | The Sentry project slug, visible in the Sentry dashboard URL. |
 
@@ -64,9 +64,11 @@ Sentry (`@sentry/nextjs`) is wired up to email-alert on new issues, but it needs
 - [ ] Add a temporary route (e.g. `app/api/debug-throw/route.ts` with a `GET` handler that does `throw new Error('sentry smoke test')`) and deploy it, or trigger any real error path once (e.g. an invalid checkout scan).
 - [ ] Confirm the error appears in the Sentry dashboard within a minute or two.
 - [ ] Confirm an email alert arrives at the account email.
-- [ ] Trigger a client-side error too (e.g. a deliberate throw in a Client Component) and check the browser devtools console: confirm there's no `Content-Security-Policy: connect-src` violation logged — the `tunnelRoute: '/monitoring'` setup should route the report through this app's own origin, not directly to a `sentry.io` host.
+- [ ] Trigger a client-side error from an event handler (e.g. a button `onClick` that throws — not a render error, which Next's built-in error boundary swallows before it reaches Sentry) and confirm two things: a `POST /monitoring` request appears in the browser's network tab (not a request to any `sentry.io` host — the `tunnelRoute: '/monitoring'` setup should keep it same-origin), and the event actually shows up in the Sentry dashboard.
 - [ ] If a temporary debug route was added, remove it and redeploy.
 - [ ] Separately, confirm the SSE fix: temporarily break `DATABASE_URL` (or otherwise force `getSalesSnapshot` to throw) in a local/staging environment, open the sales dashboard, and confirm the connection closes cleanly (no hang) and the error reaches Sentry.
+
+Note: `/monitoring` (the Sentry tunnel route) is intentionally unauthenticated and outside this app's Upstash rate limiting — anyone can POST envelopes through it to Sentry's ingest hosts (it cannot be used to reach anywhere else). This is Sentry's accepted `tunnelRoute` design, not a gap specific to this app.
 
 ## Known follow-ups
 
