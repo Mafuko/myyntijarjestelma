@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import { auth } from '@/lib/auth'
 import { getSalesSnapshot } from '@/lib/services/sales-dashboard'
 
@@ -39,11 +40,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         // tokenVersion bump from PII deletion, or an admin removing the
         // caller's EventMembership) cuts the stream within one poll interval
         // instead of only at the next reconnect.
-        const currentSession = await auth()
-        const snapshot = await getSalesSnapshot(currentSession, eventId)
-        if (snapshot.ok) {
-          send(snapshot.data)
-        } else {
+        try {
+          const currentSession = await auth()
+          const snapshot = await getSalesSnapshot(currentSession, eventId)
+          if (snapshot.ok) {
+            send(snapshot.data)
+          } else {
+            stop()
+          }
+        } catch (err) {
+          Sentry.captureException(err)
           stop()
         }
       }, POLL_INTERVAL_MS)
