@@ -4,9 +4,9 @@
 
 ## Open
 
-1. **No error/monitoring visibility once deployed**
-   - Nothing currently surfaces runtime errors (a failed sale, a broken PDF render, an SSE disconnect) beyond server logs.
-   - Decided approach (spec written and approved: `docs/superpowers/specs/2026-09-06-error-monitoring-design.md`, not yet implemented): `@sentry/nextjs`, free tier, email-on-new-issue alerting, error-only (no performance tracing). Needs a manual try/catch added to the SSE polling loop (`app/api/sse/[eventId]/route.ts`) since that runs detached from Next's automatic request-error instrumentation.
+1. **No error/monitoring visibility once deployed — implemented, pending live smoke check**
+   - `@sentry/nextjs` is wired up (`docs/superpowers/specs/2026-09-06-error-monitoring-design.md`, `docs/superpowers/plans/2026-09-24-error-monitoring.md`): error-only (`tracesSampleRate: 0`, no session replay), free tier, email-on-new-issue alerting. The SSE polling loop's silent-hang gap (`app/api/sse/[eventId]/route.ts`) is fixed with an explicit try/catch reporting to `Sentry.captureException`.
+   - Not yet done: creating the actual Sentry project/DSN and running the post-deploy smoke check in `docs/deployment.md`'s "Verify error monitoring" section, against a real Vercel deploy. Move this item to "Done since MVP" once that's completed.
 
 2. **No in-app notification when new changes are published** — DONE
    - Shipped: a dismissible banner in the dashboard layout (`app/(dashboard)/layout.tsx`), showing the single most recent release note a user's effective role can see. Notes are hand-authored in `messages/release-notes.json` (bilingual, most-recent-first, optional `minRole`); a user's effective role is the highest `EventRole` across their `ACTIVE` memberships (or `OWNER` if `isOwner`). Dismissing persists `User.lastSeenReleaseNoteDate`. See `docs/superpowers/specs/2026-09-18-whats-new-notification-design.md`.

@@ -26,6 +26,10 @@ Set these in the Vercel project's Settings → Environment Variables (Production
 | `PII_ENCRYPTION_KEY` | Generate with `openssl rand -base64 32`. See the dedicated section below before setting this — it's not a normal env var to lose. |
 | `UPSTASH_REDIS_REST_URL` | Reuse the existing Upstash Redis database used by CI — get the value from the [Upstash console](https://console.upstash.com) (the database's Details page has a "REST API" section showing both values). **Not** from the GitHub Actions secret of the same name: GitHub secrets are write-only and can't be viewed again once saved, only overwritten — Upstash's own dashboard is the actual source of truth. No new Upstash database needed. |
 | `UPSTASH_REDIS_REST_TOKEN` | Same as above. |
+| `NEXT_PUBLIC_SENTRY_DSN` | From the Sentry project's Settings → Client Keys (DSN) page. |
+| `SENTRY_AUTH_TOKEN` | Generate at Sentry → Settings → Auth Tokens (needs `project:releases` scope) — used only at build time for source-map upload. |
+| `SENTRY_ORG` | The Sentry organization slug, visible in the Sentry dashboard URL. |
+| `SENTRY_PROJECT` | The Sentry project slug, visible in the Sentry dashboard URL. |
 
 ### `PII_ENCRYPTION_KEY` handling
 
@@ -53,9 +57,19 @@ Walk through the app once as the new owner to confirm the real deployment works 
 - [ ] Run one checkout by scanning (or typing) that item's barcode.
 - [ ] Confirm the sales dashboard updates live.
 
+## 6. Verify error monitoring
+
+Sentry (`@sentry/nextjs`) is wired up to email-alert on new issues, but it needs one manual smoke check after each fresh deploy since it depends on the live `NEXT_PUBLIC_SENTRY_DSN` actually being set correctly in Vercel:
+
+- [ ] Add a temporary route (e.g. `app/api/debug-throw/route.ts` with a `GET` handler that does `throw new Error('sentry smoke test')`) and deploy it, or trigger any real error path once (e.g. an invalid checkout scan).
+- [ ] Confirm the error appears in the Sentry dashboard within a minute or two.
+- [ ] Confirm an email alert arrives at the account email.
+- [ ] Trigger a client-side error too (e.g. a deliberate throw in a Client Component) and check the browser devtools console: confirm there's no `Content-Security-Policy: connect-src` violation logged — the `tunnelRoute: '/monitoring'` setup should route the report through this app's own origin, not directly to a `sentry.io` host.
+- [ ] If a temporary debug route was added, remove it and redeploy.
+- [ ] Separately, confirm the SSE fix: temporarily break `DATABASE_URL` (or otherwise force `getSalesSnapshot` to throw) in a local/staging environment, open the sales dashboard, and confirm the connection closes cleanly (no hang) and the error reaches Sentry.
+
 ## Known follow-ups
 
-This runbook covers what's needed to deploy today. Two related items are tracked separately in `docs/next-steps.md` and aren't part of this process yet:
+This runbook covers what's needed to deploy today. One related item is tracked separately in `docs/next-steps.md` and isn't part of this process yet:
 
-- **No error/monitoring visibility** — nothing currently surfaces a runtime failure (e.g. a failed sale, a broken PDF render) beyond Vercel's function logs. Watch those logs during the first real event.
 - **`PII_ENCRYPTION_KEY` rotation** — not built; see the handling section above for the current (document-and-never-lose-it) approach.
