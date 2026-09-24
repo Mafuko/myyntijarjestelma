@@ -50,6 +50,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           }
         } catch (err) {
           Sentry.captureException(err)
+          // Vercel can freeze/end this serverless invocation immediately
+          // after stop() closes the response stream; without an explicit
+          // flush, the captured event may never actually be sent.
+          await Sentry.flush(2000).catch(() => {})
           stop()
         }
       }, POLL_INTERVAL_MS)

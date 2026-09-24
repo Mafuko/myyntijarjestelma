@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 
 vi.mock('@/lib/auth', () => ({ auth: vi.fn() }))
 vi.mock('@/lib/services/sales-dashboard', () => ({ getSalesSnapshot: vi.fn() }))
-vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn() }))
+vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn(), flush: vi.fn().mockResolvedValue(true) }))
 
 const okSnapshot = { ok: true, data: { items: [], totalRevenue: '0', commissionOwed: '0' } } as const
 
